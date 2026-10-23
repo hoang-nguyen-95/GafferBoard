@@ -13,6 +13,10 @@ local OUT_DIR = "D:/XboxGames/fc_exports"
 local TABLE_PATTERNS = {
     "^players$", "^teams$", "^teamplayerlinks$", "^leagueteamlinks$", "^leagues$",
     "fixture", "calendar", "^career_users$", "^default_teamsheets$", "^formations$",
+    -- Bổ sung sau lần xuất đầu (tên cầu thủ, quốc gia, playstyle, dữ liệu phong độ/kết quả):
+    "^playernames$", "^editedplayernames$", "^dcplayernames$", "^nations$", "^playstyles$",
+    "^teamformdiff$", "^playerformdiff$", "^prevcompetitionstats$",
+    "^career_playerlastmatchhistory$", "^career_competitionprogress$", "^career_squadranking$",
 }
 -- ====================
 
