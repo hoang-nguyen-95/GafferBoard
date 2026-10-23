@@ -1,0 +1,197 @@
+# Ánh xạ cột file CSV xuất bằng tools/live_editor/export_tables.lua -> trường mô hình (app/models.py).
+# Tên cột gốc đã đối chiếu với lần xuất thật (xem docs/data-schema.md).
+# Cú pháp mỗi trường:  field: nguon_col             (mặc định kiểu int)
+#                      field: {col: nguon_col, type: str|int|id|bool|date_days}
+#                      field: {cols: [c1, c2], type: int_list}
+# Kiểu: id = int, giá trị âm (-1) -> null; date_days = số ngày kể từ 1582-10-14;
+#       int_list = danh sách int bỏ giá trị âm; optional: true = cho phép thiếu cột.
+adapter: live_editor
+
+tables:
+  leagues:
+    file: leagues.csv
+    model: League
+    key: [league_id]
+    columns:
+      league_id: leagueid
+      name: {col: leaguename, type: str}
+      country_id: countryid
+      level: level
+      is_international: {col: isinternationalleague, type: bool}
+      is_women: {col: iswomencompetition, type: bool}
+
+  teams:
+    file: teams.csv
+    model: Team
+    key: [team_id]
+    columns:
+      team_id: teamid
+      name: {col: teamname, type: str}
+      gender: gender
+      overall: overallrating
+      attack: attackrating
+      midfield: midfieldrating
+      defense: defenserating
+      build_up_play: buildupplay
+      defensive_depth: defensivedepth
+      captain_id: {col: captainid, type: id}
+      penalty_taker_id: {col: penaltytakerid, type: id}
+      popularity: popularity
+
+  players:
+    file: players.csv
+    model: Player
+    key: [player_id]
+    columns:
+      player_id: playerid
+      first_name_id: {col: firstnameid, type: id}
+      last_name_id: {col: lastnameid, type: id}
+      common_name_id: {col: commonnameid, type: id}
+      jersey_name_id: {col: playerjerseynameid, type: id}
+      birth_date: {col: birthdate, type: date_days}
+      gender: gender
+      nationality_id: nationality
+      height: height
+      weight: weight
+      overall: overallrating
+      potential: potential
+      positions:
+        cols: [preferredposition1, preferredposition2, preferredposition3, preferredposition4,
+               preferredposition5, preferredposition6, preferredposition7]
+        type: int_list
+      preferred_foot: preferredfoot
+      weak_foot: weakfootabilitytypecode
+      skill_moves: skillmoves
+      international_rep: internationalrep
+      contract_until: contractvaliduntil
+      trait1: trait1
+      trait2: trait2
+      icon_trait1: icontrait1
+      icon_trait2: icontrait2
+      pac_div: pacdiv
+      sho_han: shohan
+      pas_kic: paskic
+      dri_ref: driref
+      def_spe: defspe
+      phy_pos: phypos
+      acceleration: acceleration
+      sprint_speed: sprintspeed
+      finishing: finishing
+      shot_power: shotpower
+      long_shots: longshots
+      positioning: positioning
+      volleys: volleys
+      penalties: penalties
+      short_passing: shortpassing
+      long_passing: longpassing
+      vision: vision
+      crossing: crossing
+      curve: curve
+      free_kick_accuracy: freekickaccuracy
+      dribbling: dribbling
+      ball_control: ballcontrol
+      agility: agility
+      balance: balance
+      reactions: reactions
+      composure: composure
+      defensive_awareness: defensiveawareness
+      interceptions: interceptions
+      standing_tackle: standingtackle
+      sliding_tackle: slidingtackle
+      strength: strength
+      stamina: stamina
+      aggression: aggression
+      jumping: jumping
+      heading_accuracy: headingaccuracy
+      gk_diving: gkdiving
+      gk_handling: gkhandling
+      gk_kicking: gkkicking
+      gk_positioning: gkpositioning
+      gk_reflexes: gkreflexes
+
+  squad:
+    file: teamplayerlinks.csv
+    model: SquadMember
+    key: [team_id, player_id]
+    prune: true            # cầu thủ chuyển đi -> xóa liên kết cũ
+    columns:
+      team_id: teamid
+      player_id: playerid
+      position: position
+      jersey_number: jerseynumber
+      injury: injury
+      form: form
+      league_appearances: leagueappearances
+      league_goals: leaguegoals
+      yellows: yellows
+      reds: reds
+
+  standings:
+    file: leagueteamlinks.csv
+    model: TeamStanding
+    key: [team_id]
+    prune: true
+    columns:
+      team_id: teamid
+      league_id: leagueid
+      position: currenttableposition
+      previous_position: previousyeartableposition
+      points: points
+      played: nummatchesplayed
+      home_wins: homewins
+      home_draws: homedraws
+      home_losses: homelosses
+      home_gf: homegf
+      home_ga: homega
+      away_wins: awaywins
+      away_draws: awaydraws
+      away_losses: awaylosses
+      away_gf: awaygf
+      away_ga: awayga
+      form_raw: {col: teamform, type: str}
+      last_result: lastgameresult
+
+  fixtures:
+    file: fixtures.csv
+    model: Fixture
+    key: [fixture_id]
+    prune: true            # trận biến mất khỏi lịch = đã đá
+    columns:
+      fixture_id: fixtureid
+      competition_id: competitionid
+      home_team_id: hometeamid
+      away_team_id: awayteamid
+      fixture_date: {col: fixturedate, type: date_days}
+      fixture_time: fixturetime
+      home_form_raw: {col: hometeamform, type: str}
+      away_form_raw: {col: awayteamform, type: str}
+      home_league_pos: hometeamleaguepos
+      away_league_pos: awayteamleaguepos
+      home_played: hometeammatchesplayed
+      away_played: awayteammatchesplayed
+      stadium_id: stadiumid
+
+  user:
+    file: career_users.csv
+    model: UserProfile
+    key: [user_id]
+    columns:
+      user_id: userid
+      user_team_id: {col: clubteamid, type: id}
+      league_id: {col: leagueid, type: id}
+      first_name: {col: firstname, type: str}
+      surname: {col: surname, type: str}
+
+# Đội hình xuất phát: ghép default_teamsheets (11 người theo slot) với formations (vị trí/vai trò từng slot).
+lineups:
+  teamsheets_file: default_teamsheets.csv
+  formations_file: formations.csv
+  team_col: teamid
+  formation_id_col: formationid
+  formation_name_col: formationname
+  captain_col: captainid
+  penalty_taker_col: penaltytakerid
+  slot_player_col: "playerid{i}"
+  slot_position_col: "position{i}"
+  slot_role_col: "pos{i}role"
+  slots: 11
