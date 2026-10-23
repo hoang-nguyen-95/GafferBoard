@@ -7,7 +7,7 @@
 
 | Mục | Giá trị |
 |---|---|
-| Công cụ mod (tên + phiên bản) | Live Editor (người dùng xác nhận); phiên bản _chưa biết_ |
+| Công cụ mod (tên + phiên bản) | Live Editor (người dùng xác nhận); v26.3.6 (từ ảnh chụp); xem bảng gốc qua Features → Game Database |
 | Phiên bản game FC26 (bản vá / title update) | _chưa biết_ |
 | Định dạng xuất (CSV / JSON / SQLite / khác) | _chưa biết_ |
 | Mã hóa / dấu phân cách / dòng tiêu đề | _chưa biết_ |
