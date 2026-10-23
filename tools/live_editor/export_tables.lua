@@ -6,7 +6,7 @@
 
 -- ===== CẤU HÌNH =====
 -- Thư mục phải tồn tại sẵn. Dùng dấu / hoặc \\ trong đường dẫn.
-local OUT_DIR = "C:/fc_exports"
+local OUT_DIR = "D:/XboxGames/fc_exports"
 
 -- Mẫu Lua (khớp trên tên bảng viết thường). "^players$" = đúng bảng players.
 -- Đây chỉ là phỏng đoán tên bảng; xem _tables.txt để chỉnh cho đúng.
