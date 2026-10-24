@@ -231,3 +231,24 @@ export type Meta = {
   user_team: TeamBrief | null;
   user_team_source: "manual" | "game" | null;
 };
+
+export type Suggestion = {
+  rule_id: string;
+  priority: number;
+  title: string;
+  advice: string;
+  tactics: string[];
+  evidence: string[];
+  strength: number;
+  emphasis: Record<string, Record<string, number>>;
+};
+
+export type Advice = {
+  opponent: string;
+  opponent_formation: string | null;
+  my_team: { team_id: number; name: string } | null;
+  compared_with_league: boolean;
+  suggestions: Suggestion[];
+  formation_counters: { formation: string; reason: string }[];
+  notes: string[];
+};

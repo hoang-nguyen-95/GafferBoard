@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AnalysisView } from "@/components/AnalysisView";
-import { ApiError, type OpponentAnalysis, apiGet } from "@/lib/api";
+import { type Advice, ApiError, type OpponentAnalysis, apiGet } from "@/lib/api";
 
 export default function AnalysisPage(props: PageProps<"/teams/[id]/analysis">) {
   return (
@@ -15,13 +15,16 @@ export default function AnalysisPage(props: PageProps<"/teams/[id]/analysis">) {
 
 async function AnalysisContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  let data: OpponentAnalysis;
+  let data: OpponentAnalysis, advice: Advice;
   try {
-    data = await apiGet<OpponentAnalysis>(`/teams/${encodeURIComponent(id)}/analysis`);
+    [data, advice] = await Promise.all([
+      apiGet<OpponentAnalysis>(`/teams/${encodeURIComponent(id)}/analysis`),
+      apiGet<Advice>(`/teams/${encodeURIComponent(id)}/suggestions`),
+    ]);
   } catch (e) {
     if (e instanceof ApiError && (e.status === 404 || e.status === 422)) notFound();
     throw e;
   }
-  return <AnalysisView data={data} />;
+  return <AnalysisView data={data} advice={advice} />;
 }
 
