@@ -13,7 +13,10 @@ if (!fs.existsSync(path.join(web, "index.html"))) {
 fs.rmSync(dest, { recursive: true, force: true });
 fs.mkdirSync(dest, { recursive: true });
 fs.cpSync(web, path.join(dest, "web"), { recursive: true });
-fs.copyFileSync(path.join(root, "tools", "live_editor", "export_tables.lua"), path.join(dest, "export_tables.lua"));
+fs.mkdirSync(path.join(dest, "scripts"), { recursive: true });
+for (const f of ["export_tables.lua", "probe_loop.lua", "export_loop.lua"]) {
+  fs.copyFileSync(path.join(root, "tools", "live_editor", f), path.join(dest, "scripts", f));
+}
 // Danh sách file CSV mà bộ nhập thật sự dùng (từ mapping của engine): phần còn lại trong thư mục xuất bị bỏ qua.
 const mapping = JSON.parse(fs.readFileSync(path.join(root, "frontend", "src", "engine", "data", "mapping.json"), "utf8"));
 const known = new Set(Object.values(mapping.tables).map((t) => t.file.toLowerCase()));

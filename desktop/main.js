@@ -3,13 +3,13 @@ const { app, BrowserWindow, Menu, dialog, ipcMain, protocol, shell } = require("
 const fs = require("node:fs");
 const path = require("node:path");
 const { createConfig } = require("./src/config");
-const { findScriptDir, installScript } = require("./src/lesetup");
+const { findScriptDir, installScripts } = require("./src/lesetup");
 const { mimeOf, resolveAppPath } = require("./src/protocol");
 const { createWatcher, listCsv } = require("./src/watcher");
 
 const ORIGIN = "app://counterpick";
 const WEB_ROOT = process.env.COUNTERPICK_WEB_ROOT || path.join(__dirname, "app", "web");
-const SCRIPT_TEMPLATE = process.env.COUNTERPICK_SCRIPT || path.join(__dirname, "app", "export_tables.lua");
+const SCRIPTS_DIR = process.env.COUNTERPICK_SCRIPTS_DIR || path.join(__dirname, "app", "scripts");
 const KNOWN_FILES = process.env.COUNTERPICK_KNOWN_FILES || path.join(__dirname, "app", "known-files.json");
 const POLL_MS = Number(process.env.COUNTERPICK_POLL_MS) || 2000;
 const QUIET_MS = Number(process.env.COUNTERPICK_QUIET_MS) || 5000;
@@ -55,9 +55,22 @@ function startWatching(hasData) {
   watcher.start();
 }
 
+/** Nhịp tim do script xuất lặp ghi (heartbeat.txt): cho biết script còn chạy trong Live Editor không. */
+function readHeartbeat(exportDir) {
+  if (!exportDir) return null;
+  const file = path.join(exportDir, "heartbeat.txt");
+  try {
+    const st = fs.statSync(file);
+    const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
+    return { ageSeconds: Math.max(0, Math.round((Date.now() - st.mtimeMs) / 1000)), state: (lines[1] || "").trim() || "unknown" };
+  } catch {
+    return null;
+  }
+}
+
 function state() {
   const { exportDir, leDir } = config.get();
-  return { exportDir, leDir, csvCount: exportDir ? listCsv(exportDir, knownFiles).size : 0, watching: Boolean(watcher) };
+  return { exportDir, leDir, csvCount: exportDir ? listCsv(exportDir, knownFiles).size : 0, watching: Boolean(watcher), heartbeat: readHeartbeat(exportDir) };
 }
 
 async function pickDir(title, defaultPath) {
@@ -104,8 +117,8 @@ function registerIpc() {
       if (!target) return { ok: false, message: "Đã hủy." };
     }
     try {
-      const file = installScript({ templatePath: SCRIPT_TEMPLATE, targetDir: target, exportDir });
-      return { ok: true, path: file, message: `Đã chép script vào ${file}` };
+      const files = installScripts({ templateDir: SCRIPTS_DIR, targetDir: target, exportDir });
+      return { ok: true, path: target, message: `Đã chép ${files.length} script vào ${target}: ${files.map((f) => path.basename(f.file)).join(", ")}`, files: files.map((f) => ({ name: path.basename(f.file), note: f.note })) };
     } catch (e) {
       return { ok: false, message: `Không chép được script: ${e.message}` };
     }
@@ -115,6 +128,18 @@ function registerIpc() {
     watcher?.resendAll();
     watcher?.tick(Date.now(), true); // bỏ qua thời gian chờ yên lặng vì người dùng chủ động yêu cầu
     return state();
+  });
+
+  // Báo script xuất lặp (nếu đang chạy trong Live Editor) xuất toàn bộ ngay: nó thấy file này ở vòng kiểm tra kế tiếp.
+  handle("desktop:request-export", () => {
+    const { exportDir } = config.get();
+    if (!exportDir) return { ok: false, message: "Hãy chọn thư mục xuất trước." };
+    try {
+      fs.writeFileSync(path.join(exportDir, "request_full.txt"), new Date().toISOString());
+      return { ok: true, message: "Đã gửi yêu cầu. Nếu script xuất lặp đang chạy trong Live Editor, vài giây nữa file mới sẽ xuất hiện." };
+    } catch (e) {
+      return { ok: false, message: `Không ghi được file yêu cầu: ${e.message}` };
+    }
   });
 
   handle("desktop:open-folder", () => {

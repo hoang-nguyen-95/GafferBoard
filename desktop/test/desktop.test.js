@@ -5,7 +5,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { resolveAppPath } = require("../src/protocol");
 const { createWatcher } = require("../src/watcher");
-const { findScriptDir, installScript, renderScript } = require("../src/lesetup");
+const { findScriptDir, installScript, installScripts, renderScript, SCRIPTS } = require("../src/lesetup");
 const { createConfig } = require("../src/config");
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), "cp-desktop-"));
@@ -110,4 +110,17 @@ test("watcher: chỉ theo dõi file trong danh sách `only`, bỏ qua bảng xu�
   w.tick(2);
   assert.deepEqual(batches.flat().map((x) => x.name), ["players.csv"]);
   assert.equal(w.count(), 1);
+});
+
+test("lesetup: cài đủ các script, mỗi script đã điền thư mục xuất", () => {
+  const live = path.resolve(__dirname, "../../tools/live_editor");
+  const target = tmp();
+  const exportDir = path.join(tmp(), "exp ort");
+  const done = installScripts({ templateDir: live, targetDir: target, exportDir });
+  assert.deepEqual(done.map((d) => path.basename(d.file)), SCRIPTS.map((s) => s.target));
+  for (const d of done) {
+    const text = fs.readFileSync(d.file, "utf8");
+    assert.ok(text.includes(`local OUT_DIR = "${exportDir.replace(/\\/g, "/")}"`), `${path.basename(d.file)} chưa điền thư mục xuất`);
+    assert.ok(!text.includes("D:/XboxGames/fc_exports"), "không được còn đường dẫn mẫu");
+  }
 });

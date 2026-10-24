@@ -33,4 +33,19 @@ function installScript({ templatePath, targetDir, exportDir, fileName = "counter
   return out;
 }
 
-module.exports = { findScriptDir, renderScript, installScript };
+/** Các script được cài: tên file trong Live Editor <- tên file mẫu trong thư mục mẫu. */
+const SCRIPTS = [
+  { target: "counterpick_export.lua", source: "export_tables.lua", note: "xuất một lần (chạy tay)" },
+  { target: "counterpick_probe_loop.lua", source: "probe_loop.lua", note: "chạy thử vòng lặp (nên chạy trước)" },
+  { target: "counterpick_export_loop.lua", source: "export_loop.lua", note: "xuất lặp lại tự động (thử nghiệm)" },
+];
+
+/** Cài toàn bộ script vào `targetDir`, mỗi script đã điền thư mục xuất. Trả về [{file, note}]. */
+function installScripts({ templateDir, targetDir, exportDir }) {
+  return SCRIPTS.map((s) => ({
+    file: installScript({ templatePath: path.join(templateDir, s.source), targetDir, exportDir, fileName: s.target }),
+    note: s.note,
+  }));
+}
+
+module.exports = { findScriptDir, renderScript, installScript, installScripts, SCRIPTS };

@@ -49,6 +49,8 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     trên Linux; file `.exe` do GitHub Actions build, chưa có ai mở thử. Chưa có chữ ký số nên Windows sẽ cảnh báo "Unknown publisher".
 19. **Chưa biết Live Editor bản của người dùng có tự chạy script được không** (khi mở save hoặc theo sự kiện). Nếu không, vẫn phải bấm Execute trong Live Editor
     mỗi phiên chơi; app không điều khiển Live Editor. Cần danh sách thư mục/file của Live Editor để xác định.
+22. **Script xuất lặp chưa được thử trên Live Editor thật** (`tools/live_editor/export_loop.lua`, `probe_loop.lua`): chỉ kiểm tra bằng môi trường Lua giả. Chưa biết `Sleep` có tính bằng mili giây,
+    vòng lặp có làm đơ game không, xuất bảng `players` mất bao lâu. Chạy `probe_loop.lua` trước và gửi `probe_result.txt` (xem `docs/live-editor-loop.md`).
 21. **Chế độ Manager dựa trên hệ số kinh nghiệm và số bạn tự nhập** (xem `docs/manager.md`): dữ liệu xuất chưa có giá trị cầu thủ, lương, ngân sách; ba bậc giá đàm phán, trọng số điểm
     đáng mua, ngưỡng tuổi chưa kiểm chứng với game. ID giải huyền thoại (2255) và cầu thủ tự do (382) chỉ kiểm tra trên một save. Cần xuất thêm các bảng hợp đồng/chuyển nhượng (script đã bổ sung) để thay giả định bằng số thật.
 20. **Cẩm nang là kinh nghiệm chung và cách công cụ phân tích**, không phải số liệu chính thức của EA; mô tả "chỉ số làm gì" viết tay và chưa được ai có chuyên môn

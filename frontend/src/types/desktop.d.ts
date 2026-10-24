@@ -7,6 +7,8 @@ declare global {
     leDir: string | null;
     csvCount: number;
     watching: boolean;
+    /** Nhịp tim của script xuất lặp trong Live Editor; null nếu chưa thấy. */
+    heartbeat: { ageSeconds: number; state: string } | null;
   }
   interface DesktopFile { name: string; sig: string; text: string }
   interface DesktopApi {
@@ -14,7 +16,8 @@ declare global {
     getState(): Promise<DesktopState>;
     chooseExportDir(): Promise<DesktopState>;
     chooseLeDir(): Promise<DesktopState>;
-    installScript(): Promise<{ ok: boolean; path?: string; message: string }>;
+    installScript(): Promise<{ ok: boolean; path?: string; message: string; files?: { name: string; note: string }[] }>;
+    requestExport(): Promise<{ ok: boolean; message: string }>;
     rescan(): Promise<DesktopState>;
     openFolder(): Promise<void>;
     ready(hasData: boolean): Promise<DesktopState>;

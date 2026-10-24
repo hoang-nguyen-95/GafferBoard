@@ -10,10 +10,15 @@ export function DesktopPanel() {
   const [message, setMessage] = useState<string | null>(null);
   const sync = useSyncStatus();
 
-  // đọc trạng thái lúc mở và đếm lại số file CSV mỗi khi việc nhập có tiến triển
+  // đọc trạng thái lúc mở, mỗi khi việc nhập có tiến triển, và định kỳ (để thấy nhịp tim của script xuất lặp)
   useEffect(() => {
     void api?.getState().then(setState);
   }, [api, sync.at]);
+  useEffect(() => {
+    if (!api) return;
+    const timer = setInterval(() => void api.getState().then(setState), 5000);
+    return () => clearInterval(timer);
+  }, [api]);
 
   if (!api) return null;
   const btn = "rounded border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900";
@@ -51,16 +56,36 @@ export function DesktopPanel() {
           </button>
           {state?.leDir && state.exportDir && (
             <button type="button" className={btn} onClick={async () => setMessage((await api.installScript()).message)}>
-              Cài script xuất vào Live Editor
+              Cài các script xuất vào Live Editor
             </button>
           )}
         </div>
         <p className="text-xs text-zinc-500">
-          Script được chép sẵn với đúng thư mục xuất ở trên. Trong Live Editor chỉ cần vào Features → Lua Engine, chọn script
-          <code> counterpick_export.lua</code> và Execute.
+          Các script được chép sẵn với đúng thư mục xuất ở trên. Trong Live Editor vào Features → Lua Engine, chọn script
+          <code> counterpick_export.lua</code> (xuất một lần) và Execute.
         </p>
         {message && <p className="text-xs">{message}</p>}
       </div>
+
+      {state?.exportDir && (
+        <div className="space-y-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+          <p className="font-medium">Tự xuất lặp lại trong Live Editor <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300">thử nghiệm</span></p>
+          <p className="text-xs text-zinc-500">
+            Chạy <code>counterpick_probe_loop.lua</code> trước (10 giây, chỉ để xem game có bị đơ không). Nếu ổn, chạy <code>counterpick_export_loop.lua</code> một lần mỗi phiên chơi:
+            script ở lại và tự xuất lại dữ liệu; tạo file <code>stop.txt</code> trong thư mục xuất để dừng.
+          </p>
+          <p className={state.heartbeat && state.heartbeat.ageSeconds < 30 ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-500"}>
+            {state.heartbeat
+              ? state.heartbeat.ageSeconds < 30
+                ? `Script xuất lặp đang chạy (nhịp ${state.heartbeat.ageSeconds} giây trước, trạng thái: ${state.heartbeat.state}).`
+                : `Thấy dấu vết script xuất lặp nhưng đã ${state.heartbeat.ageSeconds} giây không có nhịp (có thể đã dừng).`
+              : "Chưa thấy script xuất lặp chạy."}
+          </p>
+          <button type="button" className={btn} onClick={async () => setMessage((await api.requestExport()).message)}>
+            Yêu cầu xuất lại ngay
+          </button>
+        </div>
+      )}
 
       <p className={`text-sm ${sync.kind === "error" ? "text-red-600" : sync.kind === "ok" ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-500"}`}>
         {sync.kind === "idle" && (state?.exportDir ? "Đang theo dõi thư mục, chưa có file mới." : "Chưa theo dõi thư mục nào.")}

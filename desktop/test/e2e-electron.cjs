@@ -33,7 +33,7 @@ async function launch() {
     env: {
       ...process.env,
       COUNTERPICK_WEB_ROOT: path.join(ROOT, "frontend/out"),
-      COUNTERPICK_SCRIPT: path.join(ROOT, "tools/live_editor/export_tables.lua"),
+      COUNTERPICK_SCRIPTS_DIR: path.join(ROOT, "tools/live_editor"),
       COUNTERPICK_USER_DATA: userData,
       COUNTERPICK_KNOWN_FILES: knownFile,
       COUNTERPICK_POLL_MS: "300",
@@ -97,9 +97,20 @@ const api = (page, method, p, body) => page.evaluate(async ([m, u, b]) => {
 
     console.log("4. Cài script vào Live Editor");
     const res = await page.evaluate(() => window.desktop.installScript());
-    check(res.ok && fs.existsSync(path.join(leDir, "lua", "scripts", "counterpick_export.lua")), "script được chép vào thư mục script");
+    check(res.ok && ["counterpick_export.lua", "counterpick_probe_loop.lua", "counterpick_export_loop.lua"].every((f) => fs.existsSync(path.join(leDir, "lua", "scripts", f))), "cả 3 script được chép vào thư mục script");
     const lua = fs.readFileSync(path.join(leDir, "lua", "scripts", "counterpick_export.lua"), "utf8");
     check(lua.includes(`local OUT_DIR = "${exportDir.replace(/\\/g, "/")}"`), "script đã điền sẵn thư mục xuất");
+
+    const req = await page.evaluate(() => window.desktop.requestExport());
+    check(req.ok && fs.existsSync(path.join(exportDir, "request_full.txt")), "nút yêu cầu xuất tạo file request_full.txt cho script lặp");
+    check((await page.evaluate(() => window.desktop.getState())).heartbeat === null, "chưa có script lặp thì không có nhịp tim");
+    fs.writeFileSync(path.join(exportDir, "heartbeat.txt"), "1\nidle\n");
+    const hb = (await page.evaluate(() => window.desktop.getState())).heartbeat;
+    check(hb && hb.state === "idle" && hb.ageSeconds < 10, "đọc được nhịp tim của script lặp");
+    await page.reload({ waitUntil: "networkidle" });
+    await page.goto("app://counterpick/import");
+    await page.waitForSelector("text=Script xuất lặp đang chạy");
+    check(true, "giao diện báo script xuất lặp đang chạy");
 
     check(problems.length === 0, `không có lỗi console (${problems.slice(0, 3).join(" | ") || "không"})`);
 

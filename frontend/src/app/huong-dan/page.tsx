@@ -42,6 +42,10 @@ export default function GuidePage() {
             </li>
           ))}
         </ol>
+        <Callout icon={Terminal} tone="amber" title="Tự xuất lặp lại (thử nghiệm)">
+          Ứng dụng cũng chép sẵn một script chạy lặp: bạn Execute một lần mỗi phiên chơi và nó tự xuất lại dữ liệu định kỳ. Cách này chưa được thử trên mọi bản Live Editor,
+          nên ứng dụng kèm một script thử 10 giây để kiểm tra game có bị đơ không trước khi dùng. Bấm Execute thủ công vẫn luôn dùng được.
+        </Callout>
         <Callout icon={Lock} tone="emerald" title="Riêng tư">
           Ứng dụng chỉ đọc file CSV bạn tự xuất. Không đọc bộ nhớ game, không sửa save, không đụng tới chế độ online, và không gửi dữ liệu của bạn đi đâu.
         </Callout>

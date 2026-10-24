@@ -14,6 +14,11 @@ thư mục xuất từ Live Editor**: có file CSV mới là tự nhập và ph�
 
 Dữ liệu và ghi chú nằm trong thư mục dữ liệu người dùng của app (`%APPDATA%/counterpick-fc-desktop`), không gửi đi đâu.
 
+## Tự xuất lặp trong Live Editor (thử nghiệm)
+
+Nút **Cài các script xuất vào Live Editor** chép ba script: xuất một lần, script thử vòng lặp và script xuất lặp. Xem `docs/live-editor-loop.md` (bước thử an toàn trước, rồi mới dùng).
+Ứng dụng hiển thị nhịp tim của script lặp và có nút **Yêu cầu xuất lại ngay**.
+
 ## Chế độ Manager
 
 Mục **Manager** trong ứng dụng: nhu cầu đội hình, mục tiêu chuyển nhượng, ngân sách/shortlist, gợi ý đàm phán. Xem `docs/manager.md`.
