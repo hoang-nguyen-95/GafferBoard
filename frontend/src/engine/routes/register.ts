@@ -1,0 +1,29 @@
+// Gom mọi route của engine (đăng ký theo đúng đường dẫn của backend FastAPI).
+import { registerRoute as r } from "../api";
+import * as analysis from "./analysis";
+import * as compare from "./compare";
+import * as manual from "./manual";
+import * as notes from "./notes";
+
+r("GET", "/teams/{team_id}/analysis", analysis.teamAnalysis);
+r("GET", "/teams/{team_id}/suggestions", analysis.teamSuggestions);
+r("GET", "/teams/{team_id}/report.md", analysis.teamReportMd);
+r("GET", "/teams/{team_id}/counter-lineups", analysis.counterLineups);
+r("GET", "/teams/{team_id}/form", notes.getForm);
+r("POST", "/teams/{team_id}/results", notes.addResult);
+r("DELETE", "/results/{result_id}", notes.deleteResult);
+r("GET", "/teams/{team_id}/notes", notes.getNotes);
+r("PUT", "/teams/{team_id}/note", notes.putNote);
+r("POST", "/teams/{team_id}/meetings", notes.addMeeting);
+r("DELETE", "/meetings/{meeting_id}", notes.deleteMeeting);
+r("GET", "/manual-lineups", manual.listManual);
+r("POST", "/manual-lineups", manual.createManual);
+r("GET", "/manual-lineups/{lineup_id}", manual.getManualDetail);
+r("PUT", "/manual-lineups/{lineup_id}", manual.updateManual);
+r("DELETE", "/manual-lineups/{lineup_id}", manual.deleteManual);
+r("GET", "/manual-lineups/{lineup_id}/analysis", manual.manualAnalysis);
+r("GET", "/manual-lineups/{lineup_id}/suggestions", manual.manualSuggestions);
+r("GET", "/manual-lineups/{lineup_id}/counter-lineups", manual.manualCounterLineups);
+r("GET", "/manual-lineups/{lineup_id}/report.md", manual.manualReportMd);
+r("GET", "/compare/players", compare.comparePlayers);
+r("GET", "/compare/teams", compare.compareTeams);
