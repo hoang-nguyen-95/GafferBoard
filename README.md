@@ -8,6 +8,7 @@ Kế hoạch các giai đoạn: [PLAN.md](PLAN.md). Cấu trúc dữ liệu xu�
 
 - Giai đoạn 0 (khảo sát dữ liệu): xong, xem `docs/data-schema.md`.
 - Giai đoạn 1 (khung dự án + import): backend FastAPI + SQLite + Alembic, importer idempotent, API `GET /teams`, `GET /players?team=&q=` (tìm theo tên, không phân biệt dấu); frontend Next.js mới có trang kiểm tra kết nối.
+- Giai đoạn 2-4: xem đội/cầu thủ (radar, điểm mạnh/yếu), phân tích đối thủ, tự nhận đối thủ kế tiếp + watcher.
 - Tên cầu thủ được ghép từ `playernames`/`dcplayernames`/`editedplayernames` nếu có trong thư mục xuất.
 
 ## Xuất dữ liệu từ game
@@ -34,6 +35,17 @@ Sửa `backend/app/models.py` thì tạo migration: `cd backend && alembic revis
 Hành vi import: `leagues`, `teams`, `players` được cập nhật tại chỗ (không xóa); `squad` (cầu thủ thuộc đội),
 `standings`, `lineups`, `fixtures` được đồng bộ đúng theo file xuất mới (dòng không còn trong file bị xóa).
 File thiếu thì bị bỏ qua; cột thiếu/giá trị sai làm import dừng và không ghi gì.
+
+## Tự cập nhật khi có file xuất mới
+
+```bash
+cd backend
+python watcher.py data/exports      # theo dõi thư mục; thả/sửa file CSV thì tự nhập lại sau khi thư mục yên lặng 3 giây
+```
+
+Trang chủ hiển thị "Trận kế tiếp" của đội bạn (đội lấy từ `career_users`, đổi được bằng nút "Đổi đội") dựa trên bảng
+`fixtures`; tải lại trang sau khi dữ liệu mới được nhập. Nếu lịch của đội bạn chưa có (vd tiền mùa giải) thì chọn đối
+thủ thủ công ngay trên trang chủ.
 
 ## Chạy frontend
 

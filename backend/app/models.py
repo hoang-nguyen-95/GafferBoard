@@ -209,3 +209,10 @@ class MatchResult(SQLModel, table=True):
     played_on: Optional[date] = None
     is_home: Optional[bool] = None
     created_at: datetime
+
+
+class AppSetting(SQLModel, table=True):
+    """Cài đặt người dùng: `user_team_id` (đội của bạn, ghi đè career_users) và `opponent_team_id` (đối thủ chọn tay)."""
+
+    key: str = Field(primary_key=True)
+    value: str

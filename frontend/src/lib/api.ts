@@ -198,3 +198,36 @@ export type OpponentAnalysis = {
   form: FormInfo | null;
   injuries: { player_id: number; name: string; in_xi: boolean }[];
 };
+
+export type TeamBrief = { team_id: number; name: string; league_id: number | null; overall: number | null };
+
+export type FixtureBrief = {
+  fixture_id: number;
+  date: string | null;
+  time_seconds: number | null;
+  competition_id: number | null;
+  is_home: boolean;
+  home: TeamBrief | null;
+  away: TeamBrief | null;
+  opponent: TeamBrief | null;
+};
+
+export type NextMatch = {
+  user_team: TeamBrief | null;
+  user_team_source: "manual" | "game" | null;
+  source: "manual" | "fixture" | "none";
+  opponent: TeamBrief | null;
+  fixture: FixtureBrief | null;
+  upcoming: FixtureBrief[];
+  reason: "no_user_team" | "no_fixtures" | null;
+};
+
+export type Meta = {
+  teams: number;
+  players: number;
+  fixtures: number;
+  last_import_at: string | null;
+  reference_date: string;
+  user_team: TeamBrief | null;
+  user_team_source: "manual" | "game" | null;
+};
