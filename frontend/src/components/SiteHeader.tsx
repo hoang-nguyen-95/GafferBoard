@@ -15,6 +15,9 @@ export function SiteHeader() {
           <Link href="/manual" className="hover:underline">
             Nhập tay đối thủ
           </Link>
+          <Link href="/compare/players" className="hover:underline">
+            So sánh
+          </Link>
         </nav>
         <div className="ml-auto w-full sm:w-72">
           <HeaderSearch />

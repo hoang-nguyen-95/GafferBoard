@@ -4,12 +4,18 @@ Web app chạy **local** giúp phân tích đối thủ và gợi ý đấu phá
 Chỉ đọc file CSV bạn tự xuất từ game; không đụng vào bộ nhớ game, save hay chế độ online.
 Kế hoạch các giai đoạn: [PLAN.md](PLAN.md). Cấu trúc dữ liệu xuất: [docs/data-schema.md](docs/data-schema.md).
 
-## Trạng thái
+## Tính năng
 
-- Giai đoạn 0 (khảo sát dữ liệu): xong, xem `docs/data-schema.md`.
-- Giai đoạn 1 (khung dự án + import): backend FastAPI + SQLite + Alembic, importer idempotent, API `GET /teams`, `GET /players?team=&q=` (tìm theo tên, không phân biệt dấu); frontend Next.js mới có trang kiểm tra kết nối.
-- Giai đoạn 2-4: xem đội/cầu thủ (radar, điểm mạnh/yếu), phân tích đối thủ, tự nhận đối thủ kế tiếp + watcher.
-- Tên cầu thủ được ghép từ `playernames`/`dcplayernames`/`editedplayernames` nếu có trong thư mục xuất.
+- **Trang chủ**: trận kế tiếp của đội bạn (đọc từ `fixtures`), mở thẳng phân tích đối thủ; chọn đội/đối thủ thủ công.
+- **Đội và cầu thủ**: sân đội hình, trung bình theo tuyến; trang cầu thủ có radar và điểm mạnh/yếu theo phân vị so với cầu thủ cùng vị trí (cùng giải).
+- **Phân tích đối thủ**: chỉ số hàng thủ/thủ môn/tiền vệ/hai biên/thể lực/độ sâu so với các đội cùng giải, cầu thủ nguy hiểm, điểm yếu, phong độ (nhập tay kết quả).
+- **Gợi ý đấu pháp** (11 luật có lý do bằng chỉ số) và **sơ đồ khắc chế** cấu hình được.
+- **Đội hình đáp trả**: 2–3 phương án (sơ đồ khác nhau) chọn từ squad của bạn, loại cầu thủ chấn thương, kèm giải thích từng người.
+- **Nhập tay đội hình đối thủ**: chọn sơ đồ, gõ tên từng vị trí; chạy cùng pipeline phân tích/gợi ý/đáp trả.
+- **Ghi chú cá nhân, lịch sử các trận gặp, xuất báo cáo Markdown, so sánh 2 cầu thủ/2 đội**, giao diện sáng/tối theo hệ thống.
+- **Diễn giải bằng LLM** (tùy chọn, mặc định tắt, dùng khóa API của bạn): xem mục bên dưới.
+
+Giới hạn và những điểm chưa kiểm chứng: [docs/known-issues.md](docs/known-issues.md).
 
 ## Xuất dữ liệu từ game
 
@@ -46,6 +52,26 @@ python watcher.py data/exports      # theo dõi thư mục; thả/sửa file CSV
 Trang chủ hiển thị "Trận kế tiếp" của đội bạn (đội lấy từ `career_users`, đổi được bằng nút "Đổi đội") dựa trên bảng
 `fixtures`; tải lại trang sau khi dữ liệu mới được nhập. Nếu lịch của đội bạn chưa có (vd tiền mùa giải) thì chọn đối
 thủ thủ công ngay trên trang chủ.
+
+## Diễn giải bằng LLM (tùy chọn)
+
+Mặc định **tắt** và không có gì rời khỏi máy bạn. Khi bật (công tắc trong mục "Diễn giải bằng LLM" của trang phân tích), nội dung
+báo cáo phân tích (gồm ghi chú cá nhân nếu có) được gửi tới Claude API của Anthropic bằng khóa của chính bạn:
+
+```bash
+pip install anthropic                     # đã có trong requirements.txt
+export ANTHROPIC_API_KEY=...              # hoặc đăng nhập bằng `ant auth login`; app không lưu khóa
+export COUNTERPICK_LLM_MODEL=claude-opus-5-5   # tùy chọn, mặc định claude-opus-5-5
+```
+
+## Kiểm thử
+
+```bash
+cd backend && pytest                      # ~200 test (importer, phân tích, luật, tối ưu đội hình, API, watcher...)
+cd frontend && npm run lint && npm run build
+```
+
+Test dùng dữ liệu mẫu tự sinh trong code, không cần và không commit dữ liệu từ game.
 
 ## Chạy frontend
 

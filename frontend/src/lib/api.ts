@@ -308,3 +308,27 @@ export type ManualDetail = {
 };
 
 export type ManualSummary = { id: number; name: string; formation_name: string | null; players: number; updated_at: string };
+
+export type NotesData = {
+  note: { text: string; updated_at: string } | null;
+  meetings: { id: number; goals_for: number; goals_against: number; played_on: string | null; is_home: boolean | null; note: string | null }[];
+  summary: { played: number; wins: number; draws: number; losses: number; goals_for: number; goals_against: number };
+};
+
+export type CompareRow = { key: string; label: string; a: number | null; b: number | null; diff: number | null; better: "a" | "b" | null };
+
+export type PlayerCompare = {
+  a: PlayerAnalysis & { player: PlayerSummary };
+  b: PlayerAnalysis & { player: PlayerSummary };
+  rows: CompareRow[];
+  same_role: boolean;
+};
+
+export type TeamCompare = {
+  a: { team_id: number; name: string; formation: string | null };
+  b: { team_id: number; name: string; formation: string | null };
+  ratings: CompareRow[];
+  metrics: (CompareRow & { percentile_a: number | null; percentile_b: number | null })[];
+};
+
+export type LlmStatus = { enabled: boolean; sdk_installed: boolean; has_api_key: boolean; model: string; privacy: string };

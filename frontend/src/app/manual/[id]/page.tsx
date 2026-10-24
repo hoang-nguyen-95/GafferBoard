@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AnalysisView } from "@/components/AnalysisView";
+import { LlmPanel } from "@/components/LlmPanel";
 import { ManualActions } from "@/components/ManualActions";
 import {
   type Advice, ApiError, type CounterLineups, type OpponentAnalysis, apiGet, apiGetOptional,
@@ -33,7 +34,13 @@ async function Content({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <ManualActions id={Number(id)} />
+      <p className="mb-4 text-sm">
+        <a href={`/api/manual-lineups/${encodeURIComponent(id)}/report.md`} download className="underline hover:no-underline">
+          Tải báo cáo (.md)
+        </a>
+      </p>
       <AnalysisView data={data} advice={advice} counter={counter} />
+      <LlmPanel explainPath={`/api/manual-lineups/${encodeURIComponent(id)}/explain`} />
       <p className="mt-8 text-xs text-zinc-500">
         Đội hình nhập tay không có thông tin dự bị, phong độ hay chấn thương nên các mục đó không được tính.
       </p>

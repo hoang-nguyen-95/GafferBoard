@@ -229,3 +229,24 @@ class ManualLineup(SQLModel, table=True):
     slots: list[dict] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
     created_at: datetime
     updated_at: datetime
+
+
+class TeamNote(SQLModel, table=True):
+    """Ghi chú cá nhân của người dùng về một đội."""
+
+    team_id: int = Field(primary_key=True, sa_column_kwargs={"autoincrement": False})
+    text: str
+    updated_at: datetime
+
+
+class Meeting(SQLModel, table=True):
+    """Một trận người dùng đã gặp một đội (tỷ số tính theo đội của người dùng)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    opponent_team_id: int = Field(index=True)
+    goals_for: int
+    goals_against: int
+    played_on: Optional[date] = None
+    is_home: Optional[bool] = None
+    note: Optional[str] = None
+    created_at: datetime

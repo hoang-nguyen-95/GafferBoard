@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlmodel import Session
@@ -149,3 +150,16 @@ def manual_counter_lineups(
     report = analyze_manual(session, _get(session, lineup_id))
     mine_id = mine if mine is not None else settings.effective_user_team(session)[0]
     return counter_payload(session, report, mine_id, limit)
+
+
+@router.get("/manual-lineups/{lineup_id}/report.md")
+def manual_report(lineup_id: int, mine: Optional[int] = Query(None), session: Session = Depends(get_session)) -> PlainTextResponse:
+    from datetime import date
+    from app.routers.analysis import report_response
+    from app.services.report import render_report
+
+    report = analyze_manual(session, _get(session, lineup_id))
+    mine_id = mine if mine is not None else settings.effective_user_team(session)[0]
+    counter = counter_payload(session, report, mine_id) if mine_id is not None else None
+    text = render_report(report_to_dict(report, session), advise(session, report, mine_id), counter, None, generated_on=date.today())
+    return report_response(report.name, text)

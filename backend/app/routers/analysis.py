@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 from sqlmodel import Session
 
 from app.db import get_session
@@ -68,3 +69,33 @@ def team_suggestions(
         raise HTTPException(404, "Không tìm thấy đội")
     mine_id = mine if mine is not None else settings.effective_user_team(session)[0]
     return advise(session, report, mine_id)
+
+
+def report_response(name: str, text: str) -> PlainTextResponse:
+    from app.services.report import slug
+    return PlainTextResponse(
+        text, media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="phan-tich-{slug(name)}.md"'},
+    )
+
+
+@router.get("/teams/{team_id}/report.md")
+def team_report(team_id: int, mine: Optional[int] = Query(None), session: Session = Depends(get_session)) -> PlainTextResponse:
+    """Báo cáo Markdown: phân tích, gợi ý, đội hình đáp trả (nếu biết đội bạn) và ghi chú cá nhân."""
+    from datetime import date
+    from app.routers.lineups import counter_payload
+    from app.routers.notes import team_notes
+    from app.services.report import render_report
+
+    report = analyze_team(session, team_id)
+    if report is None:
+        raise HTTPException(404, "Không tìm thấy đội")
+    mine_id = mine if mine is not None else settings.effective_user_team(session)[0]
+    counter = None
+    if mine_id is not None and mine_id != team_id:
+        counter = counter_payload(session, report, mine_id)
+    text = render_report(
+        report_to_dict(report, session), advise(session, report, mine_id), counter, team_notes(session, team_id),
+        generated_on=date.today(),
+    )
+    return report_response(report.name, text)

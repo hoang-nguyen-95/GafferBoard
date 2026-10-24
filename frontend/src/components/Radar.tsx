@@ -1,4 +1,4 @@
-type Axis = { label: string; value: number | null; peer_avg?: number | null };
+type Axis = { label: string; value: number | null; peer_avg?: number | null; other?: number | null };
 
 const SIZE = 260;
 const C = SIZE / 2;
@@ -22,6 +22,7 @@ function polygon(axes: Axis[], pick: (a: Axis) => number | null | undefined): st
 export function Radar({ axes }: { axes: Axis[] }) {
   const own = polygon(axes, (a) => a.value);
   const peer = polygon(axes, (a) => a.peer_avg);
+  const other = polygon(axes, (a) => a.other);
   const n = axes.length;
   return (
     <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full max-w-xs" role="img" aria-label="Biểu đồ radar chỉ số">
@@ -46,6 +47,7 @@ export function Radar({ axes }: { axes: Axis[] }) {
         );
       })}
       {peer && <polygon points={peer} fill="none" strokeDasharray="4 3" className="stroke-zinc-500" strokeWidth={1.5} />}
+      {other && <polygon points={other} className="fill-sky-500/25 stroke-sky-600" strokeWidth={2} />}
       {own && <polygon points={own} className="fill-emerald-500/30 stroke-emerald-600" strokeWidth={2} />}
     </svg>
   );
