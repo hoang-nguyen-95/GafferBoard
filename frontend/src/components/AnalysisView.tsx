@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Pitch } from "@/components/Pitch";
 import { ResultsForm } from "@/components/ResultsForm";
 import { Suggestions } from "@/components/Suggestions";
-import type { Advice, DangerousPlayer, Metric, OpponentAnalysis } from "@/lib/api";
+import { CounterLineupsView } from "@/components/CounterLineups";
+import type { Advice, CounterLineups, DangerousPlayer, Metric, OpponentAnalysis } from "@/lib/api";
 import { percentileColor } from "@/lib/positions";
 
 const GROUPS: { title: string; keys: string[] }[] = [
@@ -14,7 +15,16 @@ const GROUPS: { title: string; keys: string[] }[] = [
   { title: "Độ sâu đội hình", keys: ["xi_overall", "bench_quality", "depth_drop"] },
 ];
 
-export function AnalysisView({ data, advice }: { data: OpponentAnalysis; advice?: Advice | null }) {
+export function AnalysisView({
+  data,
+  advice,
+  counter,
+}: {
+  data: OpponentAnalysis;
+  advice?: Advice | null;
+  /** undefined: không hiển thị mục này; null: không tính được (thiếu đội của bạn). */
+  counter?: CounterLineups | null;
+}) {
   const byKey = new Map(data.metrics.map((m) => [m.key, m]));
   const { extras } = data;
   return (
@@ -33,6 +43,7 @@ export function AnalysisView({ data, advice }: { data: OpponentAnalysis; advice?
       </div>
 
       {advice && <Suggestions advice={advice} />}
+      {counter !== undefined && <CounterLineupsView data={counter} teamName={data.name} />}
 
       <div className="grid gap-8 md:grid-cols-2">
         <section>

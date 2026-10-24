@@ -4,13 +4,14 @@ from typing import Callable, Optional, Sequence
 
 from app.models import Player
 from app.services.assignment import solve_assignment
-from app.services.positions import line_of_position, role_of_position
+from app.services.positions import line_of_position, role_of_position, same_family
 
 # Điểm trừ (vào overall) khi cầu thủ đá vị trí không phải sở trường.
+PENALTY_SAME_FAMILY = 1     # cùng họ vị trí (vd CB <-> LCB), gần như tương đương
 PENALTY_ALT_POSITION = 2     # vị trí ưa thích thứ 2..7 của cầu thủ
 PENALTY_SAME_ROLE = 4        # cùng vai trò (vd RB <-> LB)
-PENALTY_SAME_LINE = 8        # cùng tuyến (vd CB <-> RB)
-PENALTY_OTHER_LINE = 15      # khác tuyến
+PENALTY_SAME_LINE = 12       # cùng tuyến nhưng khác vai trò (vd CB <-> RB, tiền đạo cánh <-> tiền vệ phòng ngự)
+PENALTY_OTHER_LINE = 20      # khác tuyến
 PENALTY_GK_MISMATCH = 60     # thủ môn <-> cầu thủ ngoài sân: gần như cấm
 PENALTY_UNKNOWN_SLOT = 10
 
@@ -22,6 +23,8 @@ def position_penalty(positions: Sequence[int], slot_position: Optional[int]) -> 
         return 0
     if slot_position in positions:
         return PENALTY_ALT_POSITION
+    if any(same_family(p, slot_position) for p in positions):
+        return PENALTY_SAME_FAMILY
     slot_is_gk = slot_position == 0
     player_is_gk = bool(positions) and positions[0] == 0
     if slot_is_gk != player_is_gk:

@@ -252,3 +252,45 @@ export type Advice = {
   formation_counters: { formation: string; reason: string }[];
   notes: string[];
 };
+
+export type CounterSlot = Slot & {
+  rating: number;
+  fit_penalty: number;
+  form_bonus: number;
+  rule_bonus: number;
+  score: number;
+  reasons: string[];
+};
+
+export type CounterOption = {
+  formation: { id: number; name: string; positions: string[] };
+  score: number;
+  baseline_score: number;
+  valid: boolean;
+  is_usual: boolean;
+  why_formation: string;
+  warnings: string[];
+  slots: CounterSlot[];
+  added: { player_id: number; name: string; position: string; because: string }[];
+  removed: { player_id: number; name: string }[];
+};
+
+export type CounterLineups = {
+  opponent: string;
+  my_team_id: number;
+  usual_formation: string | null;
+  available_players: number;
+  injured: { player_id: number; name: string }[];
+  rules_applied: string[];
+  options: CounterOption[];
+};
+
+/** Như apiGet nhưng trả về null khi API báo lỗi nghiệp vụ (409/422/404) để trang vẫn hiển thị phần còn lại. */
+export async function apiGetOptional<T>(path: string): Promise<T | null> {
+  try {
+    return await apiGet<T>(path);
+  } catch (e) {
+    if (e instanceof ApiError && [404, 409, 422].includes(e.status)) return null;
+    throw e;
+  }
+}

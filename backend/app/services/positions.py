@@ -30,6 +30,14 @@ LINES = ["GK", "DEF", "MID", "ATT"]
 
 _ROLE_BY_POSITION = {pos: role for role, positions in ROLE_POSITIONS.items() for pos in positions}
 
+# Họ vị trí: các mã gần như tương đương (vd trung vệ trái/giữa/phải), chuyển qua lại gần như không mất chất lượng.
+POSITION_FAMILIES = [{4, 5, 6}, {9, 10, 11}, {13, 14, 15}, {17, 18, 19}, {20, 21, 22, 24, 25, 26}]
+
+
+def same_family(a: int | None, b: int | None) -> bool:
+    return a is not None and b is not None and any(a in fam and b in fam for fam in POSITION_FAMILIES)
+
+
 # Vị trí biên (để đánh giá độ hở hai cánh)
 FLANK_DEFENDER_POSITIONS = {2, 3, 7, 8}
 WIDE_MIDFIELDER_POSITIONS = {12, 16}

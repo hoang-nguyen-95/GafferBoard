@@ -36,3 +36,17 @@ def add_team(session, team_id: int, league_id: int = 13, *, speed: int = 70, ben
     ))
     session.commit()
     return starters
+
+
+FORMATIONS = {
+    (8, "4-3-3"): POSITIONS_433,
+    (16, "4-4-2"): [0, 3, 4, 6, 7, 12, 13, 15, 16, 24, 26],
+    (3, "4-2-3-1"): [0, 3, 4, 6, 7, 9, 11, 12, 16, 18, 25],
+}
+
+
+def add_formations(session) -> None:
+    from app.models import FormationDef
+    for (fid, name), positions in FORMATIONS.items():
+        session.add(FormationDef(formation_id=fid, name=name, positions=positions))
+    session.commit()

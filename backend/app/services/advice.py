@@ -31,12 +31,13 @@ def context_for(report: OpponentReport, mine_values: dict, mine_extras: dict) ->
     )
 
 
-def advise(session: Session, report: OpponentReport, mine_team_id: Optional[int]) -> dict:
+def advise_full(session: Session, report: OpponentReport, mine_team_id: Optional[int]) -> tuple[list[Suggestion], dict]:
+    """Trả về (các `Suggestion` gốc, payload JSON). Bước chọn đội hình dùng bản gốc (có trọng số nhấn mạnh)."""
     if mine_team_id is not None and mine_team_id == report.team_id:
         mine_team_id = None  # không so đội với chính nó
     mine_values, mine_extras, mine_name = my_profile(session, mine_team_id)
-    suggestions: list[Suggestion] = evaluate(context_for(report, mine_values, mine_extras))
-    return {
+    suggestions = evaluate(context_for(report, mine_values, mine_extras))
+    payload = {
         "opponent": report.name,
         "opponent_formation": report.lineup.formation_name,
         "my_team": {"team_id": mine_team_id, "name": mine_name} if mine_name else None,
@@ -48,3 +49,8 @@ def advise(session: Session, report: OpponentReport, mine_team_id: Optional[int]
             *([] if mine_name else ["Chưa biết đội của bạn: các luật so sánh với đội bạn không được xét."]),
         ],
     }
+    return suggestions, payload
+
+
+def advise(session: Session, report: OpponentReport, mine_team_id: Optional[int]) -> dict:
+    return advise_full(session, report, mine_team_id)[1]

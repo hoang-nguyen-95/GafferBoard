@@ -1,6 +1,7 @@
 from app.models import Player
 from app.services.lineup import (
-    PENALTY_ALT_POSITION, PENALTY_GK_MISMATCH, PENALTY_OTHER_LINE, PENALTY_SAME_LINE, PENALTY_SAME_ROLE,
+    PENALTY_ALT_POSITION, PENALTY_GK_MISMATCH, PENALTY_OTHER_LINE, PENALTY_SAME_FAMILY, PENALTY_SAME_LINE,
+    PENALTY_SAME_ROLE,
     assign_players, position_penalty, position_rating,
 )
 
@@ -12,7 +13,10 @@ def mk(pid, overall, positions):
 def test_position_penalty_levels():
     assert position_penalty([5], 5) == 0                         # đúng sở trường
     assert position_penalty([5, 4], 4) == PENALTY_ALT_POSITION   # vị trí phụ
-    assert position_penalty([3], 7) == PENALTY_SAME_ROLE         # RB -> LB
+    assert position_penalty([5], 6) == PENALTY_SAME_FAMILY       # CB -> LCB: gần như không mất gì
+    assert position_penalty([25], 24) == position_penalty([21], 26) == PENALTY_SAME_FAMILY
+    assert position_penalty([14], 15) == position_penalty([10], 9) == PENALTY_SAME_FAMILY
+    assert position_penalty([3], 7) == PENALTY_SAME_ROLE         # RB -> LB (khác bên): vẫn bị trừ
     assert position_penalty([5], 3) == PENALTY_SAME_LINE         # CB -> RB
     assert position_penalty([5], 25) == PENALTY_OTHER_LINE       # CB -> ST
     assert position_penalty([0], 5) == PENALTY_GK_MISMATCH       # GK ra sân
@@ -44,3 +48,7 @@ def test_bonus_can_change_the_pick():
     plain = assign_players([25], [slow, fast])
     boosted = assign_players([25], [slow, fast], bonus=lambda p, pos: 10 if p.player_id == 2 else 0)
     assert plain[0].player.player_id == 1 and boosted[0].player.player_id == 2
+
+
+def test_family_penalty_is_smaller_than_changing_role_and_larger_than_natural():
+    assert 0 < PENALTY_SAME_FAMILY < PENALTY_ALT_POSITION < PENALTY_SAME_ROLE < PENALTY_SAME_LINE < PENALTY_OTHER_LINE
