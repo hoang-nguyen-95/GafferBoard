@@ -224,6 +224,10 @@ def import_exports(session: Session, exports: Path, mapping: dict) -> ImportRepo
     report = ImportReport()
     for name, spec in mapping["tables"].items():
         report.tables.append(_import_table(session, exports, name, spec))
+        if name == "players" and "names" in mapping:
+            from app.importers.names import import_names  # tránh import vòng
+
+            report.tables.append(import_names(session, exports, mapping["names"]))
         if name == "squad" and "lineups" in mapping:
             report.tables.append(_import_lineups(session, exports, mapping["lineups"]))
     return report

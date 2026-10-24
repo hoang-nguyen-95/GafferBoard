@@ -25,7 +25,7 @@ def test_players_by_team_sorted_by_overall_with_squad_info(client):
     top = rows[0]
     assert top["overall"] == 88 and top["positions"] == [18]
     assert top["team_id"] == 11 and top["squad_position"] == 18 and top["jersey_number"] == 8
-    assert top["name"] is None
+    assert top["name"] == "Anh Nguyễn" and top["jersey_name"] == "A.Nguyen"
 
 
 def test_players_without_filter_and_pagination(client):
@@ -42,3 +42,19 @@ def test_player_detail_has_all_attributes(client):
 
 def test_leagues(client):
     assert [l["league_id"] for l in client.get("/leagues").json()] == [13, 53]
+
+
+def test_player_search_ignores_case_accents_and_word_order(client):
+    ids = lambda q: [p["player_id"] for p in client.get("/players", params={"q": q}).json()]  # noqa: E731
+    assert ids("OSTERGAARD") == [103]
+    assert ids("østergaard") == [103]
+    assert ids("nguyen anh") == [101]   # đúng thứ tự khác
+    assert ids("guðjohnsen") == [102] and ids("gudjohnsen") == [102]
+    assert ids("khong co ai") == []
+    assert ids("%") == []               # ký tự đặc biệt của LIKE không khớp mọi thứ
+
+
+def test_player_search_combines_with_team_filter(client):
+    rows = client.get("/players", params={"team": 22, "q": "linh"}).json()
+    assert [r["player_id"] for r in rows] == [201]
+    assert client.get("/players", params={"team": 11, "q": "linh"}).json() == []

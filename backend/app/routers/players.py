@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from app.db import get_session
+from app.importers.names import fold_text
 from app.models import Player, SquadMember
 from app.schemas import PlayerSummary
 
@@ -24,7 +25,7 @@ def _summary(player: Player, member: Optional[SquadMember] = None) -> PlayerSumm
 @router.get("/players", response_model=list[PlayerSummary])
 def list_players(
     team: Optional[int] = Query(None, description="team_id"),
-    q: Optional[str] = Query(None, description="Tìm theo tên (chỉ có khi đã import tên cầu thủ)"),
+    q: Optional[str] = Query(None, description="Tìm theo tên, không phân biệt hoa thường và dấu"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     session: Session = Depends(get_session),
@@ -34,8 +35,10 @@ def list_players(
         stmt = stmt.where(SquadMember.team_id == team)
     else:
         stmt = select(Player)
-    if q:
-        stmt = stmt.where(Player.name.ilike(f"%{q}%"))
+    if q and fold_text(q):
+        # Mỗi từ phải xuất hiện trong tên (thứ tự bất kỳ): "fernandes bruno" vẫn khớp.
+        for word in fold_text(q).split():
+            stmt = stmt.where(Player.name_search.contains(word, autoescape=True))
     stmt = stmt.order_by(Player.overall.desc(), Player.player_id).limit(limit).offset(offset)
     rows = session.exec(stmt).all()
     return [_summary(*r) for r in rows] if team is not None else [_summary(p) for p in rows]

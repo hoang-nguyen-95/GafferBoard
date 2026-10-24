@@ -32,22 +32,39 @@ def lineup_headers() -> tuple[list[str], list[str]]:
     return sheets, forms
 
 
-# Cầu thủ 1xx thuộc đội 11, 2xx thuộc đội 22
+# Cầu thủ 1xx thuộc đội 11, 2xx thuộc đội 22. Tên bịa; id tên khớp NAMES/DC_NAMES bên dưới.
 PLAYERS = [
-    # id, overall, positions, birthdate(days), first/last/common name ids
     dict(playerid="101", overallrating="88", preferredposition1="18", preferredposition2="-1", birthdate="150444",
-         firstnameid="5", lastnameid="6", commonnameid="-1", sprintspeed="66", acceleration="68", pacdiv="67"),
+         firstnameid="5", lastnameid="6", commonnameid="0", playerjerseynameid="12",
+         sprintspeed="66", acceleration="68", pacdiv="67"),
     dict(playerid="102", overallrating="81", preferredposition1="0", preferredposition2="-1", birthdate="153303",
          firstnameid="7", lastnameid="8", commonnameid="9", gkdiving="80", pacdiv="80"),
     dict(playerid="103", overallrating="75", preferredposition1="25", preferredposition2="23", preferredposition3="27",
-         birthdate="152166", sprintspeed="90", acceleration="91", pacdiv="90"),
-    dict(playerid="201", overallrating="70", preferredposition1="5", preferredposition2="-1", birthdate="153000"),
+         birthdate="152166", firstnameid="10", lastnameid="44001", commonnameid="0",
+         sprintspeed="90", acceleration="91", pacdiv="90"),
+    dict(playerid="201", overallrating="70", preferredposition1="5", preferredposition2="-1", birthdate="153000",
+         firstnameid="5", lastnameid="6", commonnameid="0"),  # bị editedplayernames ghi đè
     dict(playerid="202", overallrating="66", preferredposition1="14", preferredposition2="10", birthdate="153100"),
+    # 202: mọi id tên = 0 (chuỗi rỗng) -> không có tên
 ]
+NAMES = {0: "", 5: "Anh", 6: "Nguyễn", 7: "Jón", 8: "Guðjohnsen", 9: "Big Jon", 10: "Marta", 12: "A.Nguyen"}
+DC_NAMES = {44001: "Østergaard"}
 
 
-def write_sample_export(d: Path, *, with_fixtures: bool = True) -> None:
+def write_names(d: Path) -> None:
+    write_csv(d / "playernames.csv", ["nameid", "commentaryid", "name"],
+              [dict(nameid=str(k), commentaryid="900000", name=v) for k, v in NAMES.items()])
+    write_csv(d / "dcplayernames.csv", ["nameid", "name"], [dict(nameid=str(k), name=v) for k, v in DC_NAMES.items()])
+    write_csv(d / "editedplayernames.csv", ["firstname", "playerjerseyname", "surname", "commonname", "playerid"], [
+        dict(firstname="Linh", playerjerseyname="L. TRAN", surname="Trần", commonname="", playerid="201"),
+        dict(firstname="Ai", playerjerseyname="AI", surname="Đó", commonname="", playerid="999"),  # không có trong players
+    ])
+
+
+def write_sample_export(d: Path, *, with_fixtures: bool = True, with_names: bool = True) -> None:
     d.mkdir(parents=True, exist_ok=True)
+    if with_names:
+        write_names(d)
     write_csv(d / "leagues.csv", table_header("leagues"), [
         dict(leagueid="13", leaguename="Premier League", countryid="14", level="1", isinternationalleague="0", iswomencompetition="0"),
         dict(leagueid="53", leaguename="LALIGA EA SPORTS", countryid="45", level="1", isinternationalleague="0", iswomencompetition="0"),

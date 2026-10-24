@@ -31,7 +31,8 @@ class TeamOut(_Out):
 
 class PlayerSummary(_Out):
     player_id: int
-    name: Optional[str] = None  # null cho tới khi import bảng playernames
+    name: Optional[str] = None  # null nếu chưa import bảng playernames
+    jersey_name: Optional[str] = None
     overall: int
     potential: Optional[int] = None
     positions: list[int] = []

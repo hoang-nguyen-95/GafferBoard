@@ -7,14 +7,15 @@ Kế hoạch các giai đoạn: [PLAN.md](PLAN.md). Cấu trúc dữ liệu xu�
 ## Trạng thái
 
 - Giai đoạn 0 (khảo sát dữ liệu): xong, xem `docs/data-schema.md`.
-- Giai đoạn 1 (khung dự án + import): backend FastAPI + SQLite + Alembic, importer idempotent, API `GET /teams`, `GET /players?team=`; frontend Next.js mới có trang kiểm tra kết nối.
+- Giai đoạn 1 (khung dự án + import): backend FastAPI + SQLite + Alembic, importer idempotent, API `GET /teams`, `GET /players?team=&q=` (tìm theo tên, không phân biệt dấu); frontend Next.js mới có trang kiểm tra kết nối.
+- Tên cầu thủ được ghép từ `playernames`/`dcplayernames`/`editedplayernames` nếu có trong thư mục xuất.
 
 ## Xuất dữ liệu từ game
 
 1. Mở FC26, load Career, bật Live Editor (phím F9).
 2. Tạo thư mục xuất (vd `D:/XboxGames/fc_exports`), sửa `OUT_DIR` ở đầu `tools/live_editor/export_tables.lua`.
 3. Live Editor → Features → Lua Engine → dán nội dung script → execute.
-4. Chép các file `.csv` vừa ra vào `data/exports/` (thư mục này bị `.gitignore`, không bị commit).
+4. Chép các file `.csv` vừa ra vào `data/exports/` (thư mục này bị `.gitignore`, không bị commit). Cần có `players`, `teams`, `teamplayerlinks`, `leagueteamlinks`, `leagues`, `default_teamsheets`, `formations`, `fixtures`, `career_users`, và `playernames` (+ `dcplayernames`, `editedplayernames`) để có tên cầu thủ; file nào thiếu thì importer bỏ qua.
 
 ## Chạy backend
 

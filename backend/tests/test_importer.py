@@ -5,7 +5,7 @@ from sqlmodel import select
 
 from app.importers.live_editor import MappingError, days_to_date, import_exports, load_mapping
 from app.importers.run import main as run_cli
-from app.models import Fixture, Player, SquadMember, TeamLineup, TeamStanding, UserProfile
+from app.models import Fixture, Player, SquadMember, Team, TeamLineup, TeamStanding, UserProfile
 from tests.sample_data import MAPPING, write_csv, write_sample_export
 
 
@@ -27,8 +27,10 @@ def test_import_converts_values(session, exports):
     p = session.get(Player, 101)
     assert p.overall == 88 and p.birth_date == date(1994, 9, 8)
     assert p.positions == [18]  # -1 bị bỏ
-    assert p.common_name_id is None and p.first_name_id == 5  # -1 -> null cho cột id
-    assert p.name is None  # chưa có bảng playernames
+    assert p.first_name_id == 5 and p.common_name_id == 0  # game dùng 0 cho "không có tên thông dụng"
+    team = session.get(Team, 11)
+    assert team.captain_id == 101 and team.penalty_taker_id is None  # -1 -> null cho cột id
+    assert p.name == "Anh Nguyễn" and p.jersey_name == "A.Nguyen"
     assert session.get(Player, 103).positions == [25, 23, 27]
 
     sm = session.get(SquadMember, (11, 101))
@@ -127,3 +129,51 @@ def test_cli_imports_into_given_db(tmp_path, exports, capsys):
     out = capsys.readouterr().out
     assert "players" in out and db.exists()
     assert run_cli([str(tmp_path / "nope"), "--db", str(db)]) == 2
+
+
+def test_names_use_common_name_else_first_and_last(session, exports):
+    import_exports(session, exports, MAPPING)
+    session.commit()
+    assert session.get(Player, 101).name == "Anh Nguyễn"      # commonnameid = 0 -> tên + họ
+    assert session.get(Player, 102).name == "Big Jon"          # có tên thông dụng
+    assert session.get(Player, 103).name == "Marta Østergaard"  # họ lấy từ dcplayernames
+    assert session.get(Player, 202).name is None                # mọi id tên = 0
+    assert session.get(Player, 202).name_search is None
+
+
+def test_edited_names_override_and_unknown_players_are_ignored(session, exports):
+    import_exports(session, exports, MAPPING)
+    session.commit()
+    p = session.get(Player, 201)
+    assert p.name == "Linh Trần" and p.jersey_name == "L. TRAN"  # không phải "Anh Nguyễn"
+    assert session.get(Player, 999) is None
+
+
+def test_search_key_is_folded(session, exports):
+    import_exports(session, exports, MAPPING)
+    session.commit()
+    assert session.get(Player, 103).name_search == "marta ostergaard"
+    assert "gudjohnsen" in session.get(Player, 102).name_search and "jon" in session.get(Player, 102).name_search
+
+
+def test_names_reimport_changes_nothing_then_follows_edits(session, exports):
+    import_exports(session, exports, MAPPING)
+    session.commit()
+    again = report_by_name(import_exports(session, exports, MAPPING))
+    assert again["names"].updated == 0
+    (exports / "editedplayernames.csv").unlink()  # người dùng bỏ chỉnh sửa tên
+    third = report_by_name(import_exports(session, exports, MAPPING))
+    session.commit()
+    session.expire_all()
+    assert third["names"].updated == 1 and session.get(Player, 201).name == "Anh Nguyễn"
+
+
+def test_missing_names_file_is_skipped_and_keeps_existing_names(session, exports, tmp_path):
+    import_exports(session, exports, MAPPING)
+    session.commit()
+    for f in ("playernames.csv", "dcplayernames.csv", "editedplayernames.csv"):
+        (exports / f).unlink()
+    report = report_by_name(import_exports(session, exports, MAPPING))
+    session.commit()
+    assert report["names"].status == "skipped"
+    assert session.get(Player, 102).name == "Big Jon"

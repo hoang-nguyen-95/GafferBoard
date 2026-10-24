@@ -1,7 +1,7 @@
 # Data schema — dữ liệu xuất từ game (Giai đoạn 0)
 
 Nguồn: bảng database gốc của game, xuất bằng `tools/live_editor/export_tables.lua` (Live Editor v26.3.6, Career Mode, PC).
-Số liệu dưới đây đo trên lần xuất đầu tiên. Ký hiệu: **[OK]** đã kiểm chứng bằng dữ liệu, **[GIẢ THUYẾT]** suy ra nhưng chưa kiểm chứng, **[THIẾU]** chưa có dữ liệu.
+Số liệu dưới đây đo trên hai lần xuất (lần 2 bổ sung các bảng tên; 6 file chính giống hệt lần 1, tức save chưa đổi). Ký hiệu: **[OK]** đã kiểm chứng bằng dữ liệu, **[GIẢ THUYẾT]** suy ra nhưng chưa kiểm chứng, **[THIẾU]** chưa có dữ liệu.
 
 ## 1. Môi trường xuất
 
@@ -25,7 +25,7 @@ Số liệu dưới đây đo trên lần xuất đầu tiên. Ký hiệu: **[OK
 
 | File | Số dòng | Nội dung | Mô hình (PLAN §4) | Trạng thái |
 |---|---|---|---|---|
-| `players.csv` | 22 151 | Toàn bộ cầu thủ (145 cột, gồm chỉ số chi tiết) | `Player` | **Thiếu tên** (xem §5) |
+| `players.csv` | 22 151 | Toàn bộ cầu thủ (145 cột, gồm chỉ số chi tiết) | `Player` | OK (tên: ghép từ 3 bảng tên bên dưới) |
 | `teams.csv` | 851 | Đội (110 cột: tên, rating đội, phong cách) | `Team` | OK |
 | `teamplayerlinks.csv` | 24 662 | Cầu thủ ↔ đội, vị trí trong đội hình, chấn thương, phong độ, bàn thắng | `Player.team_id`, `TeamLineup` | OK |
 | `leagueteamlinks.csv` | 851 | Đội ↔ giải + bảng xếp hạng (điểm, thắng/hòa/thua, phong độ) | `Team.league`, phong độ | OK |
@@ -33,6 +33,14 @@ Số liệu dưới đây đo trên lần xuất đầu tiên. Ký hiệu: **[OK
 | `default_teamsheets.csv` | 850 | Đội hình xuất phát 11 người + người đá phạt | `TeamLineup` | OK |
 | `formations.csv` | 880 | Sơ đồ (vị trí từng slot, vai trò); mỗi đội một dòng theo `teamid` | `TeamLineup.formation` | OK |
 | `fixtures.csv` | 40 | Các trận sắp diễn ra | `Fixture` | **Không đủ** (xem §4) |
+| `playernames.csv` | 41 190 | `nameid → name` (tên/họ/tên thông dụng/tên in áo) | `Player.name` | OK, đã import |
+| `dcplayernames.csv` | 7 322 | Như trên, `nameid` từ 44000 (không trùng `playernames`) | `Player.name` | OK, đã import |
+| `editedplayernames.csv` | 32 | Tên do người dùng sửa trong Live Editor, theo `playerid` | `Player.name` (ưu tiên cao nhất) | OK, đã import |
+| `nations.csv` | 218 | `nationid → nationname`, `isocountrycode` | Quốc tịch cầu thủ | Chưa import; tên tiếng Việt bị lỗi mã hóa (`BŇ` = Bỉ) |
+| `prevcompetitionstats.csv` | 4 381 | Thống kê mùa trước theo (cầu thủ, giải): bàn, kiến tạo, trận, thẻ, giữ sạch lưới | Phân tích cầu thủ nguy hiểm (GĐ3) | Chưa import |
+| `career_playerlastmatchhistory.csv` | 103 | Đội hình ra sân trận gần nhất của một số đội (phút thi đấu, vị trí) | — | Không có tỷ số; chưa import |
+| `playerformdiff.csv`, `teamformdiff.csv`, `career_squadranking.csv` | 50 / 50 / 46 | Chênh lệch overall sau lần cập nhật gần nhất | — | Chưa import |
+| `playstyles.csv` | 36 | Chỉ có cột `playstyleid`, cột `type` rỗng | — | **Không dùng được** để giải mã playstyle |
 | `career_users.csv` | 1 | Hồ sơ người chơi (HLV) và đội của họ | `UserProfile` | OK |
 | `career_calendar.csv` | 1 | Lịch Career | ngày hiện tại | **Không dùng được** (xem §4) |
 
@@ -45,7 +53,7 @@ Khóa: `playerid`. Các cột thực tế dùng cho mô hình:
 | Trường mô hình | Cột gốc | Ghi chú |
 |---|---|---|
 | id | `playerid` | |
-| name | `firstnameid`, `lastnameid`, `commonnameid`, `playerjerseynameid` | Chỉ là **ID tên**; chuỗi tên nằm ở bảng `playernames` (chưa xuất) |
+| name | `firstnameid`, `lastnameid`, `commonnameid`, `playerjerseynameid` | **ID tên**, ghép với `playernames`/`dcplayernames` (xem §4.8) |
 | age | `birthdate` | Số ngày từ 1582-10-14 |
 | positions | `preferredposition1`..`preferredposition7` | Mã vị trí, `-1` = trống |
 | overall / potential | `overallrating`, `potential` | Khoảng overall 1..95 |
@@ -60,7 +68,7 @@ Khóa: `playerid`. Các cột thực tế dùng cho mô hình:
 | weak_foot | `weakfootabilitytypecode` | Khoảng 1..5 |
 | skill_moves | `skillmoves` | Khoảng 0..4 (GK = 0). Có vẻ lệch 1 so với số sao hiển thị **[GIẢ THUYẾT]** |
 | preferred_foot | `preferredfoot` | 1 = chân phải trong mẫu kiểm tra (chưa kiểm chứng mã 2) |
-| playstyles / traits | `trait1`, `trait2`, `icontrait1`, `icontrait2` | Là **bitfield** (vd `12591116`); chưa giải mã. Bảng định nghĩa nằm ở `playstyles` (chưa xuất) **[THIẾU]** |
+| playstyles / traits | `trait1`, `trait2`, `icontrait1`, `icontrait2` | Là **bitfield** (vd `12591116`); chưa giải mã. Bảng `playstyles` chỉ có ID, không có tên/bit nên không giúp được **[THIẾU]** |
 | gender | `gender` | 0 = nam (20 113), 1 = nữ (2 038) |
 | nationality | `nationality` | ID quốc gia; tên ở bảng `nations` (chưa xuất) |
 | contract | `contractvaliduntil` | Năm |
@@ -107,16 +115,24 @@ Cột: `fixtureid` (khóa), `hometeamid`, `awayteamid`, `competitionid` (trùng 
 
 Một dòng: `clubteamid` = đội của người dùng (11 = Manchester Utd, HLV Michael Carrick), `leagueid` = 13 (Premier League), `firstname`, `surname`. Dùng làm `user_team_id` tự động, không cần người dùng chọn **[OK]**.
 
+### 4.8 Tên cầu thủ: `playernames` + `dcplayernames` + `editedplayernames`
+
+- `playernames(nameid, commentaryid, name)` và `dcplayernames(nameid, name)`: bảng tra `nameid → chuỗi`; hai bảng không trùng ID nên gộp thành một từ điển. `nameid = 0` là chuỗi rỗng (nghĩa là "không có") **[OK]**.
+- `players.firstnameid/lastnameid/commonnameid/playerjerseynameid` đều tra được 22 151/22 151 cầu thủ (`commonnameid = 0` ở 18 111 người, tức không có tên thông dụng) **[OK]**.
+- `editedplayernames(firstname, playerjerseyname, surname, commonname, playerid)`: 32 dòng (31 khớp `players`), thay hoàn toàn các tên trên.
+- **Quy tắc tên hiển thị** (đã đối chiếu với Bruno Fernandes, Matheus Cunha, Senne Lammens, Erling Haaland, Cristiano Ronaldo): nếu có dòng `editedplayernames` thì lấy `commonname`, trống thì `firstname + " " + surname`; nếu không có thì lấy tên thông dụng (`commonnameid`), trống thì `tên + họ`. Tên in áo (`jersey_name`) lấy từ `playerjerseynameid` hoặc `playerjerseyname`.
+- Tên cầu thủ **giữ đúng dấu** (574 tên có dấu, vd `Hańćko`, `Østergaard`, `Guðjohnsen`); lỗi mã hóa ở §2 chỉ ảnh hưởng chuỗi bản địa hóa (tên giải, quốc gia, một số tên đội). Khóa tìm kiếm `name_search` được bỏ dấu (`ø→o`, `ð→d`, `þ→th`...).
+
 ## 5. Phát hiện quan trọng và khoảng trống
 
 | # | Vấn đề | Mức độ | Phương án |
 |---|---|---|---|
-| 1 | **Chưa có tên cầu thủ.** `players` chỉ có ID tên (`firstnameid`, `lastnameid`, `commonnameid`) | Chặn GĐ2 (tìm kiếm/autocomplete), GĐ7 | Xuất thêm bảng `playernames` (cùng `editedplayernames`, `dcplayernames` nếu có) rồi nối theo ID |
+| 1 | ~~Chưa có tên cầu thủ~~ **Đã giải quyết** ở lần xuất 2 (xem §4.8) | — | — |
 | 2 | **`fixtures` chỉ có 40 trận, không có trận nào của đội 11 và không có Premier League.** Chỉ có MLS (39), La Liga 2 (54), Liga F (2222) | Chặn GĐ4 "tự nhận đối thủ" nếu không xuất lại | Xuất lại sau khi game đã chạy tới ngày thi đấu của đội bạn; nếu `fixtures` vẫn không chứa trận của bạn thì dùng chọn đối thủ thủ công |
 | 3 | **`career_calendar` không dùng được:** `currdate = 20080101` là giá trị mặc định, trong khi `fixtures` có ngày từ 2026-05-27 đến 2026-07-22 (xem công thức ở §2) | Không biết ngày hiện tại của game | Lấy ngày hiện tại từ `min(fixturedate)` của `fixtures`, hoặc người dùng nhập; cần xác nhận lại ở lần xuất thứ hai |
 | 4 | **Không có kết quả từng trận.** Chỉ có chuỗi phong độ 5 trận (0/1/2) và thống kê tổng mùa | GĐ3 chỉ làm được "điểm 5 trận gần nhất" | Hiệu số 5 trận gần nhất: nhập tay, hoặc xuất bảng `career_playerlastmatchhistory`, `prevcompetitionstats`, `teamformdiff` và kiểm tra xem có tỷ số không |
 | 5 | **Save đang ở trạng thái đầu**: bảng điểm của các CLB bằng 0 (chỉ giải đội tuyển 78 và nữ quốc tế 2136 có trận); `injury` đều 0 | Chưa thể kiểm chứng phong độ/chấn thương | Xuất lại sau khi chơi vài trận |
-| 6 | Mã hóa chuỗi có dấu không nhất quán (§2) | Ảnh hưởng tìm kiếm tên | So khớp bỏ dấu; kiểm tra lại với bảng `playernames` |
+| 6 | Mã hóa chuỗi có dấu không nhất quán (§2) | Ảnh hưởng tìm kiếm tên | Tên cầu thủ đã kiểm tra: sạch. Lỗi chỉ ở tên giải/quốc gia/đội bản địa hóa; tìm kiếm dùng khóa bỏ dấu |
 | 7 | `trait1/trait2/icontrait*` là bitfield chưa giải mã | Chưa dùng được playstyle trong luật | Xuất `playstyles`, đối chiếu với vài cầu thủ biết trước playstyle |
 | 8 | `nationality` chỉ là ID | Thấp | Xuất `nations` khi cần hiển thị |
 
@@ -125,7 +141,7 @@ Một dòng: `clubteamid` = đội của người dùng (11 = Manchester Utd, HL
 | Câu hỏi | Kết quả | Phương án nếu thiếu |
 |---|---|---|
 | Có bảng cầu thủ + chỉ số chi tiết? | **Có** (`players`) | |
-| Có tên cầu thủ? | **Chưa** (chỉ ID tên) | Xuất `playernames` |
+| Có tên cầu thủ? | **Có** (`playernames` + `dcplayernames` + `editedplayernames`) | |
 | Có bảng đội, giải, quan hệ đội–giải? | **Có** | |
 | Có cầu thủ thuộc đội nào? | **Có** (`teamplayerlinks`) | |
 | Có lineup / sơ đồ mỗi đội? | **Có** (`default_teamsheets` + `formations`) | Không cần suy luận |
@@ -138,11 +154,11 @@ Một dòng: `clubteamid` = đội của người dùng (11 = Manchester Utd, HL
 
 ## 7. Đề xuất chốt lại mô hình dữ liệu (cho Giai đoạn 1)
 
-- **Player**: khóa `playerid`; thêm `first_name_id/last_name_id/common_name_id` và cột `name` điền từ `playernames`; lưu thêm trường `name_search` đã bỏ dấu cho autocomplete.
+- **Player**: khóa `playerid`; thêm `first_name_id/last_name_id/common_name_id` và cột `name`, `jersey_name`, `name_search` (đã bỏ dấu, cho autocomplete) điền từ các bảng tên. **Đã triển khai ở Giai đoạn 1.**
 - **Team**: khóa `teamid`; `league_id` lấy từ `leagueteamlinks`; kèm `overall/attack/midfield/defense`.
 - **TeamStanding** (mới, bảng riêng từ `leagueteamlinks`): vị trí, điểm, thắng/hòa/thua nhà–khách, bàn thắng bại, `form_string`. Thay cho khái niệm tự tính phong độ từ `Fixture.score` trong PLAN, vì dữ liệu không có tỷ số từng trận.
 - **TeamLineup**: nguồn `default_teamsheets` + `formations` (không cần suy ra từ overall); giữ cơ chế suy luận làm phương án dự phòng cho đội thiếu dữ liệu và cho nhập tay.
 - **Fixture**: giữ như PLAN nhưng bỏ `score`/`played`; thêm `competition_id`, `fixture_time`. Kết quả (nếu cần) lưu ở bảng **MatchResult** nhập tay.
 - **UserProfile**: `user_team_id` lấy từ `career_users.clubteamid` khi có, người dùng chỉ chọn thủ công khi không có.
 - **Cấu hình ánh xạ cột bằng file YAML** (PLAN §6): giữ nguyên ý tưởng, vì tên cột dạng chữ thường cố định nhưng có thể đổi giữa các bản FC.
-- Các bảng cần xuất bổ sung trước/trong Giai đoạn 1: `playernames`, `editedplayernames`, `dcplayernames`, `nations`, `playstyles`, và (sau khi chơi vài trận) bản xuất mới của `fixtures`, `leagueteamlinks`, `teamplayerlinks`, `career_calendar`.
+- Còn cần xuất lại (sau khi chơi vài trận CLB): `fixtures`, `leagueteamlinks`, `teamplayerlinks`, `career_calendar`, `career_playerlastmatchhistory`. Các bảng đã xuất nhưng chưa import (`nations`, `prevcompetitionstats`, `*formdiff`) sẽ nhập khi giai đoạn dùng đến chúng cần.

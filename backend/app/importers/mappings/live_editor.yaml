@@ -195,3 +195,12 @@ lineups:
   slot_position_col: "position{i}"
   slot_role_col: "pos{i}role"
   slots: 11
+
+# Tên cầu thủ: ghép ID tên trong players với các bảng tên. editedplayernames (nếu có) được ưu tiên.
+names:
+  names_file: playernames.csv
+  extra_names_files: [dcplayernames.csv]
+  id_col: nameid
+  name_col: name
+  edited_file: editedplayernames.csv
+  edited_cols: {player_id: playerid, first: firstname, last: surname, common: commonname, jersey: playerjerseyname}

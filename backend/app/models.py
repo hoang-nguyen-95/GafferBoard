@@ -34,8 +34,10 @@ class Team(SQLModel, table=True):
 
 class Player(SQLModel, table=True):
     player_id: int = Field(primary_key=True, sa_column_kwargs={"autoincrement": False})
-    # Tên: players.csv chỉ có ID tên; `name` sẽ điền khi có bảng playernames.
+    # Tên: players.csv chỉ có ID tên; các cột dưới đây được điền từ bảng playernames (importers/names.py).
     name: Optional[str] = Field(default=None, index=True)
+    jersey_name: Optional[str] = None  # tên in trên áo, vd "B.Fernandes"
+    name_search: Optional[str] = Field(default=None, index=True)  # chữ thường, bỏ dấu, cho autocomplete
     first_name_id: Optional[int] = None
     last_name_id: Optional[int] = None
     common_name_id: Optional[int] = None
