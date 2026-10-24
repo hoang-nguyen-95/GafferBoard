@@ -128,10 +128,10 @@ Một dòng: `clubteamid` = đội của người dùng (11 = Manchester Utd, HL
 | # | Vấn đề | Mức độ | Phương án |
 |---|---|---|---|
 | 1 | ~~Chưa có tên cầu thủ~~ **Đã giải quyết** ở lần xuất 2 (xem §4.8) | — | — |
-| 2 | **`fixtures` chỉ có 40 trận, không có trận nào của đội 11 và không có Premier League.** Chỉ có MLS (39), La Liga 2 (54), Liga F (2222) | Chặn GĐ4 "tự nhận đối thủ" nếu không xuất lại | Xuất lại sau khi game đã chạy tới ngày thi đấu của đội bạn; nếu `fixtures` vẫn không chứa trận của bạn thì dùng chọn đối thủ thủ công |
-| 3 | **`career_calendar` không dùng được:** `currdate = 20080101` là giá trị mặc định, trong khi `fixtures` có ngày từ 2026-05-27 đến 2026-07-22 (xem công thức ở §2) | Không biết ngày hiện tại của game | Lấy ngày hiện tại từ `min(fixturedate)` của `fixtures`, hoặc người dùng nhập; cần xác nhận lại ở lần xuất thứ hai |
+| 2 | **`fixtures` chỉ có 40 trận, không có trận nào của đội 11 và không có Premier League.** Chỉ có MLS (39), La Liga 2 (54), Liga F (2222). **Nguyên nhân (người dùng xác nhận): save đang ở giai đoạn tiền mùa giải**, lịch các giải châu Âu chưa được tạo; ba giải còn lại đang trong mùa thi đấu | Chặn GĐ4 "tự nhận đối thủ" cho tới khi mùa giải bắt đầu | Xuất lại khi mùa giải đã bắt đầu. **[GIẢ THUYẾT]** `fixtures` sẽ chứa trận của đội bạn khi đó, và có thể chỉ chứa các trận trong một khoảng ngày tới (hiện 2026-05-27 → 2026-07-22), chưa kiểm chứng; nếu vẫn thiếu thì dùng chọn đối thủ thủ công. Trận giao hữu tiền mùa giải cũng chưa biết có nằm trong bảng này không |
+| 3 | **`career_calendar` không dùng được:** `currdate = 20080101` là giá trị mặc định, trong khi `fixtures` có ngày từ 2026-05-27 đến 2026-07-22 (xem công thức ở §2). Lần xuất thứ hai giữ nguyên giá trị này; chưa biết có đổi khi mùa giải bắt đầu không | Không biết ngày hiện tại của game | Lấy ngày hiện tại từ `min(fixturedate)` của `fixtures`, hoặc người dùng nhập; kiểm tra lại sau khi mùa giải bắt đầu |
 | 4 | **Không có kết quả từng trận.** Chỉ có chuỗi phong độ 5 trận (0/1/2) và thống kê tổng mùa | GĐ3 chỉ làm được "điểm 5 trận gần nhất" | Hiệu số 5 trận gần nhất: nhập tay, hoặc xuất bảng `career_playerlastmatchhistory`, `prevcompetitionstats`, `teamformdiff` và kiểm tra xem có tỷ số không |
-| 5 | **Save đang ở trạng thái đầu**: bảng điểm của các CLB bằng 0 (chỉ giải đội tuyển 78 và nữ quốc tế 2136 có trận); `injury` đều 0 | Chưa thể kiểm chứng phong độ/chấn thương | Xuất lại sau khi chơi vài trận |
+| 5 | **Save đang ở tiền mùa giải**: bảng điểm của các CLB bằng 0 (chỉ giải đội tuyển 78 và nữ quốc tế 2136 có trận); `injury` đều 0 | Chưa thể kiểm chứng phong độ/chấn thương | Xuất lại sau vài vòng đấu chính thức |
 | 6 | Mã hóa chuỗi có dấu không nhất quán (§2) | Ảnh hưởng tìm kiếm tên | Tên cầu thủ đã kiểm tra: sạch. Lỗi chỉ ở tên giải/quốc gia/đội bản địa hóa; tìm kiếm dùng khóa bỏ dấu |
 | 7 | `trait1/trait2/icontrait*` là bitfield chưa giải mã | Chưa dùng được playstyle trong luật | Xuất `playstyles`, đối chiếu với vài cầu thủ biết trước playstyle |
 | 8 | `nationality` chỉ là ID | Thấp | Xuất `nations` khi cần hiển thị |
@@ -145,7 +145,7 @@ Một dòng: `clubteamid` = đội của người dùng (11 = Manchester Utd, HL
 | Có bảng đội, giải, quan hệ đội–giải? | **Có** | |
 | Có cầu thủ thuộc đội nào? | **Có** (`teamplayerlinks`) | |
 | Có lineup / sơ đồ mỗi đội? | **Có** (`default_teamsheets` + `formations`) | Không cần suy luận |
-| Có lịch thi đấu? | **Một phần**: 40 trận, không có trận của đội người dùng | Xuất lại khi game tới ngày thi đấu; chọn đối thủ thủ công |
+| Có lịch thi đấu? | **Chưa kiểm chứng**: 40 trận, không có trận của đội người dùng vì đang tiền mùa giải | Xuất lại khi mùa giải bắt đầu; chọn đối thủ thủ công |
 | Có kết quả các trận đã đá? | **Không có tỷ số từng trận**; có chuỗi phong độ 5 trận và thống kê mùa | Chuỗi 0/1/2 cho điểm; hiệu số nhập tay |
 | Xác định được đội người dùng? | **Có** (`career_users.clubteamid`) | |
 | Có chấn thương / phong độ cầu thủ? | `injury` (chưa có dữ liệu mẫu), `form` có | Xuất lại sau vài trận để thấy mã chấn thương |
