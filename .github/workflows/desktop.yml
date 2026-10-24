@@ -1,6 +1,7 @@
 # Build ứng dụng Windows (bản cài đặt .exe + bản chạy thẳng) từ bản web tĩnh.
 # - đẩy lên nhánh phát triển: chỉ build và đưa file vào Artifacts để thử;
-# - đẩy tag v* hoặc chạy tay (Actions -> Run workflow): tạo Release công khai, trang web trỏ nút "Tải ứng dụng Windows" tới /releases/latest.
+# - đẩy tag v*, chạy tay (Actions -> Run workflow), hoặc commit có chữ [release] trong thông điệp: tạo Release công khai,
+#   trang web trỏ nút "Tải ứng dụng Windows" tới /releases/latest.
 name: desktop
 
 on:
@@ -38,8 +39,8 @@ jobs:
           name: CounterPickFC-windows
           path: |
             desktop/dist/*.exe
-      - name: Tạo Release (khi là tag hoặc chạy tay)
-        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+      - name: Tạo Release (tag, chạy tay, hoặc commit có [release])
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
