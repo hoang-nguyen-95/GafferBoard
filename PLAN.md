@@ -132,6 +132,11 @@ Nghiệm thu: nhập 4-3-3 + 11 tên → ra phân tích và đội hình đáp t
 - Electron bọc bản web tĩnh; theo dõi thư mục xuất, tự nhập khi file đổi và yên lặng; cài script xuất vào Live Editor đã điền sẵn thư mục.
 - Build Windows bằng GitHub Actions. Chưa làm: script xuất chạy vòng lặp bên trong Live Editor (chờ kết quả thử `Sleep`/vòng lặp trên Live Editor của người dùng).
 
+### Giai đoạn 11 — Trang web thành cẩm nang + trang tải ứng dụng (đã làm)
+- Trang web chỉ còn cẩm nang (chỉ số, vai trò, đấu pháp, sơ đồ, cách đọc phân tích, hướng dẫn xuất dữ liệu) và màn tải ứng dụng với nút tải thẳng file `.exe`.
+- Công cụ phân tích (nhập CSV, phân tích, đội hình đáp trả...) chỉ có trong ứng dụng Windows; hai bản build chọn bằng `NEXT_PUBLIC_TARGET`.
+- Nội dung cẩm nang lấy từ chính logic của engine, có test bảo đảm không lệch.
+
 ## 6. Rủi ro và cách xử lý
 
 | Rủi ro | Xử lý |

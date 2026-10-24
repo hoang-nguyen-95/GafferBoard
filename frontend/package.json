@@ -6,8 +6,11 @@
     "sync-assets": "node scripts/sync-assets.mjs",
     "predev": "npm run sync-assets",
     "dev": "next dev",
+    "dev:desktop": "node scripts/with-target.mjs desktop next dev",
     "prebuild": "npm run sync-assets",
-    "build": "next build",
+    "build": "node scripts/with-target.mjs web next build",
+    "prebuild:desktop": "npm run sync-assets",
+    "build:desktop": "node scripts/with-target.mjs desktop next build",
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

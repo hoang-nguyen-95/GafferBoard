@@ -41,8 +41,7 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     giả và bằng SDK thật ở nhánh "chưa có khóa". Mặc định tắt. Chưa bật tham số `fallbacks` của API cho trường hợp bị từ chối vì
     nội dung phân tích bóng đá không thuộc nhóm nhạy cảm; nếu bị từ chối app hiển thị thông báo thay vì lỗi.
 14. **Mới thử trên một save** (Man Utd, Premier League, FC26 Live Editor v26.3.6).
-15. **Bản web tĩnh: dữ liệu chỉ nằm trong trình duyệt** (IndexedDB). Xóa dữ liệu trình duyệt, dùng chế độ ẩn danh hoặc đổi trình duyệt/máy là phải nhập lại
-    file CSV và mất ghi chú; có nút sao lưu/khôi phục dữ liệu cá nhân (.json) ở trang Nhập dữ liệu. Chưa đồng bộ giữa các máy.
+15. **Dữ liệu và ghi chú chỉ nằm trên máy** (IndexedDB trong thư mục dữ liệu của ứng dụng). Xóa thư mục dữ liệu hoặc đổi máy là mất ghi chú; có nút sao lưu/khôi phục dữ liệu cá nhân (.json) ở trang Nhập dữ liệu. Chưa đồng bộ giữa các máy.
 16. **Bản web tĩnh: địa chỉ trang dùng `?id=`** (vd `/team?id=123`) thay vì `/teams/123` vì site tĩnh không biết trước id nào tồn tại.
     Link cũ dạng `/teams/123` không còn hiệu lực.
 17. **Nhập dữ liệu lớn chạy trên luồng chính của trình duyệt**: bộ dữ liệu thật (~22 nghìn cầu thủ) mất vài giây và trang đứng hình trong lúc đó; chưa chuyển sang Web Worker.
@@ -50,4 +49,5 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     trên Linux; file `.exe` do GitHub Actions build, chưa có ai mở thử. Chưa có chữ ký số nên Windows sẽ cảnh báo "Unknown publisher".
 19. **Chưa biết Live Editor bản của người dùng có tự chạy script được không** (khi mở save hoặc theo sự kiện). Nếu không, vẫn phải bấm Execute trong Live Editor
     mỗi phiên chơi; app không điều khiển Live Editor. Cần danh sách thư mục/file của Live Editor để xác định.
-
+20. **Cẩm nang là kinh nghiệm chung và cách công cụ phân tích**, không phải số liệu chính thức của EA; mô tả "chỉ số làm gì" viết tay và chưa được ai có chuyên môn
+    game kiểm tra. Trang web không có cơ sở dữ liệu cầu thủ thật (không đưa dữ liệu game vào repo).

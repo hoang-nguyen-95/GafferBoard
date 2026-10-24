@@ -39,10 +39,10 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
-      "artifactName": "CounterPickFC-Setup-${version}.${ext}"
+      "artifactName": "CounterPickFC-Setup.${ext}"
     },
     "portable": {
-      "artifactName": "CounterPickFC-Portable-${version}.${ext}"
+      "artifactName": "CounterPickFC-Portable.${ext}"
     }
   }
 }

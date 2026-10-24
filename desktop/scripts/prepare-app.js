@@ -1,4 +1,4 @@
-// Gom bản web tĩnh (frontend/out) và script xuất vào desktop/app để đóng gói.
+// Gom giao diện bản desktop (frontend/out, build bằng `npm run build:desktop`) và script xuất vào desktop/app để đóng gói.
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -7,7 +7,7 @@ const web = path.join(root, "frontend", "out");
 const dest = path.resolve(__dirname, "../app");
 
 if (!fs.existsSync(path.join(web, "index.html"))) {
-  console.error("Chưa có frontend/out. Chạy trước: cd frontend && npm ci && npm run build");
+  console.error("Chưa có frontend/out. Chạy trước: cd frontend && npm ci && npm run build:desktop");
   process.exit(1);
 }
 fs.rmSync(dest, { recursive: true, force: true });

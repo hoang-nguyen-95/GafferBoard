@@ -2,6 +2,7 @@
 
 // Cầu nối giữa giao diện và engine chạy trong trình duyệt: máy chủ ảo trả về cùng JSON như API FastAPI.
 // Mọi lời gọi fetch("/api/...") của các component được chuyển thẳng vào engine nên không cần máy chủ nào.
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import { handleRequest, type ApiResponse } from "@/engine/api";
@@ -10,6 +11,7 @@ import { restoreUser, serializeUser } from "@/engine/backup";
 import { clearSaved, loadStore, saveGame, saveUser } from "@/engine/persist";
 import "@/engine/routes/register";
 import { Store } from "@/engine/store";
+import { IS_DESKTOP_BUILD } from "@/lib/target";
 
 export const store = new Store();
 
@@ -132,21 +134,48 @@ export function useApi<T>(path: string | null): ApiState<T> | null {
 const GateContext = createContext(false);
 export const useEngineReady = () => useContext(GateContext);
 
+/** Bản web chỉ có cẩm nang và trang tải; mọi trang công cụ phân tích chỉ có trong ứng dụng Windows. */
+const WEB_PATHS = ["/cam-nang", "/huong-dan", "/tai-ung-dung"];
+const isWebPath = (pathname: string) => pathname === "/" || WEB_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
+function WebGate({ children }: { children: ReactNode }) {
+  const pathname = usePathname() ?? "/";
+  if (isWebPath(pathname)) return <>{children}</>;
+  return (
+    <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
+      <div className="rounded border border-zinc-200 p-6 dark:border-zinc-800">
+        <h1 className="text-xl font-semibold">Tính năng này nằm trong ứng dụng Windows</h1>
+        <p className="mt-2 text-sm text-zinc-500">
+          Trang web chỉ có cẩm nang. Việc phân tích đối thủ từ dữ liệu save của bạn do ứng dụng cài trên máy làm, để dữ liệu không rời máy bạn.
+        </p>
+        <p className="mt-4 flex flex-wrap gap-3 text-sm">
+          <Link href="/tai-ung-dung" className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">Tải ứng dụng</Link>
+          <Link href="/cam-nang" className="rounded border border-zinc-300 px-4 py-2 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900">Đọc cẩm nang</Link>
+        </p>
+      </div>
+    </main>
+  );
+}
+
 /** Chờ nạp dữ liệu đã lưu rồi mới hiển thị trang; chưa có dữ liệu thì dẫn tới trang nhập. */
-export function EngineGate({ children }: { children: ReactNode }) {
+function DesktopGate({ children }: { children: ReactNode }) {
   const v = useDataVersion();
   const pathname = usePathname() ?? "/";
   useEffect(() => void boot(), []);
   if (phase !== "ready") return <p className="p-6 text-zinc-500">Đang mở dữ liệu…</p>;
-  const open = pathname === "/" || pathname.startsWith("/import");
+  const open = pathname === "/" || pathname.startsWith("/import") || isWebPath(pathname);
   if (!hasData() && !open) {
     return (
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12" data-v={v}>
         <p className="rounded border border-amber-500/50 bg-amber-500/10 p-4">
-          Chưa có dữ liệu. <a href="/import" className="underline">Nhập file xuất từ game</a> trước nhé.
+          Chưa có dữ liệu. <Link href="/import" className="underline">Nhập file xuất từ game</Link> trước nhé.
         </p>
       </main>
     );
   }
   return <GateContext.Provider value>{children}</GateContext.Provider>;
+}
+
+export function EngineGate({ children }: { children: ReactNode }) {
+  return IS_DESKTOP_BUILD ? <DesktopGate>{children}</DesktopGate> : <WebGate>{children}</WebGate>;
 }

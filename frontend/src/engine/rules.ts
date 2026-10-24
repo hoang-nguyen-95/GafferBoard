@@ -2,11 +2,11 @@
 import counters from "./data/counters.json";
 import { pyFloat, pyRound } from "./util";
 
-const LOW_PCT = 25.0;
-const HIGH_PCT = 75.0;
-const PACE_EDGE = 4.0;
-const FLANK_GAP = 8.0;
-const HEIGHT_EDGE = 4.0;
+export const LOW_PCT = 25.0;
+export const HIGH_PCT = 75.0;
+export const PACE_EDGE = 4.0;
+export const FLANK_GAP = 8.0;
+export const HEIGHT_EDGE = 4.0;
 
 type Num = number | null | undefined;
 type Dict = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any

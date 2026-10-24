@@ -1,4 +1,5 @@
-# Build ứng dụng Windows (bản cài đặt .exe + bản chạy thẳng) từ bản web tĩnh.
+# Build ứng dụng Windows (bản cài đặt .exe + bản chạy thẳng) từ giao diện bản desktop. File có tên cố định (không kèm số phiên bản)
+# để đường dẫn /releases/latest/download/<tên file> trên trang web tải thẳng về máy.
 # - đẩy lên nhánh phát triển: chỉ build và đưa file vào Artifacts để thử;
 # - đẩy tag v*, chạy tay (Actions -> Run workflow), hoặc commit có chữ [release] trong thông điệp: tạo Release công khai,
 #   trang web trỏ nút "Tải ứng dụng Windows" tới /releases/latest.
@@ -22,12 +23,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Build web tĩnh
+      - name: Build giao diện cho ứng dụng (NEXT_PUBLIC_TARGET=desktop)
         working-directory: frontend
         run: |
           npm ci
           npm test
-          npm run build
+          npm run build:desktop
       - name: Test và đóng gói ứng dụng
         working-directory: desktop
         run: |

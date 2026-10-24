@@ -1,12 +1,15 @@
-# Đưa bản web tĩnh lên mạng
+# Đưa trang web lên mạng
 
-Bản web (`frontend/`) là **site tĩnh**: `npm run build` sinh ra thư mục `frontend/out/` chỉ gồm HTML/JS/CSS. Không có
-máy chủ, không có API, không cơ sở dữ liệu. Người dùng kéo thả file CSV xuất từ Live Editor vào trang `/import`; toàn bộ
-phân tích chạy trong trình duyệt của họ (`frontend/src/engine/`) và dữ liệu được lưu trong IndexedDB của chính trình duyệt đó.
-Người host không bao giờ nhận được dữ liệu game hay ghi chú của người dùng.
+Trang web (`frontend/`, bản build mặc định `npm run build`) là **site tĩnh** gồm cẩm nang người chơi và trang tải ứng dụng Windows:
+`frontend/out/` chỉ có HTML/JS/CSS, không máy chủ, không API, không cơ sở dữ liệu, không nhận dữ liệu game của ai. Công cụ phân tích nằm trong
+ứng dụng Windows (xem `docs/desktop.md`); các trang công cụ trên web chỉ hiện hướng dẫn tải ứng dụng.
+
+**Nút tải** trỏ tới `https://github.com/hoang-nguyen-95/GafferBoard/releases/latest/download/CounterPickFC-Setup.exe`: GitHub trả file về máy ngay
+(không mở trang). Vì vậy file trong Release phải có tên cố định `CounterPickFC-Setup.exe` / `CounterPickFC-Portable.exe` (workflow `desktop` đã đặt như vậy)
+và phải có ít nhất một Release (xem `docs/desktop.md`, mục Phát hành). Nếu đổi tên repo, sửa `frontend/src/lib/links.ts`.
 
 Yêu cầu build: Node 20.9+ (khuyến nghị 22) và `npm`. Repo phải có cả thư mục `tools/` (script xuất `export_tables.lua` được
-chép vào `frontend/public/` trong bước `prebuild` để người dùng tải về từ trang nhập).
+chép vào `frontend/public/` trong bước `prebuild` để người dùng tải về từ trang Hướng dẫn).
 
 ## Netlify
 
@@ -37,7 +40,7 @@ GitHub Pages cần thêm `basePath` trong `frontend/next.config.ts`, chưa đư�
 ```bash
 cd frontend
 npm run build
-node e2e/static.cjs            # nhập CSV giả, phân tích, ghi chú, tải báo cáo... trên chính bản build (cần Playwright + Chromium)
+node e2e/web.cjs               # trang chủ, nút tải (tải thẳng file .exe), cẩm nang, các trang công cụ bị chặn (cần Playwright + Chromium)
 ```
 
-`npm test` chạy bộ đối chiếu engine TypeScript với bản Python (cần `python3` có `fastapi sqlmodel pyyaml`); xem `docs/engine-parity.md`.
+`npm test` chạy test engine (gồm đối chiếu với bản Python, cần `python3` có `fastapi sqlmodel pyyaml`) và test cẩm nang; xem `docs/engine-parity.md`.

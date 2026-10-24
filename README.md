@@ -1,18 +1,18 @@
 # CounterPick FC
 
-Web app giúp phân tích đối thủ và gợi ý đấu pháp cho FC26 Career Mode (PC, offline).
-Chỉ đọc file CSV bạn tự xuất từ game; không đụng vào bộ nhớ game, save hay chế độ online.
+Hai phần, cùng một mã nguồn:
 
-**Là site tĩnh**: bạn (hoặc bất kỳ ai) mở trang web, kéo thả file CSV vào trang **Nhập dữ liệu**, mọi phân tích chạy ngay trong
-trình duyệt. Không có máy chủ, không tải file lên đâu cả; dữ liệu và ghi chú nằm trong IndexedDB của trình duyệt. Đưa lên
-Netlify/Cloudflare Pages theo [docs/deploy.md](docs/deploy.md).
+- **Trang web (cẩm nang)**: tổng hợp cách đọc chỉ số cầu thủ, vai trò, đấu pháp, sơ đồ khắc chế và nút **tải ứng dụng Windows** (tải thẳng file cài đặt).
+  Đây là site tĩnh, đưa lên Netlify/Cloudflare Pages theo [docs/deploy.md](docs/deploy.md). Web **không** nhận file CSV hay phân tích dữ liệu.
+- **Ứng dụng Windows (Electron)**: công cụ phân tích đối thủ. Tự đọc thư mục xuất từ Live Editor nên không phải kéo thả, mọi thứ chạy trên máy bạn,
+  xem [docs/desktop.md](docs/desktop.md). Chỉ đọc file CSV bạn tự xuất; không đụng vào bộ nhớ game, save hay chế độ online.
 
-**Bản desktop (Windows)**: cùng giao diện, tự đọc thư mục xuất từ Live Editor nên không phải kéo thả, xem [docs/desktop.md](docs/desktop.md).
-
-Kế hoạch các giai đoạn: [PLAN.md](PLAN.md). Cấu trúc dữ liệu xuất: [docs/data-schema.md](docs/data-schema.md).
+Giao diện công cụ và trang web là một dự án Next.js (`frontend/`), chọn bản build bằng biến `NEXT_PUBLIC_TARGET` (`npm run build` = web, `npm run build:desktop` = ứng dụng).
 Phần tính toán nằm ở `frontend/src/engine/` (TypeScript) và được đối chiếu với backend Python, xem [docs/engine-parity.md](docs/engine-parity.md).
 
-## Tính năng
+Kế hoạch các giai đoạn: [PLAN.md](PLAN.md). Cấu trúc dữ liệu xuất: [docs/data-schema.md](docs/data-schema.md).
+
+## Tính năng của ứng dụng
 
 - **Trang chủ**: trận kế tiếp của đội bạn (đọc từ `fixtures`), mở thẳng phân tích đối thủ; chọn đội/đối thủ thủ công.
 - **Đội và cầu thủ**: sân đội hình, trung bình theo tuyến; trang cầu thủ có radar và điểm mạnh/yếu theo phân vị so với cầu thủ cùng vị trí (cùng giải).
@@ -37,8 +37,10 @@ Giới hạn và những điểm chưa kiểm chứng: [docs/known-issues.md](do
 ```bash
 cd frontend
 npm install
-npm run dev            # http://localhost:3000, rồi vào "Nhập dữ liệu"
-npm run build          # sinh site tĩnh ở frontend/out (đưa nguyên thư mục này lên hosting)
+npm run dev              # trang web (cẩm nang) ở http://localhost:3000
+npm run dev:desktop      # giao diện công cụ phân tích, mở ở trình duyệt để phát triển (có trang "Nhập dữ liệu" kéo thả CSV)
+npm run build            # site tĩnh bản web ở frontend/out (đưa nguyên thư mục này lên hosting)
+npm run build:desktop    # giao diện của ứng dụng Windows (rồi cd ../desktop để chạy/đóng gói)
 ```
 
 ## Backend Python (bản tham chiếu, không bắt buộc)
@@ -86,7 +88,8 @@ Backend Python có bản tương đương (`pip install anthropic`, biến môi 
 ```bash
 cd backend && pytest                      # ~200 test (importer, phân tích, luật, tối ưu đội hình, API, watcher...)
 cd frontend && npm run lint && npm test   # test engine TypeScript, gồm đối chiếu từng bước với bản Python
-cd frontend && npm run build && node e2e/static.cjs   # đầu-cuối trên bản build tĩnh (cần Playwright + Chromium)
+cd frontend && npm run build && node e2e/web.cjs                      # bản web: cẩm nang, nút tải
+cd frontend && npm run build:desktop && node e2e/desktop-build.cjs    # công cụ phân tích trên bản build (cần Playwright + Chromium)
 ```
 
 Test dùng dữ liệu mẫu tự sinh trong code, không cần và không commit dữ liệu từ game.

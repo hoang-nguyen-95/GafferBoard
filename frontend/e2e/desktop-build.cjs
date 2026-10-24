@@ -1,5 +1,5 @@
-// Kiểm thử đầu-cuối trên BẢN BUILD TĨNH (thư mục out/), không có backend nào chạy.
-//   npm run build && node e2e/static.cjs [thư_mục_csv]
+// Kiểm thử đầu-cuối trên BẢN BUILD DESKTOP (NEXT_PUBLIC_TARGET=desktop, thư mục out/), không có backend nào chạy.
+//   npm run build:desktop && node e2e/desktop-build.cjs [thư_mục_csv]
 // Không truyền thư mục thì sinh dữ liệu giả bằng backend/tools/make_synthetic_exports.py. Cần Playwright + Chromium.
 const http = require("node:http");
 const fs = require("node:fs");
