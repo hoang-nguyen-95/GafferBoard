@@ -1,5 +1,7 @@
 # CounterPick FC
 
+**Trang web: https://gaffer-board-eta.vercel.app**
+
 Hai phần, cùng một mã nguồn:
 
 - **Trang web (cẩm nang)**: tổng hợp cách đọc chỉ số cầu thủ, vai trò, đấu pháp, sơ đồ khắc chế và nút **tải ứng dụng Windows** (tải thẳng file cài đặt).

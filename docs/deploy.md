@@ -31,6 +31,8 @@ Hoặc dùng Wrangler sau khi build ở máy: `npx wrangler pages deploy fronten
 
 ## Vercel
 
+Trang đang chạy ở **https://gaffer-board-eta.vercel.app** (địa chỉ chính thức; hằng số `SITE_URL` trong `frontend/src/lib/links.ts`). Đổi tên miền thì sửa hằng số đó và README.
+
 1. Vercel → Add New → Project → Import repo `GafferBoard` từ GitHub.
 2. **Root Directory: `frontend`** (bắt buộc). Framework tự nhận Next.js; `frontend/vercel.json` đã đặt lệnh cài và build. Giữ bật mục "Include source files outside of the Root Directory"
    (mặc định đã bật) vì bước build chép script xuất từ thư mục `tools/` ở gốc repo.
