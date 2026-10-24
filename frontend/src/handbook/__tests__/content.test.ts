@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { ATTRIBUTE_LABELS, ROLE_ATTRS } from "@/engine/analysis";
 import { METRICS } from "@/engine/opponent";
 import { RULES } from "@/engine/rules";
-import { ATTRIBUTE_NOTES, METRIC_NOTES, RULE_TRIGGERS, STAT_GROUPS } from "../content";
+import { ROLE_POSITIONS } from "@/engine/positions";
+import { ATTRIBUTE_NOTES, METRIC_NOTES, ROLE_BUYING_NOTES, RULE_TRIGGERS, STAT_GROUPS } from "../content";
 
 // Cẩm nang lấy danh sách từ engine; test này bảo đảm thêm chỉ số/luật mới thì không quên viết phần giải thích.
 describe("cẩm nang khớp công cụ", () => {
@@ -19,5 +20,12 @@ describe("cẩm nang khớp công cụ", () => {
   it("mọi luật có mô tả điều kiện kích hoạt, mọi chỉ số đội có cách tính", () => {
     for (const r of RULES) expect(RULE_TRIGGERS[r.id], r.id).toBeTruthy();
     for (const k of Object.keys(METRICS)) expect(METRIC_NOTES[k], k).toBeTruthy();
+  });
+  it("mọi vai trò có lời khuyên khi mua", () => {
+    for (const r of Object.keys(ROLE_POSITIONS)) {
+      const n = ROLE_BUYING_NOTES[r as keyof typeof ROLE_BUYING_NOTES];
+      expect(n?.look, r).toBeTruthy();
+      expect(n?.avoid, r).toBeTruthy();
+    }
   });
 });

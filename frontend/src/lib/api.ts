@@ -306,3 +306,44 @@ export type TeamCompare = {
   metrics: (CompareRow & { percentile_a: number | null; percentile_b: number | null })[];
 };
 
+
+// ---- chế độ Manager ----
+export type ManagerPlayer = {
+  player_id: number; name: string; overall: number; potential: number | null; age: number | null; positions: number[]; role: string;
+  contract_until: number | null; seasons_left: number | null; international_rep: number | null;
+};
+export type ManagerNeed = {
+  role: string; role_label: string; line: Line; slots: number; baseline_overall: number; starters: ManagerPlayer[]; backups: ManagerPlayer[];
+  issues: string[]; priority: number;
+};
+export type ManagerOverview = {
+  user_team: { team_id: number; name: string }; season_end_year: number; reference_date: string; xi_average: number; squad_size: number;
+  xi_age_average: number | null; squad_age_average: number | null; old_players: number; needs: ManagerNeed[];
+  expiring: (ManagerPlayer & { in_xi: boolean })[]; budget: { transfer: number | null; wage: number | null };
+};
+export type ScoreLine = { key: string; label: string; value: number; points: number };
+export type ManagerTarget = ManagerPlayer & {
+  score: number; breakdown: ScoreLine[]; upgrade: number; flags: string[];
+  club: { team_id: number; name: string; league_name: string | null } | null;
+};
+export type ManagerTargets = {
+  role: string; role_label: string; baseline_overall: number; min_overall: number; season_end_year: number; total_matches: number; items: ManagerTarget[];
+};
+export type ShortlistRow = {
+  player_id: number; fee: number | null; wage: number | null; note: string; status: "target" | "negotiating" | "agreed";
+  player: ManagerPlayer; club: { team_id: number; name: string } | null; score: number; points_per_million: number | null;
+};
+export type SaleRow = { player_id: number; expected_fee: number | null; wage: number | null; player: ManagerPlayer };
+export type BudgetSummary = {
+  budget: { transfer: number | null; wage: number | null }; season_end_year: number; items: ShortlistRow[]; sales: SaleRow[];
+  totals: {
+    planned_spend: number; committed_spend: number; sales_income: number; transfer_after: number | null;
+    wage_added: number; wage_saved: number; wage_after: number | null;
+  };
+  warnings: string[]; allocation: { role: string; role_label: string; priority: number; share: number; amount: number }[];
+};
+export type NegotiationPlan = {
+  player: { player_id: number; name: string; overall: number; potential: number | null }; value: number; asking: number | null; adjust_total: number;
+  factors: { text: string; effect: "buyer" | "seller"; adjust: number }[];
+  ladder: { step: string; percent_of_value: number; amount: number }[]; verdict: string | null; tips: string[]; disclaimer: string;
+};

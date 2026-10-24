@@ -137,6 +137,11 @@ Nghiệm thu: nhập 4-3-3 + 11 tên → ra phân tích và đội hình đáp t
 - Công cụ phân tích (nhập CSV, phân tích, đội hình đáp trả...) chỉ có trong ứng dụng Windows; hai bản build chọn bằng `NEXT_PUBLIC_TARGET`.
 - Nội dung cẩm nang lấy từ chính logic của engine, có test bảo đảm không lệch.
 
+### Giai đoạn 12 — Chế độ Manager và cẩm nang mua cầu thủ (đã làm phần chạy được với dữ liệu hiện có)
+- Cẩm nang: mua cầu thủ, tuổi và tiềm năng, mua theo vị trí, đàm phán giá, tài chính.
+- Ứng dụng: nhu cầu đội hình, mục tiêu chuyển nhượng, ngân sách/shortlist, đàm phán (xem `docs/manager.md`).
+- Còn chờ dữ liệu thật: lương/giá/hợp đồng chi tiết (script xuất đã bổ sung bảng; cần lập ánh xạ sau khi có file).
+
 ## 6. Rủi ro và cách xử lý
 
 | Rủi ro | Xử lý |

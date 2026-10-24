@@ -58,6 +58,9 @@ export default function HomeView() {
         <Link href="/teams" className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
           Xem các đội
         </Link>
+        <Link href="/manager" className="rounded border border-zinc-300 px-4 py-2 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900">
+          Chế độ Manager (chuyển nhượng, ngân sách)
+        </Link>
         <Link href="/manual" className="rounded border border-zinc-300 px-4 py-2 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900">
           Nhập tay đội hình đối thủ
         </Link>

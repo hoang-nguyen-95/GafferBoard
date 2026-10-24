@@ -14,4 +14,17 @@ fs.rmSync(dest, { recursive: true, force: true });
 fs.mkdirSync(dest, { recursive: true });
 fs.cpSync(web, path.join(dest, "web"), { recursive: true });
 fs.copyFileSync(path.join(root, "tools", "live_editor", "export_tables.lua"), path.join(dest, "export_tables.lua"));
-console.log("Đã chuẩn bị desktop/app từ", web);
+// Danh sách file CSV mà bộ nhập thật sự dùng (từ mapping của engine): phần còn lại trong thư mục xuất bị bỏ qua.
+const mapping = JSON.parse(fs.readFileSync(path.join(root, "frontend", "src", "engine", "data", "mapping.json"), "utf8"));
+const known = new Set(Object.values(mapping.tables).map((t) => t.file.toLowerCase()));
+if (mapping.names) {
+  known.add(mapping.names.names_file.toLowerCase());
+  for (const f of mapping.names.extra_names_files ?? []) known.add(f.toLowerCase());
+  known.add(mapping.names.edited_file.toLowerCase());
+}
+if (mapping.lineups) {
+  known.add(mapping.lineups.teamsheets_file.toLowerCase());
+  known.add(mapping.lineups.formations_file.toLowerCase());
+}
+fs.writeFileSync(path.join(dest, "known-files.json"), JSON.stringify([...known].sort(), null, 2));
+console.log("Đã chuẩn bị desktop/app từ", web, `(${known.size} file CSV được dùng)`);

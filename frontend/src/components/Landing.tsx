@@ -4,6 +4,7 @@ import { DownloadButton } from "@/components/handbook/DownloadButton";
 const CARDS = [
   { href: "/cam-nang/chi-so", title: "Chỉ số cầu thủ", text: "Mỗi chỉ số làm gì, quan trọng với vị trí nào." },
   { href: "/cam-nang/vi-tri", title: "Vị trí và vai trò", text: "Chỉ số then chốt của từng vai trò, đá lệch vị trí mất bao nhiêu." },
+  { href: "/cam-nang/mua-cau-thu", title: "Mua cầu thủ", text: "Đọc tuổi, tiềm năng, hợp đồng và chọn người đáng mua." },
   { href: "/cam-nang/chien-thuat", title: "Gợi ý đấu pháp", text: "11 tình huống của đối thủ và cách khai thác." },
   { href: "/cam-nang/so-do", title: "Sơ đồ khắc chế", text: "Gặp sơ đồ nào thì nên dùng sơ đồ nào." },
 ];
@@ -46,6 +47,7 @@ export function Landing() {
           <li>Tự nhận đối thủ kế tiếp từ lịch thi đấu, hoặc bạn chọn tay.</li>
           <li>Chỉ ra điểm yếu của đội đối thủ và cầu thủ nguy hiểm, so với các đội cùng giải.</li>
           <li>Gợi ý đấu pháp có lý do bằng chỉ số, và 2–3 đội hình đáp trả chọn từ squad của bạn.</li>
+          <li>Chế độ Manager: nhu cầu đội hình, mục tiêu chuyển nhượng, ngân sách, gợi ý đàm phán giá.</li>
           <li>Ghi chú, lịch sử các trận gặp, xuất báo cáo, nhập tay đội hình bất kỳ.</li>
         </ul>
         <p className="mt-3 text-sm">

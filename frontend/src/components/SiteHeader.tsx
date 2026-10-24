@@ -15,6 +15,7 @@ export function SiteHeader() {
           <>
             <nav className="flex gap-4 text-sm text-zinc-600 dark:text-zinc-400">
               <Link href="/teams" className={link}>Đội bóng</Link>
+              <Link href="/manager" className={link}>Manager</Link>
               <Link href="/manual" className={link}>Nhập tay đối thủ</Link>
               <Link href="/compare/players" className={link}>So sánh</Link>
               <Link href="/cam-nang" className={link}>Cẩm nang</Link>

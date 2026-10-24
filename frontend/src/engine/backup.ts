@@ -1,6 +1,6 @@
 // Sao lưu/khôi phục dữ liệu cá nhân (cài đặt, kết quả, ghi chú, đội hình nhập tay) ra file JSON, vì dữ liệu chỉ nằm trong trình duyệt.
 import type { Store } from "./store";
-import type { ManualLineup, MatchResult, Meeting, TeamNote } from "./types";
+import { emptyManager, type ManagerData, type ManualLineup, type MatchResult, type Meeting, type TeamNote } from "./types";
 
 const FORMAT = "counterpick-fc-user-data";
 
@@ -8,7 +8,7 @@ export function serializeUser(store: Store): string {
   const u = store.user;
   return JSON.stringify({
     format: FORMAT, version: 1, exported_at: new Date().toISOString(),
-    settings: [...u.settings], results: u.results, notes: [...u.notes.values()], meetings: u.meetings, manual: u.manual,
+    settings: [...u.settings], results: u.results, notes: [...u.notes.values()], meetings: u.meetings, manual: u.manual, manager: u.manager,
   });
 }
 
@@ -28,8 +28,10 @@ export function restoreUser(store: Store, text: string): void {
   const results = data.results as MatchResult[], meetings = data.meetings as Meeting[], manual = data.manual as ManualLineup[];
   const notes = data.notes as TeamNote[];
   const settings = new Map<string, string>((data.settings as [string, string][]).map(([k, v]) => [String(k), String(v)]));
+  // file sao lưu cũ chưa có `manager`: giữ dữ liệu Manager hiện có thay vì xóa
+  const manager = data.manager && typeof data.manager === "object" ? { ...emptyManager(), ...(data.manager as Partial<ManagerData>) } : store.user.manager;
   store.user = {
-    ...store.user, settings, results, meetings, manual, notes: new Map(notes.map((n) => [n.team_id, n])),
+    ...store.user, settings, results, meetings, manual, manager, notes: new Map(notes.map((n) => [n.team_id, n])),
   };
   store.touch();
 }

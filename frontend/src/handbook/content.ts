@@ -1,6 +1,7 @@
 // Nội dung cẩm nang. Phần lớn lấy thẳng từ logic của công cụ (src/engine) để cẩm nang và công cụ không bao giờ nói khác nhau;
 // chỉ phần mô tả bằng lời (chỉ số làm gì, khi nào luật kích hoạt) viết tay ở đây.
 import { ATTRIBUTE_LABELS } from "@/engine/analysis";
+import type { Role } from "@/engine/positions";
 
 export type StatGroup = { key: string; title: string; blurb: string; attrs: string[] };
 
@@ -90,4 +91,45 @@ export const METRIC_NOTES: Record<string, string> = {
   xi_overall: "OVR trung bình đội hình xuất phát.",
   bench_quality: "OVR trung bình của tối đa 7 cầu thủ dự bị tốt nhất (không tính người chấn thương).",
   depth_drop: "Chênh lệch giữa OVR đội hình chính và dự bị: càng lớn thì thay người càng làm đội yếu đi.",
+};
+
+
+/** Khi mua cầu thủ ở từng vai trò: nên nhìn gì, nên tránh gì. Kinh nghiệm chung, không phải số liệu của game. */
+export const ROLE_BUYING_NOTES: Record<Role, { look: string; avoid: string }> = {
+  GK: {
+    look: "Phản xạ, bay người và chọn vị trí là cốt lõi; thêm bắt bóng chắc tay. Thủ môn chín muồi muộn nên tuổi 28–34 vẫn là đỉnh cao.",
+    avoid: "Đừng chỉ nhìn OVR tổng: thủ môn yếu phản xạ nhưng bóng bổng tốt sẽ bị sút xa hạ gục. Phát bóng kém làm lối chơi phát động chậm.",
+  },
+  CB: {
+    look: "Ý thức phòng ngự, cắt bóng, tắc bóng, sức mạnh, bật nhảy và đánh đầu. Nếu đá cao hàng thủ thì cần thêm tốc độ để đuổi bóng sau lưng.",
+    avoid: "Trung vệ chậm và cao to dễ bị khoét khi hàng thủ dâng cao; trung vệ nhanh nhưng yếu không chiến dễ thua bóng bổng và phạt góc.",
+  },
+  FB: {
+    look: "Tốc độ, tăng tốc, thể lực để lên xuống cả trận; tắc bóng và ý thức phòng ngự để không bị bỏ lại; tạt bóng nếu đội đá biên nhiều.",
+    avoid: "Hậu vệ biên nhiều thể lực nhưng yếu phòng ngự chỉ hợp khi có tiền vệ phòng ngự che chắn phía sau.",
+  },
+  DM: {
+    look: "Cắt bóng, tắc bóng, ý thức phòng ngự, sức mạnh và thể lực; chuyền ngắn đủ tốt để đưa bóng lên an toàn.",
+    avoid: "Quyết liệt quá cao dễ dính thẻ. Đừng mua tiền vệ thiên công rồi mong họ làm việc phòng ngự.",
+  },
+  CM: {
+    look: "Chuyền ngắn và dài, tầm nhìn, kiểm soát bóng, rê bóng và thể lực. Tiền vệ trung tâm là vị trí cần cân bằng nhất.",
+    avoid: "Tránh người chỉ có một mặt mạnh (chỉ chuyền hoặc chỉ chạy) khi đội chỉ có 2–3 tiền vệ.",
+  },
+  WM: {
+    look: "Tạt bóng, rê bóng, tốc độ và tăng tốc, nhanh nhẹn; thêm chuyền ngắn để phối hợp với hậu vệ biên.",
+    avoid: "Tiền vệ cánh chậm và yếu rê bóng khó tạo khác biệt ở biên.",
+  },
+  AM: {
+    look: "Tầm nhìn, chuyền ngắn, kiểm soát bóng, rê bóng, nhanh nhẹn, bình tĩnh; sút xa và dứt điểm là điểm cộng.",
+    avoid: "Người rê bóng đẹp nhưng yếu chuyền sẽ giữ bóng quá lâu; kiểm tra thể lực nếu đội pressing nhiều.",
+  },
+  W: {
+    look: "Tốc độ, tăng tốc, rê bóng, kiểm soát bóng, nhanh nhẹn; dứt điểm và bình tĩnh để biến cơ hội thành bàn thắng.",
+    avoid: "Tiền đạo cánh nhanh nhưng yếu dứt điểm và chuyền sẽ chạy nhiều mà ít sản phẩm.",
+  },
+  ST: {
+    look: "Dứt điểm, chọn vị trí, bình tĩnh, lực sút; thêm tốc độ nếu đội chọc khe, đánh đầu và sức mạnh nếu đội tạt bóng nhiều.",
+    avoid: "Đừng mua tiền đạo chỉ vì OVR cao nếu lối chơi của đội không phục vụ được kiểu cầu thủ đó (vd cao to đánh đầu nhưng đội đá dưới thấp).",
+  },
 };

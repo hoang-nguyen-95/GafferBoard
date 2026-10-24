@@ -6,7 +6,7 @@ const path = require("node:path");
 
 const signatureOf = (st) => `${st.size}:${Math.trunc(st.mtimeMs)}`;
 
-function listCsv(dir) {
+function listCsv(dir, only = null) {
   const out = new Map();
   let names;
   try {
@@ -16,6 +16,7 @@ function listCsv(dir) {
   }
   for (const name of names) {
     if (!name.toLowerCase().endsWith(".csv")) continue;
+    if (only && !only.has(name.toLowerCase())) continue; // bảng xuất thêm mà ứng dụng chưa dùng: không đọc, không gửi
     try {
       const st = fs.statSync(path.join(dir, name));
       if (st.isFile()) out.set(name.toLowerCase(), { file: path.join(dir, name), sig: signatureOf(st) });
@@ -33,8 +34,9 @@ function listCsv(dir) {
  * @param {Record<string, string>} [o.known] chữ ký các file đã nhập trước đó (tên chữ thường -> chữ ký)
  * @param {number} [o.pollMs] chu kỳ quét
  * @param {number} [o.quietMs] thời gian file phải không đổi trước khi đọc
+ * @param {Set<string>|null} [o.only] chỉ theo dõi các file này (tên chữ thường); null = mọi file .csv
  */
-function createWatcher({ dir, onBatch, known = {}, pollMs = 2000, quietMs = 3000 }) {
+function createWatcher({ dir, onBatch, known = {}, pollMs = 2000, quietMs = 3000, only = null }) {
   const delivered = new Map(Object.entries(known));
   let last = new Map(); // chữ ký ở lần quét trước
   let stableSince = 0;
@@ -46,7 +48,7 @@ function createWatcher({ dir, onBatch, known = {}, pollMs = 2000, quietMs = 3000
   }
 
   function tick(now = Date.now(), force = false) {
-    const current = listCsv(dir);
+    const current = listCsv(dir, only);
     const changedSinceLastScan = current.size !== last.size || [...current].some(([n, f]) => last.get(n)?.sig !== f.sig);
     if (changedSinceLastScan) stableSince = now;
     last = current;
@@ -85,7 +87,7 @@ function createWatcher({ dir, onBatch, known = {}, pollMs = 2000, quietMs = 3000
     forget(name) {
       delivered.delete(name);
     },
-    count: () => listCsv(dir).size,
+    count: () => listCsv(dir, only).size,
   };
 }
 

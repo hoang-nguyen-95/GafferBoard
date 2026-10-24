@@ -99,3 +99,15 @@ test("config: lưu và đọc lại, file hỏng thì dùng mặc định", () =
   fs.writeFileSync(path.join(dir, "config.json"), "{hỏng");
   assert.equal(createConfig(dir).get().exportDir, null);
 });
+
+test("watcher: chỉ theo dõi file trong danh sách `only`, bỏ qua bảng xuất thêm", () => {
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, "players.csv"), "a\n1\n");
+  fs.writeFileSync(path.join(dir, "transfers.csv"), "x\n" + "1\n".repeat(1000));
+  const batches = [];
+  const w = createWatcher({ dir, onBatch: (b) => batches.push(b), quietMs: 0, only: new Set(["players.csv"]) });
+  w.tick(1);
+  w.tick(2);
+  assert.deepEqual(batches.flat().map((x) => x.name), ["players.csv"]);
+  assert.equal(w.count(), 1);
+});

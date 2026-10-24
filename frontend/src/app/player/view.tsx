@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { NotFoundNote } from "@/components/NotFoundNote";
+import { ShortlistButton } from "@/components/ShortlistButton";
 import { Radar } from "@/components/Radar";
 import { type AttributeScore, type Player, type PlayerAnalysis, playerName } from "@/lib/api";
 import { useApi } from "@/lib/engine";
@@ -51,6 +52,8 @@ export default function PlayerView() {
           ))}
         </dl>
       </div>
+
+      <ShortlistButton playerId={player.player_id} />
 
       <p className="mb-6 rounded border border-zinc-200 p-3 text-sm dark:border-zinc-800">
         {analysis.summary}

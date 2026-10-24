@@ -14,9 +14,14 @@ thư mục xuất từ Live Editor**: có file CSV mới là tự nhập và ph�
 
 Dữ liệu và ghi chú nằm trong thư mục dữ liệu người dùng của app (`%APPDATA%/counterpick-fc-desktop`), không gửi đi đâu.
 
+## Chế độ Manager
+
+Mục **Manager** trong ứng dụng: nhu cầu đội hình, mục tiêu chuyển nhượng, ngân sách/shortlist, gợi ý đàm phán. Xem `docs/manager.md`.
+
 ## Cách hoạt động
 
 - `desktop/main.js` phục vụ bản web tĩnh qua giao thức `app://counterpick/` (origin cố định nên IndexedDB giữ dữ liệu giữa các lần mở).
+- Chỉ các file CSV mà bộ nhập dùng (`desktop/app/known-files.json`, sinh từ `mapping.json` khi `npm run prepare-app`) được theo dõi; bảng xuất thêm (vd `transfers.csv`, rất lớn) bị bỏ qua.
 - `desktop/src/watcher.js` quét thư mục định kỳ; file chỉ được đọc khi **chữ ký (kích thước + thời điểm sửa) đổi và đã yên lặng** vài giây
   (script Lua có thể đang ghi dở). File không đổi không bị nhập lại; file hỏng báo lỗi một lần rồi chờ file đổi, không thử lặp.
 - Giao diện nhận file qua cầu nối `window.desktop` (`desktop/preload.js`), nhập bằng cùng `importFiles` của bản web, rồi báo lại

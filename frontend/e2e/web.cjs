@@ -67,6 +67,11 @@ function check(cond, msg) {
       ["/cam-nang/chien-thuat", "Hàng thủ đối thủ chậm"],
       ["/cam-nang/so-do", "Đối thủ đá 4-3-3"],
       ["/cam-nang/doc-phan-tich", "Phân vị (P) là gì"],
+      ["/cam-nang/mua-cau-thu", "Mua cầu thủ: đọc gì trước khi chi tiền"],
+      ["/cam-nang/tuoi-va-tiem-nang", "Đọc POT cho đúng"],
+      ["/cam-nang/mua-theo-vi-tri", "Tiền đạo cắm"],
+      ["/cam-nang/dam-phan-gia", "Ba bậc giá"],
+      ["/cam-nang/tai-chinh", "Hai ngân sách khác nhau"],
       ["/huong-dan", "Hướng dẫn xuất dữ liệu"],
     ]) {
       await page.goto(base + p, { waitUntil: "networkidle" });
@@ -76,7 +81,7 @@ function check(cond, msg) {
     check(rules === 11, "trang đấu pháp liệt kê đủ 11 luật");
 
     console.log("5. Công cụ phân tích không có trên web");
-    for (const p of ["/teams", "/team?id=1", "/analysis?id=1", "/import", "/manual", "/compare/players"]) {
+    for (const p of ["/teams", "/team?id=1", "/analysis?id=1", "/import", "/manual", "/compare/players", "/manager"]) {
       await page.goto(base + p, { waitUntil: "networkidle" });
       check(await page.isVisible("text=Tính năng này nằm trong ứng dụng Windows"), `${p} chỉ hiện hướng dẫn tải ứng dụng`);
     }

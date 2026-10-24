@@ -44,6 +44,7 @@ function check(cond, msg) {
   const problems = [];
   page.on("pageerror", (e) => problems.push("pageerror: " + e.message));
   page.on("console", (m) => { if (m.type() === "error") problems.push("console: " + m.text()); });
+  page.on("response", (r) => { if (r.status() === 404) problems.push("404: " + r.url()); });
   const external = [];
   page.on("request", (r) => { if (!r.url().startsWith(base) && !r.url().startsWith("data:")) external.push(r.url()); });
   const api = (method, p, body) => page.evaluate(async ([m, u, b]) => {
@@ -147,6 +148,37 @@ function check(cond, msg) {
     await page.click("button:has-text('Xóa')");
     await page.waitForURL(/\/manual$/);
     check(true, "xóa đội hình");
+
+    console.log("6c. Chế độ Manager");
+    await page.goto(`${base}/manager`, { waitUntil: "networkidle" });
+    await page.waitForSelector("text=Vị trí nên củng cố");
+    check(true, "tab Nhu cầu liệt kê vị trí cần củng cố");
+    await page.locator("text=Tìm cầu thủ cho vị trí này →").first().click();
+    await page.waitForSelector("text=đáng cân nhắc");
+    check(page.url().includes("tab=targets"), "bấm 'Tìm cầu thủ' chuyển sang tab Mục tiêu");
+    check((await page.locator("tbody tr").count()) > 0, "có cầu thủ mục tiêu được chấm điểm");
+    const firstName = await page.locator("tbody tr a").first().innerText();
+    await page.locator("button:has-text('+ Shortlist')").first().click();
+    await page.waitForSelector("button:has-text('Đã thêm')");
+    await page.click("[role=tab]:has-text('Ngân sách')");
+    await page.waitForSelector("text=Shortlist mua");
+    check(await page.isVisible(`a:has-text("${firstName}")`), "cầu thủ vừa thêm nằm trong shortlist");
+    await page.fill("label:has-text('Ngân sách chuyển nhượng còn lại') input", "50000000");
+    await page.click("section:has(h2:text('Số liệu từ màn Tài chính')) button:has-text('Lưu')");
+    await page.waitForSelector("text=Đã lưu");
+    await page.fill(`input[aria-label^="Giá "]`, "20000000");
+    await page.click("table button:has-text('Lưu') >> nth=0");
+    await page.waitForSelector("text=30.000.000");
+    check(true, "tổng kết: 50 triệu trừ 20 triệu còn 30 triệu");
+    await page.reload({ waitUntil: "networkidle" });
+    await page.waitForSelector("text=Shortlist mua");
+    check(await page.isVisible(`a:has-text("${firstName}")`) && (await page.isVisible("text=30.000.000")), "shortlist và ngân sách còn sau khi tải lại");
+    await page.click("table button:has-text('Đàm phán') >> nth=0");
+    await page.fill("label:has-text('Giá trị hiển thị trong game') input", "10000000");
+    await page.waitForSelector("text=Giá tối đa nên trả");
+    check(true, "gợi ý đàm phán có bậc giá");
+    await page.goto(`${base}/player?id=${(await api("GET", "/players?q=&limit=1")).json[0].player_id}`, { waitUntil: "networkidle" });
+    check(await page.isVisible("button:has-text('Thêm vào shortlist mua')"), "trang cầu thủ có nút thêm vào shortlist");
 
     console.log("7. Nhập lại dữ liệu mới không làm mất ghi chú");
     await page.goto(base + "/import", { waitUntil: "networkidle" });

@@ -10,6 +10,7 @@ const { createWatcher, listCsv } = require("./src/watcher");
 const ORIGIN = "app://counterpick";
 const WEB_ROOT = process.env.COUNTERPICK_WEB_ROOT || path.join(__dirname, "app", "web");
 const SCRIPT_TEMPLATE = process.env.COUNTERPICK_SCRIPT || path.join(__dirname, "app", "export_tables.lua");
+const KNOWN_FILES = process.env.COUNTERPICK_KNOWN_FILES || path.join(__dirname, "app", "known-files.json");
 const POLL_MS = Number(process.env.COUNTERPICK_POLL_MS) || 2000;
 const QUIET_MS = Number(process.env.COUNTERPICK_QUIET_MS) || 5000;
 
@@ -17,6 +18,16 @@ if (process.env.COUNTERPICK_USER_DATA) app.setPath("userData", process.env.COUNT
 
 // Origin cố định (không đổi theo mỗi lần chạy) để IndexedDB giữ được dữ liệu giữa các lần mở.
 protocol.registerSchemesAsPrivileged([{ scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
+
+/** Danh sách file CSV mà ứng dụng dùng; thiếu file này thì theo dõi mọi CSV. */
+function loadKnownFiles() {
+  try {
+    return new Set(JSON.parse(fs.readFileSync(KNOWN_FILES, "utf8")));
+  } catch {
+    return null;
+  }
+}
+const knownFiles = loadKnownFiles();
 
 let win = null;
 let config = null;
@@ -38,7 +49,7 @@ function startWatching(hasData) {
   const { exportDir, imported } = config.get();
   if (!exportDir) return;
   watcher = createWatcher({
-    dir: exportDir, known: hasData ? imported : {}, pollMs: POLL_MS, quietMs: QUIET_MS,
+    dir: exportDir, known: hasData ? imported : {}, pollMs: POLL_MS, quietMs: QUIET_MS, only: knownFiles,
     onBatch: (batch) => send("desktop:files", batch),
   });
   watcher.start();
@@ -46,7 +57,7 @@ function startWatching(hasData) {
 
 function state() {
   const { exportDir, leDir } = config.get();
-  return { exportDir, leDir, csvCount: exportDir ? listCsv(exportDir).size : 0, watching: Boolean(watcher) };
+  return { exportDir, leDir, csvCount: exportDir ? listCsv(exportDir, knownFiles).size : 0, watching: Boolean(watcher) };
 }
 
 async function pickDir(title, defaultPath) {

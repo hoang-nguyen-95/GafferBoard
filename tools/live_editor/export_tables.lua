@@ -17,6 +17,11 @@ local TABLE_PATTERNS = {
     "^playernames$", "^editedplayernames$", "^dcplayernames$", "^nations$", "^playstyles$",
     "^teamformdiff$", "^playerformdiff$", "^prevcompetitionstats$",
     "^career_playerlastmatchhistory$", "^career_competitionprogress$", "^career_squadranking$",
+    -- Bổ sung cho chế độ Manager (hợp đồng, lương, chuyển nhượng, tăng trưởng): ứng dụng CHƯA đọc các bảng này,
+    -- xuất ra để xem cột thật rồi mới lập ánh xạ. Nếu bảng nào quá lớn/chậm, xóa dòng tương ứng.
+    "^career_playercontract$", "^career_presignedcontract$", "^career_transferblock$", "^playerloans$", "^transfers$",
+    "^previousteam$", "^career_scouts$", "^career_scoutmission$", "^career_playerlastgrowth$", "^career_growthcurveinfo$",
+    "^career_playergrowthuserseason$", "^career_managerinfo$", "^career_manager$",
 }
 -- ====================
 

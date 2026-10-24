@@ -20,6 +20,11 @@ const userData = tmp("e2e-desktop-user-");
 const leDir = tmp("e2e-desktop-le-");
 fs.mkdirSync(path.join(leDir, "lua", "scripts"), { recursive: true });
 fs.writeFileSync(path.join(userData, "config.json"), JSON.stringify({ exportDir, leDir, imported: {} }));
+// bảng xuất thêm mà ứng dụng chưa dùng (rất lớn trong save thật): phải bị bỏ qua
+fs.writeFileSync(path.join(exportDir, "transfers.csv"), "a,b\n" + "1,2\n".repeat(50000));
+const mapping = JSON.parse(fs.readFileSync(path.join(ROOT, "frontend/src/engine/data/mapping.json"), "utf8"));
+const knownFile = path.join(userData, "known-files.json");
+fs.writeFileSync(knownFile, JSON.stringify([...Object.values(mapping.tables).map((t) => t.file), mapping.names.names_file, ...mapping.names.extra_names_files, mapping.names.edited_file, mapping.lineups.teamsheets_file, mapping.lineups.formations_file].map((f) => f.toLowerCase())));
 
 async function launch() {
   const app = await electron.launch({
@@ -30,6 +35,7 @@ async function launch() {
       COUNTERPICK_WEB_ROOT: path.join(ROOT, "frontend/out"),
       COUNTERPICK_SCRIPT: path.join(ROOT, "tools/live_editor/export_tables.lua"),
       COUNTERPICK_USER_DATA: userData,
+      COUNTERPICK_KNOWN_FILES: knownFile,
       COUNTERPICK_POLL_MS: "300",
       COUNTERPICK_QUIET_MS: "900",
     },
@@ -55,6 +61,8 @@ const api = (page, method, p, body) => page.evaluate(async ([m, u, b]) => {
     check(true, "dữ liệu tự được nhập và hiện trang chủ");
     const meta1 = (await api(page, "GET", "/meta")).json;
     check(meta1.teams > 0 && meta1.players > 0, `đã nhập ${meta1.teams} đội, ${meta1.players} cầu thủ`);
+    const state = await page.evaluate(() => window.desktop.getState());
+    check(state.csvCount === fs.readdirSync(exportDir).filter((f) => f.endsWith(".csv") && f !== "transfers.csv").length, "bảng xuất thêm (transfers.csv) bị bỏ qua, không đếm, không gửi");
 
     console.log("2. Sửa file trong thư mục: app tự cập nhật");
     const teamsFile = path.join(exportDir, "teams.csv");

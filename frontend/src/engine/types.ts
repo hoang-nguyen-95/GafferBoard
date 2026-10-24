@@ -98,3 +98,17 @@ export interface ManualLineup {
 }
 
 export interface ImportRun { id: number; finished_at: string; summary: string }
+
+// ---- chế độ Manager: dữ liệu cá nhân, chỉ có ở bản web/ứng dụng (không có bản Python tương ứng) ----
+export type ShortlistStatus = "target" | "negotiating" | "agreed";
+export interface ShortlistItem { player_id: number; fee: number | null; wage: number | null; note: string; status: ShortlistStatus }
+export interface SaleItem { player_id: number; expected_fee: number | null; wage: number | null }
+export interface ManagerData {
+  /** Số tiền còn lại bạn đọc trong màn Tài chính của game (đơn vị tùy bạn, nhưng nhất quán). */
+  budget: { transfer: number | null; wage: number | null };
+  /** Năm kết thúc mùa giải hiện tại (ví dụ 2026 cho mùa 2025/26); null = tự suy từ ngày tham chiếu. */
+  season_end_year: number | null;
+  shortlist: ShortlistItem[];
+  sales: SaleItem[];
+}
+export const emptyManager = (): ManagerData => ({ budget: { transfer: null, wage: null }, season_end_year: null, shortlist: [], sales: [] });

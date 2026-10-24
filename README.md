@@ -14,6 +14,8 @@ Kế hoạch các giai đoạn: [PLAN.md](PLAN.md). Cấu trúc dữ liệu xu�
 
 ## Tính năng của ứng dụng
 
+- **Chế độ Manager** (chuyển nhượng và tài chính): nhu cầu đội hình theo vị trí, mục tiêu chuyển nhượng được chấm điểm (nâng cấp, tiềm năng, tuổi, hợp đồng), shortlist và kế hoạch ngân sách (chi, thu từ bán, quỹ lương, cảnh báo vượt), gợi ý bậc giá đàm phán. Số tiền do bạn nhập từ màn Tài chính của game vì dữ liệu xuất chưa có giá/lương; xem [docs/manager.md](docs/manager.md).
+
 - **Trang chủ**: trận kế tiếp của đội bạn (đọc từ `fixtures`), mở thẳng phân tích đối thủ; chọn đội/đối thủ thủ công.
 - **Đội và cầu thủ**: sân đội hình, trung bình theo tuyến; trang cầu thủ có radar và điểm mạnh/yếu theo phân vị so với cầu thủ cùng vị trí (cùng giải).
 - **Phân tích đối thủ**: chỉ số hàng thủ/thủ môn/tiền vệ/hai biên/thể lực/độ sâu so với các đội cùng giải, cầu thủ nguy hiểm, điểm yếu, phong độ (nhập tay kết quả).

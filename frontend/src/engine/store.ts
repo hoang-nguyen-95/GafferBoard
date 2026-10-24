@@ -1,7 +1,8 @@
 import type {
   Fixture, FormationDef, ImportRun, League, ManualLineup, MatchResult, Meeting, Player, SquadMember, Team,
-  TeamLineup, TeamNote, TeamStanding, UserProfile,
+  TeamLineup, TeamNote, TeamStanding, UserProfile, ManagerData,
 } from "./types";
+import { emptyManager } from "./types";
 
 /** Dữ liệu nhập từ file xuất của game (được thay mới mỗi lần import). */
 export interface GameData {
@@ -24,6 +25,7 @@ export interface UserData {
   meetings: Meeting[];
   manual: ManualLineup[];
   importRuns: ImportRun[];
+  manager: ManagerData;
   nextId: { result: number; meeting: number; manual: number; importRun: number };
 }
 
@@ -78,7 +80,7 @@ export function emptyGameData(): GameData {
 
 export function emptyUserData(): UserData {
   return {
-    settings: new Map(), results: [], notes: new Map(), meetings: [], manual: [], importRuns: [],
+    settings: new Map(), results: [], notes: new Map(), meetings: [], manual: [], importRuns: [], manager: emptyManager(),
     nextId: { result: 1, meeting: 1, manual: 1, importRun: 1 },
   };
 }
