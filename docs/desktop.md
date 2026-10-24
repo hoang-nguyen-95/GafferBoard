@@ -5,7 +5,7 @@ thư mục xuất từ Live Editor**: có file CSV mới là tự nhập và ph�
 
 ## Dùng
 
-1. Tải `CounterPickFC-Setup-x.y.z.exe` (cài đặt) hoặc `CounterPickFC-Portable-x.y.z.exe` (chạy thẳng) từ trang Actions/Releases của repo.
+1. Bấm **Tải ứng dụng Windows** trên trang web (trỏ tới `/releases/latest` của repo), hoặc tải `CounterPickFC-Setup-x.y.z.exe` (cài đặt) hoặc `CounterPickFC-Portable-x.y.z.exe` (chạy thẳng) từ trang Actions/Releases của repo.
    Windows có thể cảnh báo "Unknown publisher" vì app chưa có chữ ký số: bấm *More info → Run anyway*.
 2. Lần đầu mở: ở trang chủ bấm **Chọn thư mục xuất** (thư mục `fc_exports` nơi script Live Editor ghi CSV). App nhớ lựa chọn.
 3. (Tùy chọn) **Chọn thư mục Live Editor** rồi **Cài script xuất vào Live Editor**: app chép `counterpick_export.lua` vào thư mục script, đã điền sẵn
@@ -22,6 +22,11 @@ Dữ liệu và ghi chú nằm trong thư mục dữ liệu người dùng của
 - Giao diện nhận file qua cầu nối `window.desktop` (`desktop/preload.js`), nhập bằng cùng `importFiles` của bản web, rồi báo lại
   kết quả để tiến trình chính ghi nhớ file nào đã nhập.
 - Bản web thường không có `window.desktop` nên các phần này tự ẩn.
+
+## Phát hành
+
+Nút tải trên web trỏ tới Release mới nhất. Release được tạo khi đẩy tag `v*` (`git tag v0.1.0 && git push origin v0.1.0`) hoặc chạy tay workflow
+`desktop` (Actions → desktop → Run workflow; nút chạy tay chỉ hiện khi file workflow đã nằm trên nhánh mặc định). Đẩy lên nhánh phát triển chỉ build và để file ở Artifacts.
 
 ## Giới hạn
 

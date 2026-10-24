@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { DesktopPanel } from "@/components/DesktopPanel";
+import { DownloadApp } from "@/components/DownloadApp";
 import { TeamSetting } from "@/components/TeamSetting";
 import { type FixtureBrief, type Meta, type NextMatch } from "@/lib/api";
 import { useApi } from "@/lib/engine";
@@ -34,6 +35,7 @@ export default function HomeView() {
         <Link href="/import" className="inline-block rounded bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
           Nhập dữ liệu
         </Link>
+        <DownloadApp />
       </div>
     );
   }
@@ -73,6 +75,7 @@ export default function HomeView() {
           : "Chưa ghi nhận lần nhập nào."}{" "}
         Có file xuất mới thì <Link href="/import" className="underline">nhập lại tại đây</Link>; ghi chú và kết quả của bạn được giữ nguyên.
       </p>
+      <DownloadApp />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef, useState, type DragEvent } from "react";
 import { expectedFiles, type TableReport } from "@/engine/importer";
 import { DesktopPanel } from "@/components/DesktopPanel";
+import { DownloadApp } from "@/components/DownloadApp";
 import type { Meta } from "@/lib/api";
 import { backupUserData, hasData, importFiles, restoreUserData, useApi, useDataVersion, wipeAll } from "@/lib/engine";
 
@@ -127,6 +128,7 @@ export default function ImportView() {
       </div>
 
       <DesktopPanel />
+      <DownloadApp />
 
       <section
         onDragOver={(e) => { e.preventDefault(); setOver(true); }}

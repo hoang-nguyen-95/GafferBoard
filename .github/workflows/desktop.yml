@@ -1,11 +1,14 @@
-# Build ứng dụng Windows (bản cài đặt .exe + bản chạy thẳng) từ bản web tĩnh. Chạy tay (Actions -> Run workflow)
-# hoặc khi đẩy tag dạng v*: tag thì còn đính kèm file vào Release.
+# Build ứng dụng Windows (bản cài đặt .exe + bản chạy thẳng) từ bản web tĩnh.
+# - đẩy lên nhánh phát triển: chỉ build và đưa file vào Artifacts để thử;
+# - đẩy tag v* hoặc chạy tay (Actions -> Run workflow): tạo Release công khai, trang web trỏ nút "Tải ứng dụng Windows" tới /releases/latest.
 name: desktop
 
 on:
   workflow_dispatch:
   push:
     tags: ["v*"]
+    branches: ["claude/plan-trien-khai-giai-doan-0-vpquyd"]
+    paths: ["desktop/**", "frontend/**", "tools/live_editor/**", ".github/workflows/desktop.yml"]
 
 permissions:
   contents: write
@@ -35,9 +38,12 @@ jobs:
           name: CounterPickFC-windows
           path: |
             desktop/dist/*.exe
-      - name: Đính kèm vào Release (khi là tag)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Tạo Release (khi là tag hoặc chạy tay)
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" desktop/dist/*.exe --generate-notes || gh release upload "${{ github.ref_name }}" desktop/dist/*.exe --clobber
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "${GITHUB_REF}" != refs/tags/* ]]; then TAG="v0.1.${GITHUB_RUN_NUMBER}"; fi
+          gh release create "$TAG" desktop/dist/*.exe --target "${GITHUB_SHA}" --title "CounterPick FC $TAG" --generate-notes || gh release upload "$TAG" desktop/dist/*.exe --clobber
