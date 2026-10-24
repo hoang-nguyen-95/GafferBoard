@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DesktopSync } from "@/lib/desktop";
 import { IS_DESKTOP_BUILD } from "@/lib/target";
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         {IS_DESKTOP_BUILD && <DesktopSync />}
         <EngineGate>{children}</EngineGate>
+        {!IS_DESKTOP_BUILD && <SiteFooter />}
       </body>
     </html>
   );

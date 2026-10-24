@@ -1,10 +1,14 @@
+import { AlertTriangle, Coins, Scale, Shirt, ShoppingCart, Target, Timer, FileText, Calculator, type LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { IconTile, SectionTitle, type Tone } from "@/components/brand/ui";
 import { Article, rowCls, thCls } from "@/components/handbook/Article";
 import {
   DEFAULT_MAX_AGE, GROWTH_MAX_AGE, MAX_PRIME_SEASONS, NEED_WEIGHTS, OLD_AGE, PRIME_END_AGE, TARGET_WEIGHTS,
 } from "@/engine/manager";
 
 export const metadata = { title: "Mua cầu thủ: đọc gì trước khi chi tiền · CounterPick FC" };
+
+const ICONS: [LucideIcon, Tone][] = [[Target, "emerald"], [Scale, "sky"], [Timer, "amber"], [FileText, "violet"], [Shirt, "rose"], [Coins, "zinc"]];
 
 const STEPS = [
   ["Xác định vị trí cần mua", "Đừng mua theo cảm hứng. Nhìn đội hình chính: vị trí nào người đá chính yếu hơn mặt bằng đội, thiếu dự bị, người đá chính đã lớn tuổi hoặc sắp hết hợp đồng. Đó là nơi mỗi đồng tiền đem lại nhiều nhất."],
@@ -19,24 +23,24 @@ export default function BuyingGuidePage() {
   return (
     <Article
       title="Mua cầu thủ: đọc gì trước khi chi tiền"
+      icon={ShoppingCart}
       intro="Một quy trình 6 bước để biến việc mua cầu thủ từ cảm tính thành quyết định có lý do. Chế độ Manager trong ứng dụng Windows làm sẵn các bước 1, 2, 3, 4 và 6 từ dữ liệu save của bạn."
     >
       <section>
-        <ol className="space-y-4">
+        <ol className="grid gap-4 sm:grid-cols-2">
           {STEPS.map(([title, text], i) => (
-            <li key={title} className="flex gap-3">
-              <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white">{i + 1}</span>
-              <div>
-                <h2 className="font-semibold">{title}</h2>
-                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{text}</p>
-              </div>
+            <li key={title} className="relative rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60">
+              <span className="absolute right-4 top-3 text-4xl font-extrabold text-zinc-100 dark:text-zinc-800">{i + 1}</span>
+              <IconTile icon={ICONS[i][0]} tone={ICONS[i][1]} />
+              <h2 className="mt-3 font-semibold">{title}</h2>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{text}</p>
             </li>
           ))}
         </ol>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold">Ứng dụng chấm “điểm đáng mua” thế nào</h2>
+        <SectionTitle icon={Calculator} tone="emerald">Ứng dụng chấm “điểm đáng mua” thế nào</SectionTitle>
         <p className="mt-2 text-sm">
           Với mỗi cầu thủ cùng vai trò mà bạn chưa có, ứng dụng cộng điểm theo 4 yếu tố rồi xếp từ cao xuống thấp. Bạn bấm “Vì sao điểm này” trong ứng dụng để xem từng phần.
         </p>
@@ -57,7 +61,7 @@ export default function BuyingGuidePage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold">Ứng dụng đánh giá nhu cầu đội hình thế nào</h2>
+        <SectionTitle icon={Target} tone="sky">Ứng dụng đánh giá nhu cầu đội hình thế nào</SectionTitle>
         <p className="mt-2 text-sm">Mỗi vai trò trong đội hình chính được cộng điểm ưu tiên khi gặp các tình huống sau; điểm cao thì nên củng cố sớm.</p>
         <table className="mt-3 w-full text-left text-sm">
           <thead><tr><th className={thCls}>Tình huống</th><th className={thCls}>Điểm ưu tiên</th></tr></thead>
@@ -76,7 +80,7 @@ export default function BuyingGuidePage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold">Giới hạn cần biết</h2>
+        <SectionTitle icon={AlertTriangle} tone="amber">Giới hạn cần biết</SectionTitle>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
           <li>Dữ liệu xuất từ Live Editor hiện <b>không có giá trị cầu thủ, lương hay ngân sách</b>. Giá, lương và ngân sách bạn đọc trong game rồi nhập vào ứng dụng.</li>
           <li>Năm hết hợp đồng (<code>contract_until</code>) được hiểu là năm dương lịch hợp đồng kết thúc. Nếu ứng dụng đoán sai mùa hiện tại, chỉnh “năm kết thúc mùa” ở tab Ngân sách.</li>

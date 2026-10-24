@@ -41,7 +41,7 @@ function check(cond, msg) {
   try {
     console.log("1. Trang chủ bản web");
     await page.goto(base + "/", { waitUntil: "networkidle" });
-    check(await page.isVisible("text=Cẩm nang phân tích chỉ số cầu thủ"), "trang chủ giới thiệu cẩm nang");
+    check(await page.isVisible("text=mua đúng người"), "trang chủ giới thiệu cẩm nang");
     check(!(await page.isVisible("text=Nhập dữ liệu")), "không còn khu vực nhập file CSV trên web");
 
     console.log("2. Nút tải");

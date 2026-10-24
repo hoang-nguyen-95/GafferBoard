@@ -133,3 +133,4 @@ export const ROLE_BUYING_NOTES: Record<Role, { look: string; avoid: string }> = 
     avoid: "Đừng mua tiền đạo chỉ vì OVR cao nếu lối chơi của đội không phục vụ được kiểu cầu thủ đó (vd cao to đánh đầu nhưng đội đá dưới thấp).",
   },
 };
+

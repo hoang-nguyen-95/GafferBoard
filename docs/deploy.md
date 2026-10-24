@@ -44,3 +44,8 @@ node e2e/web.cjs               # trang chủ, nút tải (tải thẳng file .ex
 ```
 
 `npm test` chạy test engine (gồm đối chiếu với bản Python, cần `python3` có `fastapi sqlmodel pyyaml`) và test cẩm nang; xem `docs/engine-parity.md`.
+
+## Giao diện và hình minh họa
+
+Trang web dùng bộ icon [lucide-react](https://lucide.dev) (giấy phép ISC) và các hình minh họa sân bóng, sơ đồ, thang giá vẽ bằng SVG ngay trong mã nguồn
+(`frontend/src/components/brand/`): không có ảnh ngoài, không dùng logo hay hình cầu thủ/CLB nào, nên không vướng bản quyền. Màu và họa tiết sân cỏ nằm ở `globals.css`.
