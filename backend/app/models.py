@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
 from sqlalchemy import JSON, Column
@@ -188,3 +188,24 @@ class FormationDef(SQLModel, table=True):
     midfielders: Optional[float] = None
     defenders: Optional[float] = None
     positions: list[int] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+
+
+class ImportRun(SQLModel, table=True):
+    """Mỗi lần nhập dữ liệu xong ghi một dòng; id lớn nhất làm "phiên bản dữ liệu" cho bộ nhớ đệm."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    finished_at: datetime
+    summary: str = ""
+
+
+class MatchResult(SQLModel, table=True):
+    """Kết quả trận do người dùng nhập tay (dữ liệu xuất không có tỷ số từng trận)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    team_id: int = Field(index=True)
+    opponent_name: Optional[str] = None
+    goals_for: int
+    goals_against: int
+    played_on: Optional[date] = None
+    is_home: Optional[bool] = None
+    created_at: datetime

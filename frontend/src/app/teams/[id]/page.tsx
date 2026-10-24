@@ -72,6 +72,12 @@ async function TeamContent({ params }: { params: Promise<{ id: string }> }) {
         </dl>
       </div>
 
+      <p className="mb-6">
+        <Link href={`/teams/${team.team_id}/analysis`} className="rounded bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
+          Phân tích đội này như đối thủ →
+        </Link>
+      </p>
+
       <div className="grid gap-8 md:grid-cols-2">
         <section>
           <h2 className="mb-2 font-semibold">

@@ -130,3 +130,71 @@ export async function apiGet<T>(path: string): Promise<T> {
 export function playerName(p: { name: string | null; player_id: number }): string {
   return p.name ?? `Cầu thủ #${p.player_id}`;
 }
+
+export type Metric = {
+  key: string;
+  label: string;
+  value: number | null;
+  percentile: number | null;
+  higher_is_better: boolean;
+};
+
+export type FormInfo = {
+  source: "manual" | "game";
+  verified: boolean;
+  matches: number;
+  sequence: string | null;
+  wins: number;
+  draws: number;
+  losses: number;
+  points: number;
+  max_points: number;
+  goals_for: number | null;
+  goals_against: number | null;
+  goal_difference: number | null;
+  results: {
+    id: number;
+    opponent_name: string | null;
+    goals_for: number;
+    goals_against: number;
+    played_on: string | null;
+    is_home: boolean | null;
+  }[];
+};
+
+export type DangerousPlayer = {
+  player_id: number;
+  name: string;
+  overall: number;
+  role: string;
+  score: number;
+  why: string;
+};
+
+export type WeakPoint = {
+  kind: "team" | "player";
+  label: string;
+  value: number;
+  percentile: number;
+  text: string;
+  player_id?: number;
+};
+
+export type OpponentAnalysis = {
+  name: string;
+  team_id: number | null;
+  ratings: Record<string, number | null>;
+  lineup: TeamOverview["lineup"];
+  metrics: Metric[];
+  extras: {
+    slowest_defender: { player_id: number; name: string; sprint_speed: number } | null;
+    fastest_attacker: { player_id: number; name: string; sprint_speed: number } | null;
+    weaker_flank: "left" | "right" | null;
+    back_line_size: number;
+  };
+  benchmark: { league_id: number; league_name: string | null; teams: number } | null;
+  dangerous: { attackers: DangerousPlayer[]; playmakers: DangerousPlayer[] };
+  weak_points: WeakPoint[];
+  form: FormInfo | null;
+  injuries: { player_id: number; name: string; in_xi: boolean }[];
+};

@@ -3,11 +3,14 @@ import argparse
 import sys
 from pathlib import Path
 
+from datetime import datetime, timezone
+
 from sqlmodel import Session
 
 from app.config import DEFAULT_MAPPING, REPO_ROOT, database_url
 from app.db import get_engine, run_migrations
 from app.importers.live_editor import MappingError, import_exports, load_mapping
+from app.models import ImportRun
 
 
 def resolve_exports_dir(arg: str) -> Path:
@@ -35,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with Session(get_engine(url)) as session:
             report = import_exports(session, exports, load_mapping(Path(args.mapping)))
+            session.add(ImportRun(finished_at=datetime.now(timezone.utc), summary=report.summary()))
             session.commit()
     except MappingError as e:
         print(f"Lỗi nhập dữ liệu (không có gì được ghi): {e}", file=sys.stderr)
