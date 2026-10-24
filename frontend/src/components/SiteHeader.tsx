@@ -17,6 +17,7 @@ export function SiteHeader() {
           <>
             <nav className="flex flex-wrap gap-1 text-sm text-zinc-600 dark:text-zinc-400">
               <Link href="/teams" className={link}>Đội bóng</Link>
+              <Link href="/cau-thu" className={link}>Cầu thủ</Link>
               <Link href="/manager" className={link}>Manager</Link>
               <Link href="/manual" className={link}>Nhập tay đối thủ</Link>
               <Link href="/compare/players" className={link}>So sánh</Link>
@@ -31,6 +32,7 @@ export function SiteHeader() {
           <>
             <nav className="flex flex-wrap gap-1 text-sm text-zinc-600 dark:text-zinc-400">
               <Link href="/cam-nang" className={link}>Cẩm nang</Link>
+              <Link href="/cau-thu" className={link}>Cầu thủ</Link>
               <Link href="/cam-nang/chi-so" className={link}>Chỉ số</Link>
               <Link href="/cam-nang/mua-cau-thu" className={link}>Mua cầu thủ</Link>
               <Link href="/cam-nang/chien-thuat" className={link}>Đấu pháp</Link>

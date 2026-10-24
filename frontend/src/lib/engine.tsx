@@ -4,8 +4,9 @@
 // Mọi lời gọi fetch("/api/...") của các component được chuyển thẳng vào engine nên không cần máy chủ nào.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { handleRequest, type ApiResponse } from "@/engine/api";
+import { loadDataset, type DatasetMeta, type PlayersDataset } from "@/engine/dataset";
 import { runImport, type FileMap, type TableReport } from "@/engine/importer";
 import { restoreUser, serializeUser } from "@/engine/backup";
 import { clearSaved, loadStore, saveGame, saveUser } from "@/engine/persist";
@@ -82,6 +83,49 @@ function boot(): Promise<void> {
   return booting;
 }
 
+/** Bản web: nạp bộ dữ liệu cầu thủ công khai (public/data/players.json) vào cùng engine để dùng lại các route phân tích. */
+let webLoading: Promise<DatasetMeta> | null = null;
+function bootWeb(): Promise<DatasetMeta> {
+  installFetchBridge();
+  webLoading ??= (async () => {
+    const res = await fetch("/data/players.json");
+    if (!res.ok) throw new Error(`Không tải được dữ liệu cầu thủ (HTTP ${res.status})`);
+    const meta = loadDataset(store, (await res.json()) as PlayersDataset);
+    datasetMeta = meta;
+    phase = "ready";
+    notify();
+    return meta;
+  })().catch((e) => {
+    webLoading = null;
+    throw e;
+  });
+  return webLoading;
+}
+
+let datasetMeta: DatasetMeta | null = null;
+/** Thông tin bộ dữ liệu công khai (ngày xuất, ngày tham chiếu); null nếu chưa nạp hoặc đang ở ứng dụng. */
+export const getDatasetMeta = () => datasetMeta;
+
+let nationsCache: Promise<Map<number, string>> | null = null;
+/** Tên quốc gia theo id (public/data/nations.json); rỗng nếu không có file. */
+export function loadNations(): Promise<Map<number, string>> {
+  nationsCache ??= fetch("/data/nations.json")
+    .then((r) => (r.ok ? (r.json() as Promise<Record<string, string>>) : {}))
+    .catch(() => ({} as Record<string, string>))
+    .then((o) => new Map(Object.entries(o).map(([k, v]) => [Number(k), v])));
+  return nationsCache;
+}
+
+export function useNations(): Map<number, string> {
+  const [m, setM] = useState<Map<number, string>>(new Map());
+  useEffect(() => {
+    let alive = true;
+    void loadNations().then((n) => alive && setM(n));
+    return () => void (alive = false);
+  }, []);
+  return m;
+}
+
 /** Nhập các file CSV (tên file chữ thường -> nội dung), lưu lại vào trình duyệt, làm mới mọi trang đang mở. */
 export async function importFiles(files: FileMap): Promise<TableReport[]> {
   const reports = runImport(store, files);
@@ -136,11 +180,26 @@ export const useEngineReady = () => useContext(GateContext);
 
 /** Bản web chỉ có cẩm nang và trang tải; mọi trang công cụ phân tích chỉ có trong ứng dụng Windows. */
 const WEB_PATHS = ["/cam-nang", "/huong-dan", "/tai-ung-dung"];
-const isWebPath = (pathname: string) => pathname === "/" || WEB_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+/** Trang xem cầu thủ dùng bộ dữ liệu công khai nên cần nạp trước khi hiển thị. */
+const DATASET_PATHS = ["/cau-thu", "/player"];
+const inPaths = (paths: string[], pathname: string) => paths.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+const isWebPath = (pathname: string) => pathname === "/" || inPaths(WEB_PATHS, pathname);
+
+function DatasetGate({ children }: { children: ReactNode }) {
+  const v = useDataVersion();
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    bootWeb().catch((e) => setError(e instanceof Error ? e.message : String(e)));
+  }, []);
+  if (error) return <p className="p-6 text-red-600">{error}</p>;
+  if (phase !== "ready") return <p className="p-6 text-zinc-500" data-v={v}>Đang tải dữ liệu cầu thủ (vài MB, chỉ tải một lần)…</p>;
+  return <GateContext.Provider value>{children}</GateContext.Provider>;
+}
 
 function WebGate({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/";
   if (isWebPath(pathname)) return <>{children}</>;
+  if (inPaths(DATASET_PATHS, pathname)) return <DatasetGate>{children}</DatasetGate>;
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
       <div className="rounded border border-zinc-200 p-6 dark:border-zinc-800">

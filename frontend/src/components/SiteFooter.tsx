@@ -16,6 +16,7 @@ export function SiteFooter() {
         </div>
         <ul className={col}>
           <li className="font-semibold text-current">Cẩm nang</li>
+          <li><Link href="/cau-thu" className={a}>Danh sách cầu thủ</Link></li>
           <li><Link href="/cam-nang/chi-so" className={a}>Chỉ số cầu thủ</Link></li>
           <li><Link href="/cam-nang/vi-tri" className={a}>Vị trí và vai trò</Link></li>
           <li><Link href="/cam-nang/chien-thuat" className={a}>Gợi ý đấu pháp</Link></li>

@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Coins, Handshake, Layers, LineChart, Search, Shirt, Swords, Target, Timer, type LucideIcon } from "lucide-react";
+import { ArrowRight, BookOpen, Coins, Handshake, Layers, LineChart, Search, Shirt, Swords, Target, Timer, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { IconTile, type Tone } from "@/components/brand/ui";
 
@@ -9,6 +9,7 @@ const GROUPS: { title: string; blurb: string; items: Item[] }[] = [
   {
     title: "Hiểu cầu thủ", blurb: "Đọc đúng con số trước khi quyết định.",
     items: [
+      { href: "/cau-thu", title: "Danh sách cầu thủ", text: "Bảng toàn bộ cầu thủ với mọi chỉ số, lọc theo vị trí, giải, tuổi; bấm vào để xem phân tích từng người.", icon: Users, tone: "emerald" },
       { href: "/cam-nang/chi-so", title: "Chỉ số cầu thủ", text: "34 chỉ số chia theo nhóm, mỗi chỉ số làm gì và quan trọng với vị trí nào.", icon: LineChart, tone: "sky" },
       { href: "/cam-nang/vi-tri", title: "Vị trí và vai trò", text: "9 vai trò, chỉ số then chốt và điểm trừ khi đá lệch vị trí.", icon: Shirt, tone: "violet" },
       { href: "/cam-nang/tuoi-va-tiem-nang", title: "Tuổi và tiềm năng", text: "OVR, POT và tuổi: khi nào mua người trẻ, khi nào mua người ở đỉnh cao.", icon: Timer, tone: "amber" },
