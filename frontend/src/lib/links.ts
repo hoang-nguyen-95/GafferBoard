@@ -1,3 +1,5 @@
+/** Địa chỉ chính thức của trang web (Vercel). */
+export const SITE_URL = "https://gaffer-board-eta.vercel.app";
 export const REPO_URL = "https://github.com/hoang-nguyen-95/GafferBoard";
 /** Trang các bản phát hành (file .exe do GitHub Actions build, xem docs/desktop.md). */
 export const RELEASES_URL = `${REPO_URL}/releases`;

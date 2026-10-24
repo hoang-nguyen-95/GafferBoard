@@ -54,4 +54,10 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
 21. **Chế độ Manager dựa trên hệ số kinh nghiệm và số bạn tự nhập** (xem `docs/manager.md`): dữ liệu xuất chưa có giá trị cầu thủ, lương, ngân sách; ba bậc giá đàm phán, trọng số điểm
     đáng mua, ngưỡng tuổi chưa kiểm chứng với game. ID giải huyền thoại (2255) và cầu thủ tự do (382) chỉ kiểm tra trên một save. Cần xuất thêm các bảng hợp đồng/chuyển nhượng (script đã bổ sung) để thay giả định bằng số thật.
 20. **Cẩm nang là kinh nghiệm chung và cách công cụ phân tích**, không phải số liệu chính thức của EA; mô tả "chỉ số làm gì" viết tay và chưa được ai có chuyên môn
-    game kiểm tra. Trang web không có cơ sở dữ liệu cầu thủ thật (không đưa dữ liệu game vào repo).
+    game kiểm tra.
+23. **Trang web có bộ dữ liệu cầu thủ công khai** (`frontend/public/data/players.json`, xem `docs/players-dataset.md`): đây là ngoại lệ có chủ đích của quy tắc "không commit dữ liệu game",
+    do chủ dự án chọn sau khi được cảnh báo về rủi ro bản quyền/điều khoản của EA. Chỉ gồm chỉ số, không có ảnh/logo. Nếu cần gỡ: xóa thư mục `frontend/public/data/` và route `/cau-thu` sẽ báo lỗi tải dữ liệu.
+24. **Cột giá trị chuyển nhượng và lương chưa có** trong bảng cầu thủ (web và ứng dụng): bản xuất hiện tại không có bảng hợp đồng/chuyển nhượng; quyết định là không ước lượng số.
+    Khi có `career_playercontract.csv`/`career_transferblock.csv`, ánh xạ vào importer rồi thêm cột (xem `docs/players-dataset.md`).
+25. **Một số tên tiếng Việt trong bản xuất bị lỗi mã ký tự** (vd "BŇ" thay cho "Bỉ"). Bộ dựng dữ liệu công khai sửa bằng bảng cố định (`NATION_FIXES`, `NAME_FIXES` trong `backend/tools/build_players_dataset.py`);
+    trong ứng dụng, tên đội/giải/quốc gia đọc từ save vẫn có thể bị lỗi mã nếu không nằm trong bảng đó.

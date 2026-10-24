@@ -1,5 +1,7 @@
 # CounterPick FC
 
+**Trang web: https://gaffer-board-eta.vercel.app**
+
 Hai phần, cùng một mã nguồn:
 
 - **Trang web (cẩm nang)**: tổng hợp cách đọc chỉ số cầu thủ, vai trò, đấu pháp, sơ đồ khắc chế và nút **tải ứng dụng Windows** (tải thẳng file cài đặt).
@@ -94,4 +96,4 @@ cd frontend && npm run build && node e2e/web.cjs                      # bản we
 cd frontend && npm run build:desktop && node e2e/desktop-build.cjs    # công cụ phân tích trên bản build (cần Playwright + Chromium)
 ```
 
-Test dùng dữ liệu mẫu tự sinh trong code, không cần và không commit dữ liệu từ game.
+Test dùng dữ liệu mẫu tự sinh trong code, không cần và không commit dữ liệu từ game. Ngoại lệ có chủ đích: bộ chỉ số cầu thủ công khai cho trang web (`frontend/public/data/`, xem `docs/players-dataset.md`).

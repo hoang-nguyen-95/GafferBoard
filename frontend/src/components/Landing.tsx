@@ -9,6 +9,7 @@ import { RULES } from "@/engine/rules";
 import { STAT_GROUPS } from "@/handbook/content";
 
 const FEATURES: { href: string; title: string; text: string; icon: typeof Users; tone: Tone }[] = [
+  { href: "/cau-thu", title: "Danh sách cầu thủ", text: "Bảng toàn bộ cầu thủ với mọi chỉ số, lọc theo vị trí, giải, tuổi và xem phân tích từng người.", icon: Users, tone: "sky" },
   { href: "/cam-nang/chi-so", title: "Chỉ số cầu thủ", text: "Mỗi chỉ số làm gì, quan trọng với vị trí nào, đọc phân vị thế nào.", icon: LineChart, tone: "sky" },
   { href: "/cam-nang/vi-tri", title: "Vị trí và vai trò", text: "Chỉ số then chốt của từng vai trò và điểm trừ khi đá lệch vị trí.", icon: Shirt, tone: "violet" },
   { href: "/cam-nang/mua-cau-thu", title: "Mua cầu thủ", text: "Quy trình 6 bước đọc tuổi, tiềm năng, hợp đồng để chọn người đáng mua.", icon: Target, tone: "emerald" },

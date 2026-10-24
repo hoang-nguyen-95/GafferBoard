@@ -5,16 +5,20 @@ import { useSearchParams } from "next/navigation";
 import { NotFoundNote } from "@/components/NotFoundNote";
 import { ShortlistButton } from "@/components/ShortlistButton";
 import { Radar } from "@/components/Radar";
+import { PLAYER_ATTRS } from "@/engine/types";
 import { type AttributeScore, type Player, type PlayerAnalysis, playerName } from "@/lib/api";
-import { useApi } from "@/lib/engine";
+import { useApi, useNations } from "@/lib/engine";
 import { percentileColor, positionsLabel } from "@/lib/positions";
 import { teamHref } from "@/lib/routes";
+import { IS_DESKTOP_BUILD } from "@/lib/target";
+import { ATTRIBUTE_LABELS } from "@/engine/analysis";
 
 export default function PlayerView() {
   const id = useSearchParams().get("id");
   const base = id ? `/players/${encodeURIComponent(id)}` : null;
   const p = useApi<Player>(base);
   const a = useApi<PlayerAnalysis>(base && `${base}/analysis`);
+  const nations = useNations();
   if (!p || !a) return <p className="text-zinc-500">Đang tải…</p>;
   if (!p.data || !a.data) return <NotFoundNote what="cầu thủ" />;
   const player = p.data, analysis = a.data;
@@ -29,9 +33,14 @@ export default function PlayerView() {
           {analysis.club && (
             <>
               {" · "}
-              <Link href={teamHref(analysis.club.team_id)} className="underline">
-                {analysis.club.name}
-              </Link>
+              {IS_DESKTOP_BUILD ? (
+                <Link href={teamHref(analysis.club.team_id)} className="underline">
+                  {analysis.club.name}
+                </Link>
+              ) : (
+                analysis.club.name
+              )}
+              {analysis.club.league_name ? ` (${analysis.club.league_name})` : ""}
             </>
           )}
         </p>
@@ -44,6 +53,10 @@ export default function PlayerView() {
             ["Chân thuận", footLabel],
             ["Chân yếu", player.weak_foot != null ? `${player.weak_foot}★` : null],
             ["Kỹ thuật", player.skill_moves != null ? `${Number(player.skill_moves) + 1}★` : null],
+            ["Quốc tịch", player.nationality_id != null ? nations.get(player.nationality_id as number) ?? `#${player.nationality_id}` : null],
+            ["Ngày sinh", player.birth_date],
+            ["Danh tiếng", player.international_rep != null ? `${player.international_rep}★` : null],
+            ["HĐ đến", player.contract_until],
           ].map(([label, value]) => (
             <div key={label as string}>
               <dt className="text-xs text-zinc-500">{label}</dt>
@@ -53,7 +66,7 @@ export default function PlayerView() {
         </dl>
       </div>
 
-      <ShortlistButton playerId={player.player_id} />
+      {IS_DESKTOP_BUILD && <ShortlistButton playerId={player.player_id} />}
 
       <p className="mb-6 rounded border border-zinc-200 p-3 text-sm dark:border-zinc-800">
         {analysis.summary}
@@ -91,6 +104,22 @@ export default function PlayerView() {
           ))}
         </ul>
         <p className="mt-2 text-xs text-zinc-500">P = phân vị trong nhóm so sánh (P90: tốt hơn 90% cầu thủ cùng vị trí).</p>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="mb-2 font-semibold">Tất cả chỉ số</h2>
+        <dl className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm sm:grid-cols-3 lg:grid-cols-4">
+          {PLAYER_ATTRS.filter((k) => player[k] !== null).map((k) => (
+            <div key={k} className="flex justify-between gap-2 border-b border-zinc-100 py-0.5 dark:border-zinc-800">
+              <dt className="text-zinc-600 dark:text-zinc-400">{ATTRIBUTE_LABELS[k]}</dt>
+              <dd className="font-semibold tabular-nums">{player[k]}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-3 text-xs text-zinc-500">
+          Giá trị chuyển nhượng và lương chưa có: dữ liệu hợp đồng/chuyển nhượng của game chưa được xuất, nên chưa hiển thị số nào.
+          {" "}<Link href="/cau-thu" className="underline">Về danh sách cầu thủ</Link>
+        </p>
       </section>
     </>
   );

@@ -6,7 +6,7 @@ const path = require("node:path");
 const { chromium } = require("playwright");
 
 const OUT = path.resolve(__dirname, "../out");
-const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".txt": "text/plain", ".ico": "image/x-icon", ".lua": "text/plain" };
+const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".txt": "text/plain", ".ico": "image/x-icon", ".lua": "text/plain", ".json": "application/json" };
 function serve() {
   const server = http.createServer((req, res) => {
     const url = decodeURIComponent(new URL(req.url, "http://x").pathname);
@@ -85,6 +85,26 @@ function check(cond, msg) {
       await page.goto(base + p, { waitUntil: "networkidle" });
       check(await page.isVisible("text=Tính năng này nằm trong ứng dụng Windows"), `${p} chỉ hiện hướng dẫn tải ứng dụng`);
     }
+
+    console.log("6. Danh sách cầu thủ (bộ dữ liệu công khai)");
+    await page.goto(base + "/cau-thu", { waitUntil: "networkidle" });
+    await page.waitForSelector("table tbody tr td a", { timeout: 20000 });
+    const total = await page.textContent("[data-testid=count]");
+    check(/\d/.test(total) && !/^\s*0 \//.test(total.trim()), `bảng có dữ liệu (${total.trim()})`);
+    check(await page.isVisible("text=Giá trị chuyển nhượng và lương chưa có"), "ghi rõ chưa có giá trị chuyển nhượng, không đoán số");
+    const first = await page.textContent("table tbody tr:first-child td:first-child");
+    await page.fill("input[placeholder^='Ví dụ']", first.slice(0, 4));
+    await page.waitForFunction((n) => document.querySelector("table tbody tr td a")?.textContent.startsWith(n), first.slice(0, 4));
+    await page.selectOption("select >> nth=0", "GK");
+    await page.click("button:has-text('+ 34 chỉ số chi tiết')");
+    check(await page.isVisible("th:has-text('Tốc độ chạy nước rút')"), "bộ cột chi tiết hiện đủ chỉ số");
+    await page.fill("input[placeholder^='Ví dụ']", "");
+    await page.selectOption("select >> nth=0", "");
+    await page.click("table tbody tr:first-child td:first-child a");
+    await page.waitForSelector("text=Tất cả chỉ số");
+    check(page.url().includes("/player?id="), "bấm tên mở trang phân tích cầu thủ");
+    check(await page.isVisible("text=Radar"), "trang cầu thủ có radar phân vị");
+    check(!(await page.isVisible("text=Gợi ý đàm phán")), "không có nút Manager trên web");
 
     check(external.every((u) => u.includes("/releases/latest/download/")), "chỉ có request tải file khi bấm nút");
     check(problems.length === 0, `không có lỗi console (${problems.slice(0, 3).join(" | ") || "không"})`);

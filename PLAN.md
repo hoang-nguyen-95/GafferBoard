@@ -157,7 +157,7 @@ Nghiệm thu: nhập 4-3-3 + 11 tên → ra phân tích và đội hình đáp t
 - Mọi logic phân tích/luật phải có test với dữ liệu mẫu nhỏ.
 - Giao diện và văn bản gợi ý bằng **tiếng Việt**; mã nguồn và tên biến bằng tiếng Anh.
 - Thiếu thông tin về dữ liệu thực tế → hỏi người dùng, không tự bịa cột/bảng.
-- Commit nhỏ, thông điệp rõ ràng. Không commit file save hay dữ liệu xuất của game.
+- Commit nhỏ, thông điệp rõ ràng. Không commit file save hay dữ liệu xuất của game (ngoại lệ có chủ đích: bộ chỉ số cầu thủ công khai `frontend/public/data/`, xem `docs/players-dataset.md`).
 
 ## 8. Bắt đầu từ đâu
 

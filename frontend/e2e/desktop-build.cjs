@@ -180,6 +180,17 @@ function check(cond, msg) {
     await page.goto(`${base}/player?id=${(await api("GET", "/players?q=&limit=1")).json[0].player_id}`, { waitUntil: "networkidle" });
     check(await page.isVisible("button:has-text('Thêm vào shortlist mua')"), "trang cầu thủ có nút thêm vào shortlist");
 
+    console.log("6d. Danh sách cầu thủ từ dữ liệu save");
+    await page.goto(base + "/cau-thu", { waitUntil: "networkidle" });
+    await page.waitForSelector("table tbody tr td a", { timeout: 20000 });
+    const listed = Number((await page.textContent("[data-testid=count]")).replace(/\D/g, ""));
+    const apiCount = await page.evaluate(async () => (await (await fetch("/api/players?limit=1000")).json()).length);
+    check(listed > 0 && listed <= (apiCount === 1000 ? 1e9 : apiCount), `bảng liệt kê cầu thủ của save (${listed}, API ${apiCount})`);
+    check(await page.isVisible("text=Giá trị chuyển nhượng và lương chưa có"), "báo chưa có giá trị chuyển nhượng");
+    await page.click("table tbody tr:first-child td:first-child a");
+    await page.waitForSelector("text=Tất cả chỉ số");
+    check(await page.isVisible("a:has-text('Gợi ý đàm phán')"), "trang cầu thủ trong ứng dụng vẫn có nút Manager");
+
     console.log("7. Nhập lại dữ liệu mới không làm mất ghi chú");
     await page.goto(base + "/import", { waitUntil: "networkidle" });
     await page.setInputFiles("input[type=file][accept*='csv']", csvs);
