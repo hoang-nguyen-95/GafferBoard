@@ -12,6 +12,9 @@ export function SiteHeader() {
           <Link href="/teams" className="hover:underline">
             Đội bóng
           </Link>
+          <Link href="/manual" className="hover:underline">
+            Nhập tay đối thủ
+          </Link>
         </nav>
         <div className="ml-auto w-full sm:w-72">
           <HeaderSearch />

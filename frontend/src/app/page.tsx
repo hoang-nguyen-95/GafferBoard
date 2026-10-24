@@ -67,6 +67,9 @@ async function HomeContent() {
         <Link href="/teams" className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
           Xem các đội
         </Link>
+        <Link href="/manual" className="rounded border border-zinc-300 px-4 py-2 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900">
+          Nhập tay đội hình đối thủ
+        </Link>
         {next.user_team && (
           <Link href={`/teams/${next.user_team.team_id}`} className="rounded border border-zinc-300 px-4 py-2 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900">
             Đội của tôi: {next.user_team.name}

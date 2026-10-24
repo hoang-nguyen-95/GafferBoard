@@ -44,21 +44,11 @@ def option_to_dict(option: LineupOption, ref) -> dict:
     }
 
 
-@router.get("/teams/{team_id}/counter-lineups")
-def counter_lineups(
-    team_id: int,
-    mine: Optional[int] = Query(None, description="team_id của đội bạn; mặc định là đội của người dùng"),
-    limit: int = Query(3, ge=1, le=5),
-    session: Session = Depends(get_session),
-) -> dict:
-    """2–3 phương án đội hình (sơ đồ khác nhau) của đội bạn để đáp trả đội này, kèm giải thích."""
-    report = analyze_team(session, team_id)
-    if report is None:
-        raise HTTPException(404, "Không tìm thấy đội")
-    mine_id = mine if mine is not None else settings.effective_user_team(session)[0]
+def counter_payload(session: Session, report, mine_id: Optional[int], limit: int = 3) -> dict:
+    """Phương án đội hình đáp trả cho `report` (đội trong DB hoặc đội hình nhập tay)."""
     if mine_id is None:
         raise HTTPException(409, "Chưa biết đội của bạn: chọn đội trên trang chủ trước")
-    if mine_id == team_id:
+    if report.team_id is not None and mine_id == report.team_id:
         raise HTTPException(422, "Đội của bạn trùng với đối thủ")
     suggestions, advice = advise_full(session, report, mine_id)
     result = recommend_lineups(session, mine_id, suggestions, advice["formation_counters"], limit)
@@ -72,3 +62,18 @@ def counter_lineups(
         "rules_applied": result["rules"],
         "options": [option_to_dict(o, ref) for o in result["options"]],
     }
+
+
+@router.get("/teams/{team_id}/counter-lineups")
+def counter_lineups(
+    team_id: int,
+    mine: Optional[int] = Query(None, description="team_id của đội bạn; mặc định là đội của người dùng"),
+    limit: int = Query(3, ge=1, le=5),
+    session: Session = Depends(get_session),
+) -> dict:
+    """2–3 phương án đội hình (sơ đồ khác nhau) của đội bạn để đáp trả đội này, kèm giải thích."""
+    report = analyze_team(session, team_id)
+    if report is None:
+        raise HTTPException(404, "Không tìm thấy đội")
+    mine_id = mine if mine is not None else settings.effective_user_team(session)[0]
+    return counter_payload(session, report, mine_id, limit)

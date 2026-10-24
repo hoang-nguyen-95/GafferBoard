@@ -35,3 +35,33 @@ export function percentileColor(p: number): string {
   if (p > 15) return "bg-amber-400";
   return "bg-red-500";
 }
+
+// Tuyến theo mã vị trí của game (khớp backend/app/services/positions.py)
+export function lineOfPosition(code: number): "GK" | "DEF" | "MID" | "ATT" | null {
+  if (code === 0) return "GK";
+  if (code >= 1 && code <= 8) return "DEF";
+  if (code >= 9 && code <= 19) return "MID";
+  if (code >= 20 && code <= 27) return "ATT";
+  return null;
+}
+
+/**
+ * Giữ cầu thủ khi đổi sơ đồ: ưu tiên cùng mã vị trí, sau đó cùng tuyến; cầu thủ không còn chỗ thì bị bỏ.
+ */
+export function remapPlayers<T>(oldCodes: number[], oldPlayers: (T | null)[], newCodes: number[]): (T | null)[] {
+  const result: (T | null)[] = newCodes.map(() => null);
+  const used = new Set<number>();
+  const take = (match: (oldCode: number, newCode: number) => boolean) => {
+    newCodes.forEach((code, i) => {
+      if (result[i] !== null) return;
+      const j = oldCodes.findIndex((oc, k) => !used.has(k) && oldPlayers[k] !== null && match(oc, code));
+      if (j >= 0) {
+        result[i] = oldPlayers[j];
+        used.add(j);
+      }
+    });
+  };
+  take((a, b) => a === b);
+  take((a, b) => lineOfPosition(a) !== null && lineOfPosition(a) === lineOfPosition(b));
+  return result;
+}

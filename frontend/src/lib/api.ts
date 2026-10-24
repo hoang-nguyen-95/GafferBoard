@@ -294,3 +294,17 @@ export async function apiGetOptional<T>(path: string): Promise<T | null> {
     throw e;
   }
 }
+
+
+export type FormationOption = { id: number; name: string; positions: string[]; position_codes: number[] };
+
+export type ManualDetail = {
+  id: number;
+  name: string;
+  league_id: number | null;
+  formation: { id: number; name: string | null; positions: string[] };
+  slots: Slot[];
+  updated_at: string;
+};
+
+export type ManualSummary = { id: number; name: string; formation_name: string | null; players: number; updated_at: string };

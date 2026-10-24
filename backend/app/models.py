@@ -216,3 +216,16 @@ class AppSetting(SQLModel, table=True):
 
     key: str = Field(primary_key=True)
     value: str
+
+
+class ManualLineup(SQLModel, table=True):
+    """Đội hình đối thủ nhập tay: sơ đồ + 11 cầu thủ (slot theo thứ tự vị trí của sơ đồ)."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    formation_id: int
+    league_id: Optional[int] = None  # giải dùng để so phân vị; trống thì suy ra từ CLB của các cầu thủ
+    # [{"slot": 0, "player_id": 123 | null}, ...] đúng 11 phần tử
+    slots: list[dict] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    created_at: datetime
+    updated_at: datetime

@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db import run_migrations
-from app.routers import analysis, home, lineups, players, results, teams
+from app.routers import analysis, home, lineups, manual, players, results, teams
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -27,6 +27,7 @@ app.include_router(analysis.router)
 app.include_router(results.router)
 app.include_router(home.router)
 app.include_router(lineups.router)
+app.include_router(manual.router)
 
 
 @app.get("/health")
