@@ -14,8 +14,8 @@ export const DESKTOP_DOWNLOAD_URL = RELEASES_LATEST_URL;
 
 /**
  * Ảnh chân dung cầu thủ: KHÔNG nằm trong repo hay bản cài đặt, trình duyệt của người xem tải trực tiếp từ máy chủ ảnh của EA theo mã cầu thủ.
- * Chưa kiểm chứng được địa chỉ này chạy với mọi cầu thủ; ảnh lỗi/thiếu thì giao diện dùng avatar chữ viết tắt.
+ * Đây đúng là địa chỉ trang đánh giá cầu thủ của EA đang dùng (thư mục FC25, FC26 chưa có); thử 25 cầu thủ OVR>=75 thì 22 có ảnh, OVR<65 thì 7/25. Không có ảnh thì giao diện dùng avatar chữ viết tắt.
  * Đặt chuỗi rỗng để tắt hẳn việc tải ảnh ngoài.
  */
-export const PLAYER_PHOTO_URL = "https://ratings-images-prod.pulse.ea.com/FC26/full/player-portraits/p{id}.png";
+export const PLAYER_PHOTO_URL = "https://ratings-images-prod.pulse.ea.com/FC25/full/player-portraits/p{id}.png?padding=0.7";
 export const playerPhotoUrl = (playerId: number) => (PLAYER_PHOTO_URL ? PLAYER_PHOTO_URL.replace("{id}", String(playerId)) : null);

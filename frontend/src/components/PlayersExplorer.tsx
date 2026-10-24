@@ -11,6 +11,7 @@ import { PLAYER_ATTRS, type Player } from "@/engine/types";
 import { ageOn, foldText } from "@/engine/util";
 import { getDatasetMeta, store, useDataVersion, useNations } from "@/lib/engine";
 import { lineOfPosition, LINE_LABELS, POSITION_NAMES } from "@/lib/positions";
+import { SearchSelect } from "@/components/SearchSelect";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { playerHref } from "@/lib/routes";
 import { IS_DESKTOP_BUILD } from "@/lib/target";
@@ -129,15 +130,14 @@ export function PlayersExplorer() {
   const filtered = useMemo(() => {
     const words = foldText(dq).split(" ").filter(Boolean);
     const n = (s: string) => (s.trim() === "" ? null : Number(s));
-    const nationFold = foldText(nation), clubFold = foldText(club);
     const [o, pt, a1, a2] = [n(minOvr), n(minPot), n(minAge), n(maxAge)];
     const list = rows.filter((r) => {
       if (words.length && !words.every((w) => r.search.includes(w) || foldText(r.club).includes(w))) return false;
       if (!legends && r.legend) return false;
       if (line && r.line !== line) return false;
       if (league && r.league !== league) return false;
-      if (nationFold && !foldText(r.nation).includes(nationFold)) return false;
-      if (clubFold && !foldText(r.club).includes(clubFold)) return false;
+      if (nation && r.nation !== nation) return false;
+      if (club && r.club !== club) return false;
       if (o !== null && r.player.overall < o) return false;
       if (pt !== null && (r.player.potential ?? 0) < pt) return false;
       if (a1 !== null && (r.age ?? -1) < a1) return false;
@@ -180,20 +180,10 @@ export function PlayersExplorer() {
             {Object.entries(LINE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
-        <label className="text-xs text-zinc-500">Giải
-          <select className={`${input} mt-1 block max-w-44`} value={league} onChange={(e) => { setLeague(e.target.value); setClub(""); }}>
-            <option value="">Tất cả</option>
-            {leagues.map((l) => <option key={l}>{l}</option>)}
-          </select>
-        </label>
-        <label className="text-xs text-zinc-500">Câu lạc bộ{league ? ` (${league})` : ""}
-          <input className={`${input} mt-1 block w-48`} list="club-options" placeholder="Gõ để tìm đội" value={club} onChange={(e) => setClub(e.target.value)} />
-          <datalist id="club-options">{clubList.map((l) => <option key={l} value={l} />)}</datalist>
-        </label>
-        <label className="text-xs text-zinc-500">Quốc gia
-          <input className={`${input} mt-1 block w-40`} list="nation-options" placeholder="Gõ để tìm nước" value={nation} onChange={(e) => setNation(e.target.value)} />
-          <datalist id="nation-options">{nationList.map((l) => <option key={l} value={l} />)}</datalist>
-        </label>
+        <SearchSelect label="Giải" value={league} options={leagues} searchPlaceholder="Tìm giải" className="w-44"
+          onChange={(v) => { setLeague(v); setClub(""); }} />
+        <SearchSelect label={league ? `Câu lạc bộ (${league})` : "Câu lạc bộ"} value={club} options={clubList} searchPlaceholder="Tìm câu lạc bộ" className="w-48" onChange={setClub} />
+        <SearchSelect label="Quốc gia" value={nation} options={nationList} searchPlaceholder="Tìm quốc gia" className="w-40" onChange={setNation} />
         {([["OVR ≥", minOvr, setMinOvr], ["POT ≥", minPot, setMinPot], ["Tuổi từ", minAge, setMinAge], ["đến", maxAge, setMaxAge]] as const).map(([label, value, set]) => (
           <label key={label} className="text-xs text-zinc-500">{label}
             <input className={`${input} mt-1 block w-20`} inputMode="numeric" value={value} onChange={(e) => set(e.target.value.replace(/\D/g, ""))} />
