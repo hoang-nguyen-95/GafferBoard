@@ -128,6 +128,10 @@ Nghiệm thu: nhập 4-3-3 + 11 tên → ra phân tích và đội hình đáp t
 - Diễn giải LLM gọi thẳng từ trình duyệt bằng khóa của người dùng. Build `output: "export"` → Netlify / Cloudflare Pages.
 - Nghiệm thu: engine TypeScript khớp bản Python từng bước trên dữ liệu giả và dữ liệu thật; e2e trên bản build tĩnh. Xem `docs/engine-parity.md`, `docs/deploy.md`.
 
+### Giai đoạn 10 — Ứng dụng desktop tự cập nhật (đã làm phần app)
+- Electron bọc bản web tĩnh; theo dõi thư mục xuất, tự nhập khi file đổi và yên lặng; cài script xuất vào Live Editor đã điền sẵn thư mục.
+- Build Windows bằng GitHub Actions. Chưa làm: script xuất chạy vòng lặp bên trong Live Editor (chờ kết quả thử `Sleep`/vòng lặp trên Live Editor của người dùng).
+
 ## 6. Rủi ro và cách xử lý
 
 | Rủi ro | Xử lý |

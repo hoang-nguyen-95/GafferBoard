@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DesktopPanel } from "@/components/DesktopPanel";
 import { TeamSetting } from "@/components/TeamSetting";
 import { type FixtureBrief, type Meta, type NextMatch } from "@/lib/api";
 import { useApi } from "@/lib/engine";
@@ -29,6 +30,7 @@ export default function HomeView() {
           Chưa có dữ liệu. Xuất các bảng từ Live Editor ra file CSV rồi kéo thả vào trang nhập. Mọi thứ chạy ngay trong trình duyệt của
           bạn, không có file nào được tải lên máy chủ.
         </p>
+        <DesktopPanel />
         <Link href="/import" className="inline-block rounded bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
           Nhập dữ liệu
         </Link>

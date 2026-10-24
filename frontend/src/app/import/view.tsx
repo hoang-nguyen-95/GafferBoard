@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState, type DragEvent } from "react";
 import { expectedFiles, type TableReport } from "@/engine/importer";
+import { DesktopPanel } from "@/components/DesktopPanel";
 import type { Meta } from "@/lib/api";
 import { backupUserData, hasData, importFiles, restoreUserData, useApi, useDataVersion, wipeAll } from "@/lib/engine";
 
@@ -124,6 +125,8 @@ export default function ImportView() {
           thì nhập lại, ghi chú và kết quả của bạn được giữ nguyên.
         </p>
       </div>
+
+      <DesktopPanel />
 
       <section
         onDragOver={(e) => { e.preventDefault(); setOver(true); }}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/SiteHeader";
+import { DesktopSync } from "@/lib/desktop";
 import { EngineGate } from "@/lib/engine";
 import "./globals.css";
 
@@ -13,6 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <SiteHeader />
+        <DesktopSync />
         <EngineGate>{children}</EngineGate>
       </body>
     </html>

@@ -46,3 +46,8 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
 16. **Bản web tĩnh: địa chỉ trang dùng `?id=`** (vd `/team?id=123`) thay vì `/teams/123` vì site tĩnh không biết trước id nào tồn tại.
     Link cũ dạng `/teams/123` không còn hiệu lực.
 17. **Nhập dữ liệu lớn chạy trên luồng chính của trình duyệt**: bộ dữ liệu thật (~22 nghìn cầu thủ) mất vài giây và trang đứng hình trong lúc đó; chưa chuyển sang Web Worker.
+18. **Ứng dụng desktop chưa chạy thử trên Windows thật**: logic theo dõi thư mục, nhập tự động, cài script và lưu dữ liệu đã được kiểm thử bằng Electron
+    trên Linux; file `.exe` do GitHub Actions build, chưa có ai mở thử. Chưa có chữ ký số nên Windows sẽ cảnh báo "Unknown publisher".
+19. **Chưa biết Live Editor bản của người dùng có tự chạy script được không** (khi mở save hoặc theo sự kiện). Nếu không, vẫn phải bấm Execute trong Live Editor
+    mỗi phiên chơi; app không điều khiển Live Editor. Cần danh sách thư mục/file của Live Editor để xác định.
+

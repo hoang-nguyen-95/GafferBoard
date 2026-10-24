@@ -1,0 +1,43 @@
+# Build ứng dụng Windows (bản cài đặt .exe + bản chạy thẳng) từ bản web tĩnh. Chạy tay (Actions -> Run workflow)
+# hoặc khi đẩy tag dạng v*: tag thì còn đính kèm file vào Release.
+name: desktop
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build web tĩnh
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Test và đóng gói ứng dụng
+        working-directory: desktop
+        run: |
+          npm ci
+          npm test
+          npm run dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CounterPickFC-windows
+          path: |
+            desktop/dist/*.exe
+      - name: Đính kèm vào Release (khi là tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" desktop/dist/*.exe --generate-notes || gh release upload "${{ github.ref_name }}" desktop/dist/*.exe --clobber

@@ -108,6 +108,8 @@ export async function restoreUserData(text: string): Promise<void> {
   notify();
 }
 
+export const isEngineReady = () => phase === "ready";
+
 export const hasData = () => store.data.teams.size > 0;
 
 export function useDataVersion(): number {

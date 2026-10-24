@@ -7,6 +7,8 @@ Chỉ đọc file CSV bạn tự xuất từ game; không đụng vào bộ nh�
 trình duyệt. Không có máy chủ, không tải file lên đâu cả; dữ liệu và ghi chú nằm trong IndexedDB của trình duyệt. Đưa lên
 Netlify/Cloudflare Pages theo [docs/deploy.md](docs/deploy.md).
 
+**Bản desktop (Windows)**: cùng giao diện, tự đọc thư mục xuất từ Live Editor nên không phải kéo thả, xem [docs/desktop.md](docs/desktop.md).
+
 Kế hoạch các giai đoạn: [PLAN.md](PLAN.md). Cấu trúc dữ liệu xuất: [docs/data-schema.md](docs/data-schema.md).
 Phần tính toán nằm ở `frontend/src/engine/` (TypeScript) và được đối chiếu với backend Python, xem [docs/engine-parity.md](docs/engine-parity.md).
 
