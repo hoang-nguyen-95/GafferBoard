@@ -3,7 +3,7 @@
 # Cú pháp mỗi trường:  field: nguon_col             (mặc định kiểu int)
 #                      field: {col: nguon_col, type: str|int|id|bool|date_days}
 #                      field: {cols: [c1, c2], type: int_list}
-# Kiểu: id = int, giá trị âm (-1) -> null; date_days = số ngày kể từ 1582-10-14;
+# Kiểu: float; id = int, giá trị âm (-1) -> null; date_days = số ngày kể từ 1582-10-14;
 #       int_list = danh sách int bỏ giá trị âm; optional: true = cho phép thiếu cột.
 adapter: live_editor
 
@@ -55,6 +55,7 @@ tables:
       weight: weight
       overall: overallrating
       potential: potential
+      primary_position: {col: preferredposition1, type: id}
       positions:
         cols: [preferredposition1, preferredposition2, preferredposition3, preferredposition4,
                preferredposition5, preferredposition6, preferredposition7]
@@ -108,6 +109,24 @@ tables:
       gk_kicking: gkkicking
       gk_positioning: gkpositioning
       gk_reflexes: gkreflexes
+
+  formation_defs:
+    file: formations.csv
+    model: FormationDef
+    key: [formation_id]
+    prune: true
+    where: {col: teamid, equals: "-1"}   # chỉ các sơ đồ chung; dòng theo đội dùng cho lineups
+    columns:
+      formation_id: formationid
+      name: {col: formationname, type: str}
+      full_name_id: {col: formationfullnameid, type: id}
+      attackers: {col: attackers, type: float}
+      midfielders: {col: midfielders, type: float}
+      defenders: {col: defenders, type: float}
+      positions:
+        cols: [position0, position1, position2, position3, position4, position5, position6, position7,
+               position8, position9, position10]
+        type: int_list
 
   squad:
     file: teamplayerlinks.csv
@@ -189,6 +208,7 @@ lineups:
   team_col: teamid
   formation_id_col: formationid
   formation_name_col: formationname
+  relative_formation_id_col: relativeformationid
   captain_col: captainid
   penalty_taker_col: penaltytakerid
   slot_player_col: "playerid{i}"

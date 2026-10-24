@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { apiGet, type Team } from "@/lib/api";
 
@@ -36,6 +37,11 @@ export default function Home() {
       <p className="mt-2 mb-8 text-zinc-500">
         Phân tích đối thủ và gợi ý đấu pháp cho Career Mode, chạy hoàn toàn trên máy bạn.
       </p>
+      <nav className="mb-8 flex flex-wrap gap-3 text-sm">
+        <Link href="/teams" className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
+          Xem các đội
+        </Link>
+      </nav>
       <Suspense fallback={<p className="p-4 text-zinc-500">Đang kiểm tra backend…</p>}>
         <ApiStatus />
       </Suspense>

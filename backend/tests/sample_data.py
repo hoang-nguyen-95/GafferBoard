@@ -91,6 +91,7 @@ def write_sample_export(d: Path, *, with_fixtures: bool = True, with_names: bool
         dict(teamid="33", leagueid="383", currenttableposition="0"),  # leagueid không có trong leagues
     ])
     sheets_h, forms_h = lineup_headers()
+    forms_h = list(dict.fromkeys([*forms_h, *table_header("formation_defs"), MAPPING["lineups"]["relative_formation_id_col"]]))
     sp = MAPPING["lineups"]
     sheet = dict(teamid="11", captainid="101", penaltytakerid="-1")
     form = dict(teamid="11", formationid="46", formationname="4-2-3-1")
@@ -99,10 +100,17 @@ def write_sample_export(d: Path, *, with_fixtures: bool = True, with_names: bool
         form[sp["slot_position_col"].format(i=i)] = {0: "0", 1: "18"}.get(i, str(i + 1))
         form[sp["slot_role_col"].format(i=i)] = "4162"
     write_csv(d / "default_teamsheets.csv", sheets_h, [sheet, dict(sheet, teamid="22", captainid="-1")])
+    # Hai sơ đồ chung (teamid=-1) với bộ vị trí thật của game: 4-3-3 và 4-4-2
+    def generic(fid: str, name: str, positions: list[int], att: str, mid: str, defe: str) -> dict:
+        row = dict(teamid="-1", formationid=fid, formationname=name, attackers=att, midfielders=mid, defenders=defe)
+        row.update({f"position{i}": str(p) for i, p in enumerate(positions)})
+        return row
+
     write_csv(d / "formations.csv", forms_h, [
-        dict(form, teamid="-1", formationid="1", formationname="generic"),
-        form,
-        dict(form, teamid="22", formationid="7", formationname="4-3-3"),
+        generic("8", "4-3-3", [0, 3, 4, 6, 7, 13, 14, 15, 23, 25, 27], "3.0", "3.0", "4.0"),
+        generic("16", "4-4-2", [0, 3, 4, 6, 7, 12, 13, 15, 16, 24, 26], "2.0", "4.0", "4.0"),
+        dict(form, relativeformationid="3"),
+        dict(form, teamid="22", formationid="7", formationname="4-3-3", relativeformationid="8"),
     ])
     if with_fixtures:
         write_csv(d / "fixtures.csv", table_header("fixtures"), [

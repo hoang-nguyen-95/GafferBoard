@@ -37,6 +37,7 @@ class PlayerSummary(_Out):
     potential: Optional[int] = None
     positions: list[int] = []
     birth_date: Optional[date] = None
+    age: Optional[int] = None  # tính theo ngày tham chiếu của game (ước tính)
     nationality_id: Optional[int] = None
     pac_div: Optional[int] = None
     sho_han: Optional[int] = None
@@ -50,3 +51,51 @@ class PlayerSummary(_Out):
     jersey_number: Optional[int] = None
     injury: Optional[int] = None
     form: Optional[int] = None
+    role: Optional[str] = None
+    role_label: Optional[str] = None
+    line: Optional[str] = None
+    in_xi: Optional[bool] = None
+
+
+class StandingOut(_Out):
+    league_id: Optional[int] = None
+    position: Optional[int] = None
+    points: Optional[int] = None
+    played: Optional[int] = None
+    home_wins: Optional[int] = None
+    home_draws: Optional[int] = None
+    home_losses: Optional[int] = None
+    away_wins: Optional[int] = None
+    away_draws: Optional[int] = None
+    away_losses: Optional[int] = None
+    home_gf: Optional[int] = None
+    home_ga: Optional[int] = None
+    away_gf: Optional[int] = None
+    away_ga: Optional[int] = None
+    form_raw: Optional[str] = None
+
+
+class SlotOut(BaseModel):
+    slot: int
+    position: Optional[int] = None
+    position_name: str
+    line: Optional[str] = None
+    inferred: bool = False
+    player: Optional[PlayerSummary] = None
+
+
+class LineupOut(BaseModel):
+    source: str  # teamsheet | inferred | none
+    formation_id: Optional[int] = None
+    relative_formation_id: Optional[int] = None
+    formation_name: Optional[str] = None
+    slots: list[SlotOut] = []
+
+
+class TeamOverview(BaseModel):
+    team: TeamOut
+    standing: Optional[StandingOut] = None
+    lineup: LineupOut
+    squad: dict[str, list[PlayerSummary]]
+    line_averages: dict[str, dict]
+    line_labels: dict[str, str]

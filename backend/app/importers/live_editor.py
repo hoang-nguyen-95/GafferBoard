@@ -74,6 +74,8 @@ def convert(raw: dict[str, str], spec: Any) -> Any:
         return None
     if typ == "int":
         return _to_int(value)
+    if typ == "float":
+        return float(value)
     if typ == "id":
         n = _to_int(value)
         return n if n >= 0 else None
@@ -145,7 +147,11 @@ def _import_table(session: Session, exports: Path, name: str, spec: dict) -> Tab
         return report
     header, raw_rows = read_csv(path)
     needed = [c for f in spec["columns"].values() for c in _source_columns(f)]
+    if "where" in spec:
+        needed.append(spec["where"]["col"])
     _require_columns(path, header, needed)
+    if "where" in spec:
+        raw_rows = [r for r in raw_rows if r[spec["where"]["col"]] == str(spec["where"]["equals"])]
     model = getattr(models, spec["model"])
     try:
         rows = [{f: convert(r, s) for f, s in spec["columns"].items()} for r in raw_rows]
@@ -179,7 +185,7 @@ def _import_lineups(session: Session, exports: Path, spec: dict) -> TableReport:
     _require_columns(
         formations_path, form_header,
         [team_col, spec["formation_id_col"], spec["formation_name_col"],
-         *slot_cols("slot_position_col"), *slot_cols("slot_role_col")],
+         spec["relative_formation_id_col"], *slot_cols("slot_position_col"), *slot_cols("slot_role_col")],
     )
     # Mỗi đội có một dòng formations riêng; teamid = -1 là sơ đồ chung, bỏ qua.
     formation_by_team = {int(f[team_col]): f for f in formations if int(f[team_col]) >= 0}
@@ -202,6 +208,7 @@ def _import_lineups(session: Session, exports: Path, spec: dict) -> TableReport:
         rows.append({
             "team_id": team_id,
             "formation_id": opt(f[spec["formation_id_col"]]) if f else None,
+            "relative_formation_id": opt(f[spec["relative_formation_id_col"]]) if f else None,
             "formation_name": f[spec["formation_name_col"]] if f else None,
             "captain_id": opt(sheet[spec["captain_col"]]),
             "penalty_taker_id": opt(sheet[spec["penalty_taker_col"]]),

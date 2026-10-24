@@ -5,7 +5,11 @@ from sqlmodel import Session, select
 
 from app.db import get_session
 from app.models import League, Team, TeamStanding
-from app.schemas import LeagueOut, TeamOut
+from app.routers.players import player_summary
+from app.schemas import LeagueOut, LineupOut, SlotOut, StandingOut, TeamOut, TeamOverview
+from app.services.positions import LINE_LABELS_VI, LINES
+from app.services.meta import reference_date
+from app.services.teams import group_squad_by_line, line_averages, resolve_lineup, squad_players
 
 router = APIRouter()
 
@@ -54,3 +58,37 @@ def get_team(team_id: int, session: Session = Depends(get_session)):
     if row is None:
         raise HTTPException(404, "Không tìm thấy đội")
     return _team_out(*row)
+
+
+@router.get("/teams/{team_id}/overview", response_model=TeamOverview)
+def get_team_overview(team_id: int, session: Session = Depends(get_session)):
+    row = session.exec(_team_query().where(Team.team_id == team_id)).first()
+    if row is None:
+        raise HTTPException(404, "Không tìm thấy đội")
+    squad = squad_players(session, team_id)
+    lineup = resolve_lineup(session, team_id, squad)
+    starter_ids = {sv.player.player_id for sv in lineup.slots if sv.player}
+    standing = session.get(TeamStanding, team_id)
+    ref = reference_date(session)
+    grouped = group_squad_by_line(squad, starter_ids)
+    return TeamOverview(
+        team=_team_out(*row),
+        standing=StandingOut.model_validate(standing) if standing else None,
+        lineup=LineupOut(
+            source=lineup.source, formation_id=lineup.formation_id,
+            relative_formation_id=lineup.relative_formation_id, formation_name=lineup.formation_name,
+            slots=[
+                SlotOut(
+                    slot=sv.slot, position=sv.position, position_name=sv.position_name, line=sv.line,
+                    inferred=sv.inferred,
+                    player=player_summary(sv.player, in_xi=True, ref=ref) if sv.player else None,
+                )
+                for sv in lineup.slots
+            ],
+        ),
+        squad={
+            line: [player_summary(e["player"], e["member"], e["in_xi"], ref) for e in grouped[line]] for line in LINES
+        },
+        line_averages=line_averages(lineup.slots),
+        line_labels=LINE_LABELS_VI,
+    )

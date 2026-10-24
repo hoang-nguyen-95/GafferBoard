@@ -37,6 +37,7 @@ def test_players_without_filter_and_pagination(client):
 def test_player_detail_has_all_attributes(client):
     p = client.get("/players/103").json()
     assert p["sprint_speed"] == 90 and p["positions"] == [25, 23, 27]
+    assert p["age"] == 27 and p["birth_date"] == "1999-05-27"  # ngày tham chiếu 2026-05-31
     assert client.get("/players/999999").status_code == 404
 
 
@@ -58,3 +59,9 @@ def test_player_search_combines_with_team_filter(client):
     rows = client.get("/players", params={"team": 22, "q": "linh"}).json()
     assert [r["player_id"] for r in rows] == [201]
     assert client.get("/players", params={"team": 11, "q": "linh"}).json() == []
+
+
+def test_age_uses_earliest_fixture_date_as_reference(client):
+    # Mẫu: trận sớm nhất 2026-05-31; cầu thủ 101 sinh 1994-09-08 -> 31 tuổi
+    rows = client.get("/players", params={"team": 11}).json()
+    assert {r["player_id"]: r["age"] for r in rows}[101] == 31

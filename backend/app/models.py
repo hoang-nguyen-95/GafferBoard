@@ -49,6 +49,7 @@ class Player(SQLModel, table=True):
     weight: Optional[int] = None
     overall: int = 0
     potential: Optional[int] = None
+    primary_position: Optional[int] = Field(default=None, index=True)  # preferredposition1
     positions: list[int] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
     preferred_foot: Optional[int] = None
     weak_foot: Optional[int] = None
@@ -145,6 +146,7 @@ class TeamStanding(SQLModel, table=True):
 class TeamLineup(SQLModel, table=True):
     team_id: int = Field(primary_key=True, sa_column_kwargs={"autoincrement": False})
     formation_id: Optional[int] = None
+    relative_formation_id: Optional[int] = None  # sơ đồ chung (FormationDef) mà đội này dùng
     formation_name: Optional[str] = None
     captain_id: Optional[int] = None
     penalty_taker_id: Optional[int] = None
@@ -174,3 +176,15 @@ class UserProfile(SQLModel, table=True):
     league_id: Optional[int] = None
     first_name: Optional[str] = None
     surname: Optional[str] = None
+
+
+class FormationDef(SQLModel, table=True):
+    """Sơ đồ chung của game (formations.teamid = -1): 11 mã vị trí, slot 0 luôn là GK."""
+
+    formation_id: int = Field(primary_key=True, sa_column_kwargs={"autoincrement": False})
+    name: str  # vd "4-3-3"; nhiều biến thể cùng tên khác bộ vị trí
+    full_name_id: Optional[int] = None
+    attackers: Optional[float] = None
+    midfielders: Optional[float] = None
+    defenders: Optional[float] = None
+    positions: list[int] = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
