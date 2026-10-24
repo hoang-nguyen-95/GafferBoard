@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
 
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
-
+// Xuất ra HTML/JS tĩnh (thư mục out/): đưa lên Netlify, Cloudflare Pages hoặc bất kỳ hosting tĩnh nào là chạy.
+// Mọi tính toán nằm trong trình duyệt (src/engine), không có API hay máy chủ.
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  partialPrefetching: true,
+  output: "export",
   turbopack: {
     rules: {
       "*.css": {
@@ -12,10 +11,6 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
-  },
-  // Trình duyệt gọi API qua cùng origin (/api/...), tránh CORS và không cần lộ địa chỉ backend.
-  async rewrites() {
-    return [{ source: "/api/:path*", destination: `${API_URL}/:path*` }];
   },
 };
 

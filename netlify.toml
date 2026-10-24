@@ -1,0 +1,8 @@
+# Bản web tĩnh của CounterPick FC: build Next.js ra HTML/JS thuần (frontend/out), không có máy chủ hay API.
+[build]
+  base = "frontend"
+  command = "npm ci && npm run build"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "22"

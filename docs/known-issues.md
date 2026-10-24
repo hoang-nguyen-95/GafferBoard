@@ -37,7 +37,12 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
 
 ## Chưa kiểm chứng với dịch vụ thật
 
-13. **Diễn giải bằng LLM chưa được chạy với Claude API thật** (không có khóa trong môi trường phát triển); đã kiểm thử bằng client
+13. **Diễn giải bằng LLM chưa được chạy với Claude API thật** (cả bản Python lẫn bản gọi từ trình duyệt, `frontend/src/lib/llm.ts`, chỉ mới kiểm tra việc dựng báo cáo và xử lý lỗi) (không có khóa trong môi trường phát triển); đã kiểm thử bằng client
     giả và bằng SDK thật ở nhánh "chưa có khóa". Mặc định tắt. Chưa bật tham số `fallbacks` của API cho trường hợp bị từ chối vì
     nội dung phân tích bóng đá không thuộc nhóm nhạy cảm; nếu bị từ chối app hiển thị thông báo thay vì lỗi.
 14. **Mới thử trên một save** (Man Utd, Premier League, FC26 Live Editor v26.3.6).
+15. **Bản web tĩnh: dữ liệu chỉ nằm trong trình duyệt** (IndexedDB). Xóa dữ liệu trình duyệt, dùng chế độ ẩn danh hoặc đổi trình duyệt/máy là phải nhập lại
+    file CSV và mất ghi chú; có nút sao lưu/khôi phục dữ liệu cá nhân (.json) ở trang Nhập dữ liệu. Chưa đồng bộ giữa các máy.
+16. **Bản web tĩnh: địa chỉ trang dùng `?id=`** (vd `/team?id=123`) thay vì `/teams/123` vì site tĩnh không biết trước id nào tồn tại.
+    Link cũ dạng `/teams/123` không còn hiệu lực.
+17. **Nhập dữ liệu lớn chạy trên luồng chính của trình duyệt**: bộ dữ liệu thật (~22 nghìn cầu thủ) mất vài giây và trang đứng hình trong lúc đó; chưa chuyển sang Web Worker.

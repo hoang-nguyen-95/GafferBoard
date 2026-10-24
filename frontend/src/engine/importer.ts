@@ -318,3 +318,23 @@ export function runImport(store: Store, files: FileMap, mapping: Mapping = MAPPI
   store.touch();
   return reports;
 }
+
+/** Các file CSV mà bản nhập có dùng, để trang nhập báo file nào có/thiếu. `optional`: thiếu thì chỉ mất một phần tính năng. */
+export function expectedFiles(mapping: Mapping = MAPPING): { file: string; what: string; optional: boolean }[] {
+  const out: { file: string; what: string; optional: boolean }[] = [];
+  const add = (file: string, what: string, optional = false) => {
+    if (!out.some((o) => o.file === file)) out.push({ file, what, optional });
+  };
+  const WHAT: Record<string, string> = {
+    leagues: "giải đấu", teams: "đội bóng", players: "cầu thủ và chỉ số", formation_defs: "sơ đồ chiến thuật",
+    squad: "cầu thủ thuộc đội nào", standings: "bảng xếp hạng và phong độ", fixtures: "lịch thi đấu", user: "đội bạn đang dẫn dắt",
+  };
+  for (const [name, spec] of Object.entries(mapping.tables)) add(spec.file, WHAT[name] ?? name, name === "fixtures" || name === "user");
+  if (mapping.names) {
+    add(mapping.names.names_file, "tên cầu thủ", false);
+    for (const f of mapping.names.extra_names_files ?? []) add(f, "tên cầu thủ bổ sung", true);
+    add(mapping.names.edited_file, "tên cầu thủ do bạn sửa", true);
+  }
+  if (mapping.lineups) add(mapping.lineups.teamsheets_file, "đội hình ra sân của các đội", true);
+  return out;
+}

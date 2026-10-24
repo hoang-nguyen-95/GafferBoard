@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Pitch } from "@/components/Pitch";
 import { type CounterLineups, type CounterOption, playerName } from "@/lib/api";
+import { playerHref } from "@/lib/routes";
 
 export function CounterLineupsView({ data, teamName }: { data: CounterLineups | null; teamName: string }) {
   return (
@@ -71,7 +72,7 @@ function Option({ option, open, rank }: { option: CounterOption; open: boolean; 
                     <summary className="cursor-pointer">
                       <span className="inline-block w-10 text-xs text-zinc-500">{s.position_name}</span>
                       {s.player ? (
-                        <Link href={`/players/${s.player.player_id}`} className="hover:underline">
+                        <Link href={playerHref(s.player.player_id)} className="hover:underline">
                           {playerName(s.player)}
                         </Link>
                       ) : (

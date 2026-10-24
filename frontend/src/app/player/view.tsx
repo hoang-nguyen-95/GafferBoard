@@ -1,32 +1,22 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { NotFoundNote } from "@/components/NotFoundNote";
 import { Radar } from "@/components/Radar";
-import { ApiError, type AttributeScore, type Player, type PlayerAnalysis, apiGet, playerName } from "@/lib/api";
+import { type AttributeScore, type Player, type PlayerAnalysis, playerName } from "@/lib/api";
+import { useApi } from "@/lib/engine";
 import { percentileColor, positionsLabel } from "@/lib/positions";
+import { teamHref } from "@/lib/routes";
 
-export default function PlayerPage(props: PageProps<"/players/[id]">) {
-  return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
-      <Suspense fallback={<p className="text-zinc-500">Đang tải…</p>}>
-        <PlayerContent params={props.params} />
-      </Suspense>
-    </main>
-  );
-}
-
-async function PlayerContent({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  let player: Player, analysis: PlayerAnalysis;
-  try {
-    [player, analysis] = await Promise.all([
-      apiGet<Player>(`/players/${encodeURIComponent(id)}`),
-      apiGet<PlayerAnalysis>(`/players/${encodeURIComponent(id)}/analysis`),
-    ]);
-  } catch (e) {
-    if (e instanceof ApiError && (e.status === 404 || e.status === 422)) notFound();
-    throw e;
-  }
+export default function PlayerView() {
+  const id = useSearchParams().get("id");
+  const base = id ? `/players/${encodeURIComponent(id)}` : null;
+  const p = useApi<Player>(base);
+  const a = useApi<PlayerAnalysis>(base && `${base}/analysis`);
+  if (!p || !a) return <p className="text-zinc-500">Đang tải…</p>;
+  if (!p.data || !a.data) return <NotFoundNote what="cầu thủ" />;
+  const player = p.data, analysis = a.data;
   const footLabel = player.preferred_foot === 1 ? "Phải" : player.preferred_foot === 2 ? "Trái" : "–";
 
   return (
@@ -38,7 +28,7 @@ async function PlayerContent({ params }: { params: Promise<{ id: string }> }) {
           {analysis.club && (
             <>
               {" · "}
-              <Link href={`/teams/${analysis.club.team_id}`} className="underline">
+              <Link href={teamHref(analysis.club.team_id)} className="underline">
                 {analysis.club.name}
               </Link>
             </>

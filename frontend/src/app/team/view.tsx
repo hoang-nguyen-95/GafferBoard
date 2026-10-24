@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { NotFoundNote } from "@/components/NotFoundNote";
 import { Pitch } from "@/components/Pitch";
-import { ApiError, type Line, type PlayerSummary, type TeamOverview, apiGet, playerName } from "@/lib/api";
+import { type Line, type PlayerSummary, type TeamOverview, playerName } from "@/lib/api";
+import { useApi } from "@/lib/engine";
 import { LINE_LABELS, positionsLabel } from "@/lib/positions";
+import { analysisHref, playerHref } from "@/lib/routes";
 
 const LINES: Line[] = ["GK", "DEF", "MID", "ATT"];
 
@@ -23,25 +27,12 @@ const METRIC_COLUMNS: [string, string][] = [
   ["finishing", "Dứt điểm"],
 ];
 
-export default function TeamPage(props: PageProps<"/teams/[id]">) {
-  return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
-      <Suspense fallback={<p className="text-zinc-500">Đang tải…</p>}>
-        <TeamContent params={props.params} />
-      </Suspense>
-    </main>
-  );
-}
-
-async function TeamContent({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  let data: TeamOverview;
-  try {
-    data = await apiGet<TeamOverview>(`/teams/${encodeURIComponent(id)}/overview`);
-  } catch (e) {
-    if (e instanceof ApiError && (e.status === 404 || e.status === 422)) notFound();
-    throw e;
-  }
+export default function TeamView() {
+  const id = useSearchParams().get("id");
+  const res = useApi<TeamOverview>(id ? `/teams/${encodeURIComponent(id)}/overview` : null);
+  if (!res) return <p className="text-zinc-500">Đang tải…</p>;
+  if (!res.data) return <NotFoundNote what="đội" />;
+  const data = res.data;
   const { team, standing, lineup } = data;
   const hasSeasonData = standing != null && (standing.points ?? 0) > 0;
 
@@ -73,7 +64,7 @@ async function TeamContent({ params }: { params: Promise<{ id: string }> }) {
       </div>
 
       <p className="mb-6">
-        <Link href={`/teams/${team.team_id}/analysis`} className="rounded bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
+        <Link href={analysisHref(team.team_id)} className="rounded bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
           Phân tích đội này như đối thủ →
         </Link>
       </p>
@@ -158,7 +149,7 @@ function SquadTable({ title, players }: { title: string; players: PlayerSummary[
               <tr key={p.player_id} className="border-t border-zinc-200 dark:border-zinc-800">
                 <td className="w-8 py-1 text-xs text-zinc-500">{p.jersey_number ?? ""}</td>
                 <td>
-                  <Link href={`/players/${p.player_id}`} className="hover:underline">
+                  <Link href={playerHref(p.player_id)} className="hover:underline">
                     {playerName(p)}
                   </Link>
                   {p.in_xi && <span className="ml-1 text-xs text-emerald-600">●</span>}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { type Slot, playerName } from "@/lib/api";
 import { PITCH_COORDS } from "@/lib/positions";
+import { playerHref } from "@/lib/routes";
 
 export function Pitch({ slots }: { slots: Slot[] }) {
   return (
@@ -21,7 +22,7 @@ export function Pitch({ slots }: { slots: Slot[] }) {
             style={{ left: `${x}%`, top: `${y}%` }}
           >
             {s.player ? (
-              <Link href={`/players/${s.player.player_id}`} className="group flex flex-col items-center">
+              <Link href={playerHref(s.player.player_id)} className="group flex flex-col items-center">
                 <span
                   className={`flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-semibold text-black ${
                     s.inferred ? "border-dashed border-amber-300 bg-white/80" : "border-white bg-white"

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Team } from "@/lib/api";
 
@@ -14,7 +13,6 @@ type Props = {
 
 /** Chọn một đội (tìm theo tên) và lưu vào backend; dùng cho "đội của tôi" và "đối thủ chọn tay". */
 export function TeamSetting({ endpoint, label, clearLabel }: Props) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Team[]>([]);
@@ -54,7 +52,6 @@ export function TeamSetting({ endpoint, label, clearLabel }: Props) {
     setOpen(false);
     setQuery("");
     setResults([]);
-    router.refresh();
   }
 
   const visible = query.trim().length >= 2 ? results : [];

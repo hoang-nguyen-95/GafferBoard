@@ -122,6 +122,12 @@ Nghiệm thu: nhập 4-3-3 + 11 tên → ra phân tích và đội hình đáp t
 - So sánh 2 cầu thủ/2 đội, dark mode, xuất báo cáo.
 - README hướng dẫn cài đặt, cách xuất dữ liệu từ game, cách chạy.
 
+### Giai đoạn 9 — Bản web tĩnh cho mọi người dùng (đã làm)
+- Viết lại phần tính toán bằng TypeScript (`frontend/src/engine/`) chạy trong trình duyệt; giao diện gọi qua "máy chủ ảo" trả cùng JSON như API FastAPI.
+- Trang `/import` kéo thả CSV; dữ liệu game và dữ liệu cá nhân lưu riêng trong IndexedDB; sao lưu/khôi phục dữ liệu cá nhân ra JSON.
+- Diễn giải LLM gọi thẳng từ trình duyệt bằng khóa của người dùng. Build `output: "export"` → Netlify / Cloudflare Pages.
+- Nghiệm thu: engine TypeScript khớp bản Python từng bước trên dữ liệu giả và dữ liệu thật; e2e trên bản build tĩnh. Xem `docs/engine-parity.md`, `docs/deploy.md`.
+
 ## 6. Rủi ro và cách xử lý
 
 | Rủi ro | Xử lý |

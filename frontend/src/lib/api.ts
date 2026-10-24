@@ -1,5 +1,4 @@
-// Địa chỉ API FastAPI (chỉ dùng phía server của Next.js). Trình duyệt dùng đường dẫn /api/... (xem next.config.ts).
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
+// Kiểu dữ liệu JSON do engine (src/engine) trả về, giống hệt API FastAPI của backend.
 
 export type Line = "GK" | "DEF" | "MID" | "ATT";
 
@@ -113,19 +112,6 @@ export type PlayerAnalysis = {
 };
 
 export type Player = PlayerSummary & Record<string, number | string | number[] | null>;
-
-export class ApiError extends Error {
-  constructor(public status: number, path: string) {
-    super(`API ${path} trả về ${status}`);
-  }
-}
-
-export async function apiGet<T>(path: string): Promise<T> {
-  // Dữ liệu đổi mỗi khi người dùng nhập file xuất mới -> không được cache.
-  const res = await fetch(`${API_URL}${path}`, { cache: "no-store" });
-  if (!res.ok) throw new ApiError(res.status, path);
-  return res.json() as Promise<T>;
-}
 
 export function playerName(p: { name: string | null; player_id: number }): string {
   return p.name ?? `Cầu thủ #${p.player_id}`;
@@ -285,17 +271,6 @@ export type CounterLineups = {
   options: CounterOption[];
 };
 
-/** Như apiGet nhưng trả về null khi API báo lỗi nghiệp vụ (409/422/404) để trang vẫn hiển thị phần còn lại. */
-export async function apiGetOptional<T>(path: string): Promise<T | null> {
-  try {
-    return await apiGet<T>(path);
-  } catch (e) {
-    if (e instanceof ApiError && [404, 409, 422].includes(e.status)) return null;
-    throw e;
-  }
-}
-
-
 export type FormationOption = { id: number; name: string; positions: string[]; position_codes: number[] };
 
 export type ManualDetail = {
@@ -331,4 +306,3 @@ export type TeamCompare = {
   metrics: (CompareRow & { percentile_a: number | null; percentile_b: number | null })[];
 };
 
-export type LlmStatus = { enabled: boolean; sdk_installed: boolean; has_api_key: boolean; model: string; privacy: string };

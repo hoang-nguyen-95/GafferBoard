@@ -1,8 +1,14 @@
 # CounterPick FC
 
-Web app chạy **local** giúp phân tích đối thủ và gợi ý đấu pháp cho FC26 Career Mode (PC, offline).
+Web app giúp phân tích đối thủ và gợi ý đấu pháp cho FC26 Career Mode (PC, offline).
 Chỉ đọc file CSV bạn tự xuất từ game; không đụng vào bộ nhớ game, save hay chế độ online.
+
+**Là site tĩnh**: bạn (hoặc bất kỳ ai) mở trang web, kéo thả file CSV vào trang **Nhập dữ liệu**, mọi phân tích chạy ngay trong
+trình duyệt. Không có máy chủ, không tải file lên đâu cả; dữ liệu và ghi chú nằm trong IndexedDB của trình duyệt. Đưa lên
+Netlify/Cloudflare Pages theo [docs/deploy.md](docs/deploy.md).
+
 Kế hoạch các giai đoạn: [PLAN.md](PLAN.md). Cấu trúc dữ liệu xuất: [docs/data-schema.md](docs/data-schema.md).
+Phần tính toán nằm ở `frontend/src/engine/` (TypeScript) và được đối chiếu với backend Python, xem [docs/engine-parity.md](docs/engine-parity.md).
 
 ## Tính năng
 
@@ -20,11 +26,24 @@ Giới hạn và những điểm chưa kiểm chứng: [docs/known-issues.md](do
 ## Xuất dữ liệu từ game
 
 1. Mở FC26, load Career, bật Live Editor (phím F9).
-2. Tạo thư mục xuất (vd `D:/XboxGames/fc_exports`), sửa `OUT_DIR` ở đầu `tools/live_editor/export_tables.lua`.
+2. Tạo thư mục xuất (vd `D:/XboxGames/fc_exports`), sửa `OUT_DIR` ở đầu `tools/live_editor/export_tables.lua` (trên site có nút tải script này ở trang Nhập dữ liệu).
 3. Live Editor → Features → Lua Engine → dán nội dung script → execute.
-4. Chép các file `.csv` vừa ra vào `data/exports/` (thư mục này bị `.gitignore`, không bị commit). Cần có `players`, `teams`, `teamplayerlinks`, `leagueteamlinks`, `leagues`, `default_teamsheets`, `formations`, `fixtures`, `career_users`, và `playernames` (+ `dcplayernames`, `editedplayernames`) để có tên cầu thủ; file nào thiếu thì importer bỏ qua.
+4. Kéo thả các file `.csv` vừa ra vào trang **Nhập dữ liệu** của web. (Dùng backend Python thì chép chúng vào `data/exports/`, thư mục này bị `.gitignore`, không bị commit.) Cần có `players`, `teams`, `teamplayerlinks`, `leagueteamlinks`, `leagues`, `default_teamsheets`, `formations`, `fixtures`, `career_users`, và `playernames` (+ `dcplayernames`, `editedplayernames`) để có tên cầu thủ; file nào thiếu thì importer bỏ qua.
 
-## Chạy backend
+## Chạy web ở máy bạn
+
+```bash
+cd frontend
+npm install
+npm run dev            # http://localhost:3000, rồi vào "Nhập dữ liệu"
+npm run build          # sinh site tĩnh ở frontend/out (đưa nguyên thư mục này lên hosting)
+```
+
+## Backend Python (bản tham chiếu, không bắt buộc)
+
+Bản web không cần backend. Backend Python (FastAPI + SQLite) là bản cài đặt gốc đã được kiểm chứng kỹ, giữ lại làm chuẩn để
+đối chiếu engine TypeScript và làm công cụ dòng lệnh (nhập CSV, watcher).
+
 
 ```bash
 cd backend
@@ -42,7 +61,7 @@ Hành vi import: `leagues`, `teams`, `players` được cập nhật tại chỗ
 `standings`, `lineups`, `fixtures` được đồng bộ đúng theo file xuất mới (dòng không còn trong file bị xóa).
 File thiếu thì bị bỏ qua; cột thiếu/giá trị sai làm import dừng và không ghi gì.
 
-## Tự cập nhật khi có file xuất mới
+## Tự cập nhật khi có file xuất mới (chỉ backend Python)
 
 ```bash
 cd backend
@@ -50,34 +69,22 @@ python watcher.py data/exports      # theo dõi thư mục; thả/sửa file CSV
 ```
 
 Trang chủ hiển thị "Trận kế tiếp" của đội bạn (đội lấy từ `career_users`, đổi được bằng nút "Đổi đội") dựa trên bảng
-`fixtures`; tải lại trang sau khi dữ liệu mới được nhập. Nếu lịch của đội bạn chưa có (vd tiền mùa giải) thì chọn đối
+`fixtures`; tải lại trang sau khi dữ liệu mới được nhập (bản web: nhập lại ở trang Nhập dữ liệu, ghi chú/kết quả của bạn được giữ nguyên). Nếu lịch của đội bạn chưa có (vd tiền mùa giải) thì chọn đối
 thủ thủ công ngay trên trang chủ.
 
 ## Diễn giải bằng LLM (tùy chọn)
 
-Mặc định **tắt** và không có gì rời khỏi máy bạn. Khi bật (công tắc trong mục "Diễn giải bằng LLM" của trang phân tích), nội dung
-báo cáo phân tích (gồm ghi chú cá nhân nếu có) được gửi tới Claude API của Anthropic bằng khóa của chính bạn:
-
-```bash
-pip install anthropic                     # đã có trong requirements.txt
-export ANTHROPIC_API_KEY=...              # hoặc đăng nhập bằng `ant auth login`; app không lưu khóa
-export COUNTERPICK_LLM_MODEL=claude-opus-5-5   # tùy chọn, mặc định claude-opus-5-5
-```
+Mặc định **đóng** và không có gì rời khỏi máy bạn. Trong mục "Diễn giải bằng LLM" của trang phân tích, dán khóa API Anthropic của
+chính bạn rồi bấm "Diễn giải": nội dung báo cáo (gồm ghi chú cá nhân nếu có) được gửi **thẳng từ trình duyệt** tới Claude API,
+không qua máy chủ nào khác. Khóa chỉ được lưu (localStorage) nếu bạn tick "Nhớ khóa"; đừng tick trên máy dùng chung.
+Backend Python có bản tương đương (`pip install anthropic`, biến môi trường `ANTHROPIC_API_KEY`) cho ai dùng bản local.
 
 ## Kiểm thử
 
 ```bash
 cd backend && pytest                      # ~200 test (importer, phân tích, luật, tối ưu đội hình, API, watcher...)
-cd frontend && npm run lint && npm run build
+cd frontend && npm run lint && npm test   # test engine TypeScript, gồm đối chiếu từng bước với bản Python
+cd frontend && npm run build && node e2e/static.cjs   # đầu-cuối trên bản build tĩnh (cần Playwright + Chromium)
 ```
 
 Test dùng dữ liệu mẫu tự sinh trong code, không cần và không commit dữ liệu từ game.
-
-## Chạy frontend
-
-```bash
-cd frontend
-npm install
-cp .env.example .env.local     # API_URL mặc định http://localhost:8000
-npm run dev                     # http://localhost:3000
-```

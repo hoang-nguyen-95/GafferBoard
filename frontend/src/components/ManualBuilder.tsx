@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import type { FormationOption, PlayerSummary } from "@/lib/api";
 import { PITCH_COORDS, POSITION_NAMES, remapPlayers } from "@/lib/positions";
 import { PlayerAutocomplete } from "./PlayerAutocomplete";
+import { manualHref } from "@/lib/routes";
 
 type Props = {
   formations: FormationOption[];
@@ -62,8 +63,7 @@ export function ManualBuilder({ formations, initial }: Props) {
         throw new Error(typeof detail === "string" ? detail : `Không lưu được (${res.status}).`);
       }
       const saved = await res.json();
-      router.push(`/manual/${saved.id}`);
-      router.refresh();
+      router.push(manualHref(saved.id));
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);

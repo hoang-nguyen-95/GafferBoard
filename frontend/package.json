@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "sync-assets": "mkdir -p public && cp ../tools/live_editor/export_tables.lua public/export_tables.lua",
+    "predev": "npm run sync-assets",
     "dev": "next dev",
+    "prebuild": "npm run sync-assets",
     "build": "next build",
-    "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "next": "16.4.3",

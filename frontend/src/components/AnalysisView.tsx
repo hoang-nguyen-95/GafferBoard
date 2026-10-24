@@ -5,6 +5,7 @@ import { Suggestions } from "@/components/Suggestions";
 import { CounterLineupsView } from "@/components/CounterLineups";
 import type { Advice, CounterLineups, DangerousPlayer, Metric, OpponentAnalysis } from "@/lib/api";
 import { percentileColor } from "@/lib/positions";
+import { playerHref, teamHref } from "@/lib/routes";
 
 const GROUPS: { title: string; keys: string[] }[] = [
   { title: "Hàng thủ", keys: ["def_pace", "def_accel", "def_slowest", "def_height", "def_aerial"] },
@@ -32,7 +33,7 @@ export function AnalysisView({
       <div className="mb-6">
         <p className="text-sm text-zinc-500">Phân tích đối thủ</p>
         <h1 className="text-2xl font-semibold">
-          {data.team_id != null ? <Link href={`/teams/${data.team_id}`} className="hover:underline">{data.name}</Link> : data.name}
+          {data.team_id != null ? <Link href={teamHref(data.team_id)} className="hover:underline">{data.name}</Link> : data.name}
         </h1>
         <p className="text-zinc-500">
           {data.lineup.formation_name ? `Sơ đồ ${data.lineup.formation_name}` : "Chưa rõ sơ đồ"}
@@ -68,7 +69,7 @@ export function AnalysisView({
                 {data.weak_points.map((w, i) => (
                   <li key={i}>
                     {w.kind === "player" && w.player_id != null ? (
-                      <Link href={`/players/${w.player_id}`} className="hover:underline">{w.text}</Link>
+                      <Link href={playerHref(w.player_id!)} className="hover:underline">{w.text}</Link>
                     ) : (
                       w.text
                     )}
@@ -177,7 +178,7 @@ function DangerList({ title, players }: { title: string; players: DangerousPlaye
       <ul className="space-y-0.5 text-sm">
         {players.map((p) => (
           <li key={p.player_id}>
-            <Link href={`/players/${p.player_id}`} className="font-medium hover:underline">{p.name}</Link>{" "}
+            <Link href={playerHref(p.player_id)} className="font-medium hover:underline">{p.name}</Link>{" "}
             <span className="text-zinc-500">({p.overall}) — {p.why}</span>
           </li>
         ))}

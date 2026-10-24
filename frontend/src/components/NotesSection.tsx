@@ -1,11 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { NotesData } from "@/lib/api";
 
 export function NotesSection({ teamId, teamName, data }: { teamId: number; teamName: string; data: NotesData }) {
-  const router = useRouter();
   const [text, setText] = useState(data.note?.text ?? "");
   const [status, setStatus] = useState<string | null>(null);
   const [gf, setGf] = useState("");
@@ -18,7 +16,6 @@ export function NotesSection({ teamId, teamName, data }: { teamId: number; teamN
     try {
       const res = await fetch(url, init);
       if (!res.ok) throw new Error(res.status === 422 ? "Dữ liệu không hợp lệ." : `Lỗi ${res.status}`);
-      router.refresh();
       return true;
     } catch (e) {
       setStatus((e as Error).message);

@@ -1,11 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormInfo } from "@/lib/api";
 
 export function ResultsForm({ teamId, results }: { teamId: number; results: FormInfo["results"] }) {
-  const router = useRouter();
   const [gf, setGf] = useState("");
   const [ga, setGa] = useState("");
   const [opponent, setOpponent] = useState("");
@@ -18,7 +16,6 @@ export function ResultsForm({ teamId, results }: { teamId: number; results: Form
     try {
       const res = await fetch(url, init);
       if (!res.ok) throw new Error(res.status === 422 ? "Tỷ số không hợp lệ (0–30)." : `Lỗi ${res.status}`);
-      router.refresh();
       return true;
     } catch (e) {
       setError((e as Error).message);
