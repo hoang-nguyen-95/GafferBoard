@@ -1,0 +1,35 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "sync-assets": "node scripts/sync-assets.mjs",
+    "predev": "npm run sync-assets",
+    "dev": "next dev",
+    "dev:desktop": "node scripts/with-target.mjs desktop next dev",
+    "prebuild": "npm run sync-assets",
+    "build": "node scripts/with-target.mjs web next build",
+    "prebuild:desktop": "npm run sync-assets",
+    "build:desktop": "node scripts/with-target.mjs desktop next build",
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "^1.61.0",
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^3.2.7"
+  }
+}

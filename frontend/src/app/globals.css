@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: #059669;
+  --color-brand-dark: #047857;
+  --color-pitch: #15803d;
+  --color-pitch-dark: #14532d;
+  --color-ink: #052e1c;
+}
+
+/* Họa tiết vạch sân cỏ dùng cho các banner: phủ bằng lớp giả để không ghi đè màu nền gradient của Tailwind */
+.pitch-stripes {
+  position: relative;
+  isolation: isolate;
+}
+.pitch-stripes::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(90deg, rgb(255 255 255 / 0.05) 0 48px, transparent 48px 96px);
+}
+.hero-glow {
+  background-image: radial-gradient(60rem 28rem at 85% -10%, rgb(16 185 129 / 0.18), transparent 60%),
+    radial-gradient(40rem 20rem at -10% 20%, rgb(245 158 11 / 0.10), transparent 60%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

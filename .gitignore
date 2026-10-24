@@ -1,0 +1,19 @@
+# Dữ liệu xuất từ game / file save: không commit
+data/exports/*
+!data/exports/.gitkeep
+data/*.db
+*.sav
+*.db
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# Node
+node_modules/
+.next/
+.pytest_cache/
+*.egg-info/
+data/*.db-wal
+data/*.db-shm
