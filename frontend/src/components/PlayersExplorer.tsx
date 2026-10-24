@@ -82,6 +82,7 @@ export function PlayersExplorer() {
   const [line, setLine] = useState("");
   const [league, setLeague] = useState("");
   const [nation, setNation] = useState("");
+  const [club, setClub] = useState("");
   const [minOvr, setMinOvr] = useState("");
   const [minPot, setMinPot] = useState("");
   const [minAge, setMinAge] = useState("");
@@ -117,19 +118,26 @@ export function PlayersExplorer() {
   }, [version, nations]);
 
   const leagues = useMemo(() => [...new Set(rows.map((r) => r.league).filter(Boolean))].sort(), [rows]);
-  const nationList = useMemo(() => [...new Set(rows.map((r) => r.nation).filter(Boolean))].sort(), [rows]);
+  const nationList = useMemo(() => [...new Set(rows.map((r) => r.nation).filter(Boolean))].sort((a, b) => a.localeCompare(b, "vi")), [rows]);
+  // Câu lạc bộ gợi ý theo giải đang chọn (chưa chọn giải thì gồm mọi đội, không tính đội huyền thoại/đặc biệt trừ khi bật).
+  const clubList = useMemo(
+    () => [...new Set(rows.filter((r) => (legends || !r.legend) && (!league || r.league === league)).map((r) => r.club).filter(Boolean))].sort((a, b) => a.localeCompare(b, "vi")),
+    [rows, league, legends],
+  );
 
   const cols = SETS.find((s) => s.id === setId)!.cols as readonly Col[];
   const filtered = useMemo(() => {
     const words = foldText(dq).split(" ").filter(Boolean);
     const n = (s: string) => (s.trim() === "" ? null : Number(s));
+    const nationFold = foldText(nation), clubFold = foldText(club);
     const [o, pt, a1, a2] = [n(minOvr), n(minPot), n(minAge), n(maxAge)];
     const list = rows.filter((r) => {
       if (words.length && !words.every((w) => r.search.includes(w) || foldText(r.club).includes(w))) return false;
       if (!legends && r.legend) return false;
       if (line && r.line !== line) return false;
       if (league && r.league !== league) return false;
-      if (nation && r.nation !== nation) return false;
+      if (nationFold && !foldText(r.nation).includes(nationFold)) return false;
+      if (clubFold && !foldText(r.club).includes(clubFold)) return false;
       if (o !== null && r.player.overall < o) return false;
       if (pt !== null && (r.player.potential ?? 0) < pt) return false;
       if (a1 !== null && (r.age ?? -1) < a1) return false;
@@ -145,10 +153,10 @@ export function PlayersExplorer() {
       const d = typeof a === "number" && typeof b === "number" ? a - b : String(a).localeCompare(String(b), "vi");
       return d * sort.dir || x.id - y.id;
     });
-  }, [rows, dq, line, league, nation, minOvr, minPot, minAge, maxAge, legends, sort]);
+  }, [rows, dq, line, league, nation, minOvr, minPot, minAge, maxAge, legends, sort, club]);
 
   // Đổi bộ lọc/sắp xếp thì quay về trang đầu (không cần effect: so chữ ký bộ lọc đã lưu cùng số trang).
-  const sig = JSON.stringify([dq, line, league, nation, minOvr, minPot, minAge, maxAge, legends, sort, setId]);
+  const sig = JSON.stringify([dq, line, league, nation, club, minOvr, minPot, minAge, maxAge, legends, sort, setId]);
   const page = pageState.sig === sig ? pageState.page : 0;
   const setPage = (n: number) => setPageState({ page: n, sig });
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
@@ -173,16 +181,18 @@ export function PlayersExplorer() {
           </select>
         </label>
         <label className="text-xs text-zinc-500">Giải
-          <select className={`${input} mt-1 block max-w-44`} value={league} onChange={(e) => setLeague(e.target.value)}>
+          <select className={`${input} mt-1 block max-w-44`} value={league} onChange={(e) => { setLeague(e.target.value); setClub(""); }}>
             <option value="">Tất cả</option>
             {leagues.map((l) => <option key={l}>{l}</option>)}
           </select>
         </label>
-        <label className="text-xs text-zinc-500">Quốc tịch
-          <select className={`${input} mt-1 block max-w-40`} value={nation} onChange={(e) => setNation(e.target.value)}>
-            <option value="">Tất cả</option>
-            {nationList.map((l) => <option key={l}>{l}</option>)}
-          </select>
+        <label className="text-xs text-zinc-500">Câu lạc bộ{league ? ` (${league})` : ""}
+          <input className={`${input} mt-1 block w-48`} list="club-options" placeholder="Gõ để tìm đội" value={club} onChange={(e) => setClub(e.target.value)} />
+          <datalist id="club-options">{clubList.map((l) => <option key={l} value={l} />)}</datalist>
+        </label>
+        <label className="text-xs text-zinc-500">Quốc gia
+          <input className={`${input} mt-1 block w-40`} list="nation-options" placeholder="Gõ để tìm nước" value={nation} onChange={(e) => setNation(e.target.value)} />
+          <datalist id="nation-options">{nationList.map((l) => <option key={l} value={l} />)}</datalist>
         </label>
         {([["OVR ≥", minOvr, setMinOvr], ["POT ≥", minPot, setMinPot], ["Tuổi từ", minAge, setMinAge], ["đến", maxAge, setMaxAge]] as const).map(([label, value, set]) => (
           <label key={label} className="text-xs text-zinc-500">{label}

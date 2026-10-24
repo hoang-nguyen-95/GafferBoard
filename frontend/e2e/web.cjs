@@ -112,6 +112,22 @@ function check(cond, msg) {
     check(await page.isVisible("th:has-text('Tốc độ chạy nước rút')"), "bộ cột chi tiết hiện đủ chỉ số");
     await page.fill("input[placeholder^='Ví dụ']", "");
     await page.selectOption("select >> nth=0", "");
+
+    // Lọc theo giải -> câu lạc bộ của giải đó -> quốc gia
+    await page.selectOption("select >> nth=1", "Premier League");
+    const clubOptions = await page.locator("#club-options option").evaluateAll((os) => os.map((o) => o.value));
+    check(clubOptions.length >= 10 && clubOptions.length <= 30 && clubOptions.includes("Manchester City"), `ô câu lạc bộ chỉ gợi ý đội của giải đã chọn (${clubOptions.length} đội)`);
+    await page.fill("input[placeholder='Gõ để tìm đội']", "manchester c");
+    await page.waitForFunction(() => document.querySelector("[data-testid=count]").textContent.trim().length > 0);
+    const cityRows = await page.locator("table tbody tr td:nth-child(2)").allTextContents();
+    check(cityRows.length > 0 && cityRows.every((c) => c === "Manchester City"), `lọc theo đội chỉ còn Manchester City (${cityRows.length} dòng)`);
+    await page.fill("input[placeholder='Gõ để tìm nước']", "na uy");
+    await page.waitForTimeout(300);
+    const nat = await page.locator("table tbody tr td:nth-child(4)").allTextContents();
+    check(nat.length > 0 && nat.every((c) => /na uy/i.test(c)), `thêm quốc gia: ${nat.length} cầu thủ Na Uy của đội`);
+    await page.fill("input[placeholder='Gõ để tìm đội']", "");
+    await page.fill("input[placeholder='Gõ để tìm nước']", "");
+    await page.selectOption("select >> nth=1", "");
     await page.click("table tbody tr:first-child td:first-child a");
     await page.waitForSelector("text=Tất cả chỉ số");
     check(page.url().includes("/player?id="), "bấm tên mở trang phân tích cầu thủ");
