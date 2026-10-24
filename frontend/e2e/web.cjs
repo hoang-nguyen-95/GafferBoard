@@ -30,7 +30,7 @@ function check(cond, msg) {
   const page = await ctx.newPage();
   const problems = [];
   page.on("pageerror", (e) => problems.push("pageerror: " + e.message));
-  page.on("console", (m) => { if (m.type() === "error") problems.push("console: " + m.text()); });
+  page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource.*404/.test(m.text())) problems.push("console: " + m.text()); });
   const external = [];
   // GitHub giả: trả file như một bản phát hành thật (Content-Disposition: attachment)
   await page.route("https://github.com/**", async (route) => {
@@ -87,11 +87,23 @@ function check(cond, msg) {
     }
 
     console.log("6. Danh sách cầu thủ (bộ dữ liệu công khai)");
+    // Máy chủ ảnh giả: cầu thủ có id chẵn có ảnh (PNG 1x1), id lẻ trả 404 để kiểm tra avatar chữ viết tắt thay thế.
+    const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+    const photoRequests = [];
+    await page.route("https://ratings-images-prod.pulse.ea.com/**", async (route) => {
+      const id = Number(/p(\d+)\.png/.exec(route.request().url())?.[1]);
+      photoRequests.push(id);
+      if (id % 2 === 0) await route.fulfill({ status: 200, contentType: "image/png", body: PNG });
+      else await route.fulfill({ status: 404, body: "" });
+    });
     await page.goto(base + "/cau-thu", { waitUntil: "networkidle" });
     await page.waitForSelector("table tbody tr td a", { timeout: 20000 });
     const total = await page.textContent("[data-testid=count]");
     check(/\d/.test(total) && !/^\s*0 \//.test(total.trim()), `bảng có dữ liệu (${total.trim()})`);
     check(await page.isVisible("text=Giá trị chuyển nhượng và lương chưa có"), "ghi rõ chưa có giá trị chuyển nhượng, không đoán số");
+    await page.waitForFunction(() => document.querySelectorAll("table tbody tr td:first-child img").length + document.querySelectorAll("table tbody tr td:first-child span[aria-hidden]").length >= 50);
+    check(photoRequests.length > 0, "bảng xin ảnh theo mã cầu thủ từ máy chủ ảnh (không có file ảnh nào trong repo)");
+    check((await page.locator("table tbody tr td:first-child span[aria-hidden]").count()) > 0, "ảnh lỗi/thiếu thì dùng avatar chữ viết tắt");
     const first = await page.textContent("table tbody tr:first-child td:first-child");
     await page.fill("input[placeholder^='Ví dụ']", first.slice(0, 4));
     await page.waitForFunction((n) => document.querySelector("table tbody tr td a")?.textContent.startsWith(n), first.slice(0, 4));

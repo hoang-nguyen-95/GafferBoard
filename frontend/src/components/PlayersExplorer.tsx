@@ -11,6 +11,7 @@ import { PLAYER_ATTRS, type Player } from "@/engine/types";
 import { ageOn, foldText } from "@/engine/util";
 import { getDatasetMeta, store, useDataVersion, useNations } from "@/lib/engine";
 import { lineOfPosition, LINE_LABELS, POSITION_NAMES } from "@/lib/positions";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { playerHref } from "@/lib/routes";
 import { IS_DESKTOP_BUILD } from "@/lib/target";
 
@@ -224,7 +225,10 @@ export function PlayersExplorer() {
             {shown.map((r) => (
               <tr key={r.id} className="border-t border-zinc-100 hover:bg-zinc-50 dark:border-zinc-800/70 dark:hover:bg-zinc-900/60">
                 <td className="sticky left-0 whitespace-nowrap bg-white px-3 py-1.5 font-medium dark:bg-zinc-950">
-                  <Link href={playerHref(r.id)} className="hover:underline">{r.name}</Link>
+                  <Link href={playerHref(r.id)} className="inline-flex items-center gap-2 hover:underline">
+                    <PlayerAvatar playerId={r.id} name={r.name} line={r.line} />
+                    {r.name}
+                  </Link>
                 </td>
                 {cols.map((c) => (
                   <td key={c.key} className={`whitespace-nowrap px-3 py-1.5 ${c.text ? "text-left" : "text-right tabular-nums"}`}>

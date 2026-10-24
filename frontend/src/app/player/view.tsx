@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { NotFoundNote } from "@/components/NotFoundNote";
 import { ShortlistButton } from "@/components/ShortlistButton";
 import { Radar } from "@/components/Radar";
@@ -27,7 +28,10 @@ export default function PlayerView() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">{playerName(player)}</h1>
+        <h1 className="flex items-center gap-3 text-2xl font-semibold">
+          <PlayerAvatar playerId={player.player_id} name={playerName(player)} line={analysis.line} size={64} />
+          {playerName(player)}
+        </h1>
         <p className="text-zinc-500">
           {analysis.role_label} · {positionsLabel(player.positions)}
           {analysis.club && (

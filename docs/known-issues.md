@@ -61,3 +61,6 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     Khi có `career_playercontract.csv`/`career_transferblock.csv`, ánh xạ vào importer rồi thêm cột (xem `docs/players-dataset.md`).
 25. **Một số tên tiếng Việt trong bản xuất bị lỗi mã ký tự** (vd "BŇ" thay cho "Bỉ"). Bộ dựng dữ liệu công khai sửa bằng bảng cố định (`NATION_FIXES`, `NAME_FIXES` trong `backend/tools/build_players_dataset.py`);
     trong ứng dụng, tên đội/giải/quốc gia đọc từ save vẫn có thể bị lỗi mã nếu không nằm trong bảng đó.
+26. **Ảnh chân dung cầu thủ tải trực tiếp từ máy chủ ảnh của EA** (`PLAYER_PHOTO_URL` trong `frontend/src/lib/links.ts`), không lưu trong repo hay bản cài đặt; chủ dự án chọn làm vậy
+    dù được cảnh báo về bản quyền (trang phi thương mại không loại trừ rủi ro). Địa chỉ này chưa được kiểm chứng (máy phát triển bị chặn 403), có thể không có ảnh cho mọi cầu thủ,
+    hoặc EA đổi/chặn bất cứ lúc nào; lúc đó giao diện tự dùng avatar chữ viết tắt. Đặt `PLAYER_PHOTO_URL = ""` để tắt hẳn. Ứng dụng Windows cần có mạng mới hiện ảnh.
