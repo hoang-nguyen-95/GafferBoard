@@ -113,21 +113,27 @@ function check(cond, msg) {
     await page.fill("input[placeholder^='Ví dụ']", "");
     await page.selectOption("select >> nth=0", "");
 
-    // Lọc theo giải -> câu lạc bộ của giải đó -> quốc gia
-    await page.selectOption("select >> nth=1", "Premier League");
-    const clubOptions = await page.locator("#club-options option").evaluateAll((os) => os.map((o) => o.value));
-    check(clubOptions.length >= 10 && clubOptions.length <= 30 && clubOptions.includes("Manchester City"), `ô câu lạc bộ chỉ gợi ý đội của giải đã chọn (${clubOptions.length} đội)`);
-    await page.fill("input[placeholder='Gõ để tìm đội']", "manchester c");
-    await page.waitForFunction(() => document.querySelector("[data-testid=count]").textContent.trim().length > 0);
+    // Lọc theo giải -> câu lạc bộ của giải đó -> quốc gia, đều chọn từ danh sách có ô tìm kiếm
+    const pick = async (label, search, option) => {
+      await page.click(`button[aria-label^='${label}']`);
+      await page.fill(`input[aria-label^='Tìm trong ${label}']`, search);
+      await page.click(`[role=option]:text-is('${option}')`);
+    };
+    await pick("Giải", "premier", "Premier League");
+    await page.click("button[aria-label^='Câu lạc bộ']");
+    const clubOptions = await page.locator("[role=listbox] [role=option]").allTextContents();
+    check(clubOptions.length >= 10 && clubOptions.length <= 30 && clubOptions.includes("Manchester City"), `ô câu lạc bộ chỉ có đội của giải đã chọn (${clubOptions.length - 1} đội)`);
+    await page.fill("input[aria-label^='Tìm trong Câu lạc bộ']", "manchester c");
+    check((await page.locator("[role=listbox] [role=option]").allTextContents()).join("|") === "Manchester City", "gõ không dấu một phần tên thì danh sách thu hẹp lại");
+    await page.click("[role=option]:text-is('Manchester City')");
     const cityRows = await page.locator("table tbody tr td:nth-child(2)").allTextContents();
     check(cityRows.length > 0 && cityRows.every((c) => c === "Manchester City"), `lọc theo đội chỉ còn Manchester City (${cityRows.length} dòng)`);
-    await page.fill("input[placeholder='Gõ để tìm nước']", "na uy");
-    await page.waitForTimeout(300);
+    await pick("Quốc gia", "na uy", "Na Uy");
     const nat = await page.locator("table tbody tr td:nth-child(4)").allTextContents();
-    check(nat.length > 0 && nat.every((c) => /na uy/i.test(c)), `thêm quốc gia: ${nat.length} cầu thủ Na Uy của đội`);
-    await page.fill("input[placeholder='Gõ để tìm đội']", "");
-    await page.fill("input[placeholder='Gõ để tìm nước']", "");
-    await page.selectOption("select >> nth=1", "");
+    check(nat.length > 0 && nat.every((c) => c === "Na Uy"), `thêm quốc gia: ${nat.length} cầu thủ Na Uy của đội`);
+    await pick("Quốc gia", "", "Tất cả");
+    await pick("Câu lạc bộ", "", "Tất cả");
+    await pick("Giải", "", "Tất cả");
     await page.click("table tbody tr:first-child td:first-child a");
     await page.waitForSelector("text=Tất cả chỉ số");
     check(page.url().includes("/player?id="), "bấm tên mở trang phân tích cầu thủ");

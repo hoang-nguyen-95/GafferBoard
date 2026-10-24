@@ -62,5 +62,6 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
 25. **Một số tên tiếng Việt trong bản xuất bị lỗi mã ký tự** (vd "BŇ" thay cho "Bỉ"). Bộ dựng dữ liệu công khai sửa bằng bảng cố định (`NATION_FIXES`, `NAME_FIXES` trong `backend/tools/build_players_dataset.py`);
     trong ứng dụng, tên đội/giải/quốc gia đọc từ save vẫn có thể bị lỗi mã nếu không nằm trong bảng đó.
 26. **Ảnh chân dung cầu thủ tải trực tiếp từ máy chủ ảnh của EA** (`PLAYER_PHOTO_URL` trong `frontend/src/lib/links.ts`), không lưu trong repo hay bản cài đặt; chủ dự án chọn làm vậy
-    dù được cảnh báo về bản quyền (trang phi thương mại không loại trừ rủi ro). Địa chỉ này chưa được kiểm chứng (máy phát triển bị chặn 403), có thể không có ảnh cho mọi cầu thủ,
-    hoặc EA đổi/chặn bất cứ lúc nào; lúc đó giao diện tự dùng avatar chữ viết tắt. Đặt `PLAYER_PHOTO_URL = ""` để tắt hẳn. Ứng dụng Windows cần có mạng mới hiện ảnh.
+    dù được cảnh báo về bản quyền (trang phi thương mại không loại trừ rủi ro). Địa chỉ dùng thư mục `FC25` (đúng như trang đánh giá của EA; `FC26` chưa có ảnh): kiểm tra 25 cầu thủ
+    OVR>=75 thì 22 có ảnh, 25 cầu thủ OVR<65 thì chỉ 7 có; cầu thủ mới của FC26 không có ảnh. Không có ảnh thì giao diện dùng avatar chữ viết tắt. EA đổi/chặn bất cứ lúc nào cũng được;
+    đặt `PLAYER_PHOTO_URL = ""` để tắt hẳn. Ứng dụng Windows cần có mạng mới hiện ảnh.
