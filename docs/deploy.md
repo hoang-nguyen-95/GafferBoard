@@ -29,6 +29,14 @@ Hoặc kéo thả thư mục `frontend/out/` (sau khi build ở máy) vào https
 
 Hoặc dùng Wrangler sau khi build ở máy: `npx wrangler pages deploy frontend/out`.
 
+## Vercel
+
+1. Vercel → Add New → Project → Import repo `GafferBoard` từ GitHub.
+2. **Root Directory: `frontend`** (bắt buộc). Framework tự nhận Next.js; `frontend/vercel.json` đã đặt lệnh cài và build. Giữ bật mục "Include source files outside of the Root Directory"
+   (mặc định đã bật) vì bước build chép script xuất từ thư mục `tools/` ở gốc repo.
+3. Deploy. Nếu dùng nhánh phát triển (chưa gộp vào `main`) thì Vercel tạo bản **Preview** với link riêng, vẫn dùng được; muốn thành link chính thì vào Settings → Git → Production Branch
+   và chọn nhánh đó, hoặc gộp vào `main`.
+
 ## Hosting tĩnh khác
 
 Bất kỳ nơi nào phục vụ được file tĩnh đều dùng được, miễn là địa chỉ không kèm đường dẫn con (site ở gốc tên miền), và
