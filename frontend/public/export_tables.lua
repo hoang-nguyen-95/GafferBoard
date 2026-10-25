@@ -101,7 +101,21 @@ local function dump_table(name)
     return true
 end
 
+-- Thư mục xuất sai (không tồn tại hoặc không ghi được) là lỗi hay gặp nhất: kiểm tra ngay từ đầu và báo rõ.
+local function check_out_dir()
+    local probe = OUT_DIR .. "/_ghi_thu.tmp"
+    local f = io.open(probe, "wb")
+    if not f then
+        local msg = "THU MUC XUAT KHONG DUNG HOAC KHONG GHI DUOC: " .. tostring(OUT_DIR) .. " -> hay tao thu muc nay roi sua OUT_DIR o dau script (dung dau / hoac \\\\)"
+        if Log then pcall(Log, msg) end
+        error(msg, 0)
+    end
+    f:close()
+    if os and os.remove then pcall(os.remove, probe) end
+end
+
 local function main()
+    check_out_dir()
     log("Bat dau: " .. SCRIPT_VERSION .. ", " .. #TABLE_PATTERNS .. " mau bang")
     local names = GetDBTablesNames()
     local list = open_out("_tables.txt")
