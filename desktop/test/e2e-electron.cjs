@@ -112,6 +112,13 @@ const api = (page, method, p, body) => page.evaluate(async ([m, u, b]) => {
     await page.waitForSelector("text=Script xuất lặp đang chạy");
     check(true, "giao diện báo script xuất lặp đang chạy");
 
+    // Bảng hợp đồng giả (chưa được ứng dụng dùng): nút báo cáo phải liệt kê cột và dòng mẫu, không liệt kê bảng đã dùng
+    fs.writeFileSync(path.join(exportDir, "career_playercontract.csv"), "playerid,teamid,wage\n1,10,5000\n2,10,7000\n");
+    await page.click("text=Xem cấu trúc các bảng chưa dùng");
+    const report = await page.inputValue("textarea[aria-label='Báo cáo các bảng chưa dùng']");
+    check(/## career_playercontract\.csv {2}\(2 dòng\)/.test(report) && /Cột \(3\): playerid, teamid, wage/.test(report) && /Mẫu 1: playerid=1 \| teamid=10 \| wage=5000/.test(report), "báo cáo liệt kê bảng chưa dùng với cột và dòng mẫu");
+    check(!/## players\.csv/.test(report) && !/## teams\.csv/.test(report), "không liệt kê bảng ứng dụng đã dùng");
+
     check(problems.length === 0, `không có lỗi console (${problems.slice(0, 3).join(" | ") || "không"})`);
 
     console.log("5. Mở lại app: dữ liệu còn, không nhập lại file không đổi");

@@ -65,3 +65,6 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     dù được cảnh báo về bản quyền (trang phi thương mại không loại trừ rủi ro). Địa chỉ dùng thư mục `FC25` (đúng như trang đánh giá của EA; `FC26` chưa có ảnh): kiểm tra 25 cầu thủ
     OVR>=75 thì 22 có ảnh, 25 cầu thủ OVR<65 thì chỉ 7 có; cầu thủ mới của FC26 không có ảnh. Không có ảnh thì giao diện dùng avatar chữ viết tắt. EA đổi/chặn bất cứ lúc nào cũng được;
     đặt `PLAYER_PHOTO_URL = ""` để tắt hẳn. Ứng dụng Windows cần có mạng mới hiện ảnh.
+27. **Chưa có dữ liệu hợp đồng/chuyển nhượng thật**: bản xuất mới nhất của người dùng chưa chứa `career_playercontract`, `career_transferblock`... (chỉ có tên bảng trong danh sách). Cần chạy lại `counterpick_export.lua`
+    rồi dùng nút "Xem cấu trúc các bảng chưa dùng" trong ứng dụng (xem `docs/live-editor-loop.md`) để lấy tên cột trước khi ánh xạ.
+

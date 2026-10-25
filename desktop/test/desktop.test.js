@@ -124,3 +124,21 @@ test("lesetup: cài đủ các script, mỗi script đã điền thư mục xu�
     assert.ok(!text.includes("D:/XboxGames/fc_exports"), "không được còn đường dẫn mẫu");
   }
 });
+
+test("describe: chỉ báo cáo bảng chưa dùng, đủ cột, dòng mẫu và số dòng", () => {
+  const { describeUnused, splitCsvLine } = require("../src/describe");
+  assert.deepEqual(splitCsvLine('a,"b,c","d""e",'), ["a", "b,c", 'd"e', ""]);
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, "players.csv"), "playerid,overall\n1,80\n");
+  fs.writeFileSync(path.join(dir, "Career_PlayerContract.csv"), "﻿playerid,teamid,wage,note\n10,1,50000,\"x, y\"\n11,1,75000,z\n12,2,1000,w\n13,2,2000,v\n");
+  fs.writeFileSync(path.join(dir, "notes.txt"), "bỏ qua");
+  const { count, text } = describeUnused(dir, new Set(["players.csv"]));
+  assert.equal(count, 1);
+  assert.match(text, /## Career_PlayerContract\.csv {2}\(4 dòng\)/);
+  assert.match(text, /Cột \(4\): playerid, teamid, wage, note/);
+  assert.match(text, /Mẫu 1: playerid=10 \| teamid=1 \| wage=50000 \| note=x, y/);
+  assert.match(text, /Mẫu 3: playerid=12/);
+  assert.doesNotMatch(text, /players\.csv/);
+  assert.match(describeUnused(dir, new Set(["players.csv", "career_playercontract.csv"])).text, /Không có file nào chưa dùng/);
+  assert.match(describeUnused(path.join(dir, "khong-co")).text, /Không đọc được thư mục/);
+});

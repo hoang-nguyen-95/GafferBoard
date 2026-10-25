@@ -19,6 +19,7 @@ declare global {
     installScript(): Promise<{ ok: boolean; path?: string; message: string; files?: { name: string; note: string }[] }>;
     requestExport(): Promise<{ ok: boolean; message: string }>;
     rescan(): Promise<DesktopState>;
+    describeExports(): Promise<{ ok: boolean; count: number; text: string }>;
     openFolder(): Promise<void>;
     ready(hasData: boolean): Promise<DesktopState>;
     acknowledge(items: { name: string; sig: string; ok: boolean }[]): void;
