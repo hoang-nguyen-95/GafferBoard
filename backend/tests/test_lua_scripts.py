@@ -183,3 +183,25 @@ print("OK")
     r = run(tmp_path, "export_tables.lua", body, "", check)
     assert r.returncode == 0, r.stderr + r.stdout
     assert "OK" in r.stdout
+
+
+def test_xuat_mot_lan_chay_duoc_khi_thieu_os_date_va_ghi_loi_nghiem_trong(tmp_path):
+    # Live Editor có thể giới hạn thư viện os: không có os.date thì vẫn phải xuất và ghi nhật ký.
+    body = "os.date = nil\n"
+    check = r"""
+assert(exists(OUT .. "/players.csv"), "thiếu os.date vẫn phải xuất players")
+assert(read(OUT .. "/export_log.txt"):find("Xong. Da xuat", 1, true), "vẫn phải ghi nhật ký")
+print("OK")
+"""
+    r = run(tmp_path, "export_tables.lua", body, "", check)
+    assert r.returncode == 0, r.stderr + r.stdout
+    assert "OK" in r.stdout
+
+    # Lỗi ngay ở GetDBTablesNames: ghi "LOI NGHIEM TRONG" vào nhật ký rồi báo lỗi lại cho Live Editor.
+    tmp2 = tmp_path / "second"
+    tmp2.mkdir()
+    body2 = 'function GetDBTablesNames() error("hong het") end\n'
+    check2 = 'print("KHONG-TOI-DUOC")\n'
+    r2 = run(tmp2, "export_tables.lua", body2, "", check2)
+    assert r2.returncode != 0 and "hong het" in r2.stderr
+    assert "LOI NGHIEM TRONG" in (tmp2 / "out" / "export_log.txt").read_text(encoding="utf-8")
