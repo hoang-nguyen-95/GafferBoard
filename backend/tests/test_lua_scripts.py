@@ -205,3 +205,15 @@ print("OK")
     r2 = run(tmp2, "export_tables.lua", body2, "", check2)
     assert r2.returncode != 0 and "hong het" in r2.stderr
     assert "LOI NGHIEM TRONG" in (tmp2 / "out" / "export_log.txt").read_text(encoding="utf-8")
+
+
+def test_xuat_mot_lan_bao_ro_khi_thu_muc_xuat_sai(tmp_path):
+    out = tmp_path / "out"
+    out.mkdir()
+    script = render("export_tables.lua", tmp_path / "khong_co_thu_muc_nay")
+    (tmp_path / "script.lua").write_text(script, encoding="utf-8")
+    harness = f'LOGS = {{}}\nfunction Log(s) LOGS[#LOGS + 1] = s end\nfunction GetDBTablesNames() return {{"players"}} end\ndofile("{(tmp_path / "script.lua").as_posix()}")\n'
+    (tmp_path / "h.lua").write_text(harness, encoding="utf-8")
+    r = subprocess.run(["lua", str(tmp_path / "h.lua")], capture_output=True, text=True, timeout=30)
+    assert r.returncode != 0
+    assert "THU MUC XUAT KHONG DUNG HOAC KHONG GHI DUOC" in r.stderr
