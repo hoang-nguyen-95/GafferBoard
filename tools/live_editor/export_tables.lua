@@ -25,6 +25,19 @@ local TABLE_PATTERNS = {
 }
 -- ====================
 
+-- Nhật ký ghi cả vào cửa sổ log của Live Editor lẫn file export_log.txt trong thư mục xuất (để biết đã chạy bản script nào và bảng nào lỗi).
+local SCRIPT_VERSION = "counterpick_export v3 (kèm bảng hợp đồng/chuyển nhượng)"
+local log_started = false
+local function log(msg)
+    Log(msg)
+    local f = io.open(OUT_DIR .. "/export_log.txt", log_started and "ab" or "wb")
+    if f then
+        log_started = true
+        f:write(os.date("%Y-%m-%d %H:%M:%S "), msg, "\n")
+        f:close()
+    end
+end
+
 local function csv_cell(v)
     if v == nil then return "" end
     local s = tostring(v)
@@ -73,16 +86,17 @@ local function dump_table(name)
         f:write(table.concat(line, ","), "\n")
     end
     f:close()
-    Log(string.format("Da xuat %s: %d dong, %d cot", name, #rows, #cols))
+    log(string.format("Da xuat %s: %d dong, %d cot", name, #rows, #cols))
     return true
 end
 
+log("Bat dau: " .. SCRIPT_VERSION .. ", " .. #TABLE_PATTERNS .. " mau bang")
 local names = GetDBTablesNames()
 local list = open_out("_tables.txt")
 if list then
     for _, n in ipairs(names) do list:write(n, "\n") end
     list:close()
-    Log("Da ghi _tables.txt: " .. #names .. " bang")
+    log("Da ghi _tables.txt: " .. #names .. " bang")
 end
 
 local dumped = 0
@@ -92,8 +106,17 @@ for _, n in ipairs(names) do
         if ok and res then
             dumped = dumped + 1
         elseif not ok then
-            Log("LOI khi xuat " .. n .. ": " .. tostring(res))
+            log("LOI khi xuat " .. n .. ": " .. tostring(res))
+        else
+            log("KHONG XUAT DUOC " .. n .. " (khong mo duoc file)")
         end
     end
 end
-Log("Xong. Da xuat " .. dumped .. " bang vao " .. OUT_DIR)
+-- Mẫu dạng "^ten$" (đúng một bảng) mà game không có bảng nào khớp: báo để biết tên bảng khác phiên bản.
+local present = {}
+for _, n in ipairs(names) do present[n:lower()] = true end
+for _, p in ipairs(TABLE_PATTERNS) do
+    local exact = p:match("^%^(.+)%$$")
+    if exact and not present[exact] then log("KHONG CO BANG " .. exact .. " trong game") end
+end
+log("Xong. Da xuat " .. dumped .. " bang vao " .. OUT_DIR)

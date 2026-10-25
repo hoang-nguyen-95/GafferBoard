@@ -139,6 +139,11 @@ test("describe: chỉ báo cáo bảng chưa dùng, đủ cột, dòng mẫu và
   assert.match(text, /Mẫu 1: playerid=10 \| teamid=1 \| wage=50000 \| note=x, y/);
   assert.match(text, /Mẫu 3: playerid=12/);
   assert.doesNotMatch(text, /players\.csv/);
+  assert.match(text, /Không thấy export_log\.txt: script xuất đã chạy là bản cũ/);
+  fs.writeFileSync(path.join(dir, "export_log.txt"), "2026-10-25 14:42:00 Bat dau: counterpick_export v3\n2026-10-25 14:42:01 LOI khi xuat career_transferblock: boom\n");
+  const withLog = describeUnused(dir, new Set(["players.csv"])).text;
+  assert.match(withLog, /NHẬT KÝ SCRIPT XUẤT \(export_log\.txt, 2 dòng\)/);
+  assert.match(withLog, /LOI khi xuat career_transferblock: boom/);
   assert.match(describeUnused(dir, new Set(["players.csv", "career_playercontract.csv"])).text, /Không có file nào chưa dùng/);
   assert.match(describeUnused(path.join(dir, "khong-co")).text, /Không đọc được thư mục/);
 });
