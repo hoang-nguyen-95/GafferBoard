@@ -159,3 +159,27 @@ print("OK")
 """
     r = run(tmp_path, "probe_loop.lua", "", "function Sleep(ms) end", check)
     assert r.returncode == 0, r.stderr + r.stdout
+
+
+def test_xuat_mot_lan_ghi_nhat_ky_va_bao_bang_loi_hoac_thieu(tmp_path):
+    # Bảng career_playercontract bị lỗi khi đọc; game không có career_transferblock; players xuất bình thường.
+    body = r"""
+function GetDBTablesNames() return {"players", "fixtures", "career_playercontract", "audio_junk"} end
+FAIL = {career_playercontract = true}
+"""
+    check = r"""
+assert(exists(OUT .. "/players.csv") and exists(OUT .. "/fixtures.csv"))
+assert(not exists(OUT .. "/career_playercontract.csv"), "bảng lỗi không để lại file")
+assert(not exists(OUT .. "/audio_junk.csv"))
+local log = read(OUT .. "/export_log.txt")
+assert(log:find("counterpick_export v3", 1, true), "nhật ký phải ghi phiên bản script")
+assert(log:find("Da xuat players", 1, true))
+assert(log:find("LOI khi xuat career_playercontract", 1, true), "phải ghi bảng lỗi")
+assert(log:find("KHONG CO BANG career_transferblock", 1, true), "phải báo bảng không có trong game")
+assert(not log:find("KHONG CO BANG players", 1, true))
+assert(log:find("Xong. Da xuat 2 bang", 1, true))
+print("OK")
+"""
+    r = run(tmp_path, "export_tables.lua", body, "", check)
+    assert r.returncode == 0, r.stderr + r.stdout
+    assert "OK" in r.stdout

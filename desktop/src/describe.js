@@ -6,6 +6,7 @@ const path = require("node:path");
 const SAMPLE_BYTES = 256 * 1024;
 const COUNT_LIMIT = 50 * 1024 * 1024;
 const CELL_MAX = 40;
+const LOG_LINES = 60;
 
 /** Tách một dòng CSV (hỗ trợ ô có dấu ngoặc kép và dấu phẩy bên trong). */
 function splitCsvLine(line) {
@@ -67,7 +68,15 @@ function describeUnused(dir, known = null) {
     return { count: 0, text: `Không đọc được thư mục: ${e.message}` };
   }
   const unused = names.filter((n) => !known || !known.has(n.toLowerCase()));
-  const parts = [`CÁC BẢNG CHƯA DÙNG (${unused.length}/${names.length} file CSV trong thư mục xuất)`];
+  const parts = [];
+  // Nhật ký do script xuất ghi (cho biết bản script nào đã chạy, bảng nào lỗi hoặc không có trong game)
+  try {
+    const log = fs.readFileSync(path.join(dir, "export_log.txt"), "utf8").split(/\r?\n/).filter(Boolean);
+    parts.push(`NHẬT KÝ SCRIPT XUẤT (export_log.txt, ${log.length} dòng${log.length > LOG_LINES ? `, ${LOG_LINES} dòng cuối` : ""})`, ...log.slice(-LOG_LINES), "");
+  } catch {
+    parts.push("Không thấy export_log.txt: script xuất đã chạy là bản cũ (trước khi có nhật ký). Hãy cài lại script rồi chạy lại.", "");
+  }
+  parts.push(`CÁC BẢNG CHƯA DÙNG (${unused.length}/${names.length} file CSV trong thư mục xuất)`);
   for (const n of unused) {
     try {
       const d = describeCsv(path.join(dir, n));
