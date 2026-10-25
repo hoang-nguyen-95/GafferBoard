@@ -8,6 +8,8 @@ export function DesktopPanel() {
   const api = useSyncExternalStore(() => () => undefined, getDesktop, () => null);
   const [state, setState] = useState<DesktopState | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [report, setReport] = useState<{ count: number; text: string } | null>(null);
+  const [copied, setCopied] = useState(false);
   const sync = useSyncStatus();
 
   // đọc trạng thái lúc mở, mỗi khi việc nhập có tiến triển, và định kỳ (để thấy nhịp tim của script xuất lặp)
@@ -45,6 +47,27 @@ export function DesktopPanel() {
           {state?.exportDir && <button type="button" className={btn} onClick={async () => setState(await api.rescan())}>Nhập lại toàn bộ</button>}
         </div>
       </div>
+
+      {state?.exportDir && (
+        <div className="space-y-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
+          <p className="font-medium">Các bảng chưa dùng (hợp đồng, chuyển nhượng, tuyển trạch…)</p>
+          <p className="text-xs text-zinc-500">
+            Script xuất còn có các bảng ứng dụng chưa đọc. Bấm để xem tên cột và vài dòng mẫu rồi sao chép gửi cho người phát triển: từ đó mới thêm được giá trị chuyển nhượng và lương.
+          </p>
+          <button type="button" className={btn} onClick={async () => { setCopied(false); const r = await api.describeExports(); setReport({ count: r.count, text: r.text }); }}>
+            Xem cấu trúc các bảng chưa dùng
+          </button>
+          {report && (
+            <>
+              <textarea readOnly aria-label="Báo cáo các bảng chưa dùng" value={report.text} rows={12}
+                className="w-full rounded border border-zinc-300 bg-white p-2 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-950" />
+              <button type="button" className={btn} onClick={async () => { await navigator.clipboard.writeText(report.text); setCopied(true); }}>
+                {copied ? "Đã sao chép" : "Sao chép báo cáo"}
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="space-y-1 text-sm">
         <p>

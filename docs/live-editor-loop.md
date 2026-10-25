@@ -35,3 +35,15 @@ Vì vậy có bước thử an toàn trước.
 - Vòng lặp có làm giật hoặc đơ game ở bản Live Editor của bạn không (đó là lý do có bước thử).
 - Xuất toàn bộ (đặc biệt bảng `players`) mất bao lâu và có giật game lúc đó không; kết quả `probe_result.txt` cho một ước lượng thô.
 - Nếu Live Editor tự chạy được script khi mở save thì không cần Execute thủ công: cần danh sách thư mục/file của Live Editor để biết.
+
+## Lấy cấu trúc các bảng hợp đồng/chuyển nhượng (để thêm giá trị và lương)
+
+Script xuất đã có thêm các bảng `career_playercontract`, `career_presignedcontract`, `career_transferblock`, `playerloans`, `transfers`, `career_scouts`... Ứng dụng chưa đọc chúng vì chưa biết tên cột.
+Cách lấy nhanh, không phải tự mở file:
+
+1. Trong Live Editor chạy lại **counterpick_export.lua** (xuất một lần) để có các bảng mới trong thư mục xuất.
+2. Mở ứng dụng → trang **Nhập dữ liệu** → mục **Các bảng chưa dùng** → **Xem cấu trúc các bảng chưa dùng**.
+3. Bấm **Sao chép báo cáo** và gửi lại. Báo cáo gồm tên cột, số dòng và 3 dòng mẫu của từng bảng chưa dùng; không chứa gì ngoài dữ liệu trong các bảng đó.
+
+Từ báo cáo đó mới ánh xạ được lương, thời hạn hợp đồng, giá yêu cầu trên danh sách chuyển nhượng... (dự án không đoán tên cột).
+

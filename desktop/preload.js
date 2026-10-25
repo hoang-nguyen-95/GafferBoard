@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld("desktop", {
   chooseLeDir: () => ipcRenderer.invoke("desktop:choose-le-dir"),
   installScript: () => ipcRenderer.invoke("desktop:install-script"),
   rescan: () => ipcRenderer.invoke("desktop:rescan"),
+  describeExports: () => ipcRenderer.invoke("desktop:describe-exports"),
   openFolder: () => ipcRenderer.invoke("desktop:open-folder"),
   requestExport: () => ipcRenderer.invoke("desktop:request-export"),
   /** Báo giao diện đã sẵn sàng nhận file; `hasData` false thì gửi lại toàn bộ file trong thư mục. */

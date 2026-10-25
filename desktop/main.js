@@ -6,6 +6,7 @@ const { createConfig } = require("./src/config");
 const { findScriptDir, installScripts } = require("./src/lesetup");
 const { mimeOf, resolveAppPath } = require("./src/protocol");
 const { createWatcher, listCsv } = require("./src/watcher");
+const { describeUnused } = require("./src/describe");
 
 const ORIGIN = "app://counterpick";
 const WEB_ROOT = process.env.COUNTERPICK_WEB_ROOT || path.join(__dirname, "app", "web");
@@ -140,6 +141,13 @@ function registerIpc() {
     } catch (e) {
       return { ok: false, message: `Không ghi được file yêu cầu: ${e.message}` };
     }
+  });
+
+  // Cấu trúc các bảng chưa dùng (hợp đồng, chuyển nhượng...) để người dùng sao chép gửi đi ánh xạ cột.
+  handle("desktop:describe-exports", () => {
+    const { exportDir } = config.get();
+    if (!exportDir) return { ok: false, count: 0, text: "Hãy chọn thư mục xuất trước." };
+    return { ok: true, ...describeUnused(exportDir, knownFiles) };
   });
 
   handle("desktop:open-folder", () => {
