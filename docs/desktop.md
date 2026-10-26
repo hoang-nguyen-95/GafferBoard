@@ -12,7 +12,7 @@ thư mục xuất từ Live Editor**: có file CSV mới là tự nhập và ph�
    thư mục xuất. Trong Live Editor: Features → Lua Engine → chọn script → Execute.
 4. Từ đó, mỗi lần script xuất lại, app tự cập nhật sau vài giây yên lặng.
 
-Dữ liệu và ghi chú nằm trong thư mục dữ liệu người dùng của app (`%APPDATA%/counterpick-fc-desktop`), không gửi đi đâu.
+Dữ liệu và ghi chú nằm trong thư mục dữ liệu người dùng của app (`%APPDATA%/counterpick-fc-desktop`), không gửi đi đâu. Ngoại lệ duy nhất: ảnh chân dung cầu thủ được tải từ máy chủ ảnh của EA theo mã cầu thủ (máy chủ đó thấy mã các cầu thủ đang hiện trên màn hình, không thấy dữ liệu save hay ghi chú); đặt `PLAYER_PHOTO_URL = ""` trong `frontend/src/lib/links.ts` và build lại để tắt.
 
 ## Tự xuất lặp trong Live Editor (thử nghiệm)
 

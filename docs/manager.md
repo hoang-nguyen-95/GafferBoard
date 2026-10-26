@@ -54,3 +54,21 @@ Các hệ số, số năm và ngưỡng ở `frontend/src/engine/renewals.ts` (`
 và so với "quỹ lương còn trống" bạn nhập ở tab Ngân sách. Cầu thủ không có đồng đội cùng tầm (thường là ngôi sao) không có lương tham chiếu.
 Route `GET /manager/renewals`, test `engine/__tests__/renewals.test.ts`.
 
+## Ước tính giá và lương hợp lý khi game không cho biết (tab Đàm phán)
+
+Mục đích: tránh đưa con số bừa khi mua cầu thủ. Chọn cầu thủ, công cụ cho **phí chuyển nhượng hợp lý** và **lương hợp lý khi vào đội bạn**, mỗi loại có dải sai số và ba bậc (mở giá, mục tiêu, tối đa nên trả).
+Mã: `frontend/src/engine/pricing.ts` (hằng số ở `PRICING`), route `GET /manager/pricing`, `POST/DELETE /manager/offers`, `POST/DELETE /manager/observations`.
+
+**Lương: dựa trên số thật.** Đường cong ln(lương) theo OVR được khớp trên chính hợp đồng của đội bạn trong save (thủ môn tính riêng, trừ ~30%). Trên bản xuất đã kiểm tra (46 cầu thủ Man Utd, không tính thủ môn)
+đường này giải thích 97% biến thiên lương, sai số điển hình ±20%; tuổi và tiềm năng gần như không ảnh hưởng. Đây là thang lương **của đội bạn**: mức một cầu thủ cùng OVR sẽ được trả nếu vào đội bạn,
+không phải lương hiện tại ở CLB của họ. Khi chưa đủ 8 hợp đồng thì dùng đường mặc định từ một save mẫu (ghi rõ trên giao diện).
+
+**Phí chuyển nhượng: ước tính, chưa kiểm chứng.** Game không lưu giá trị cầu thủ. Công thức mặc định: giá trị tăng theo hàm mũ của OVR hiệu dụng (OVR cộng một phần POT−OVR cho cầu thủ trẻ), nhân hệ số tuổi,
+số mùa hợp đồng còn lại và thủ môn. Sai lệch có thể lớn (dải ±55% khi chưa hiệu chỉnh). Hai cách làm nó sát hơn:
+1. **Hiệu chỉnh:** nhập "Giá trị" (và lương) bạn thấy trong game cho vài cầu thủ; công thức dịch theo trung vị sai lệch (co về 0 khi ít điểm), dải sai số thu hẹp từ 3 điểm. Số nhập cho chính cầu thủ đó được dùng nguyên.
+2. **Nhật ký đề nghị:** ghi số bạn đưa và kết quả (chấp nhận, từ chối, bên kia ra giá lại). Mỗi lần bị từ chối, gợi ý bước tiếp theo nâng khoảng 6% (dừng nếu chạm mức tối đa); bên kia ra giá trong ngưỡng thì nên chấp nhận.
+   Sau 3 lần được chấp nhận, bậc giá mặc định được thay bằng bậc học từ tỉ lệ (đề nghị / ước tính) của các lần đó.
+
+Mọi hệ số (mũ OVR 0,18, hệ số tuổi, hợp đồng, thủ môn, bước 6%, bậc 0,8/0,95/1,1 trong `negotiationPlan`) là kinh nghiệm chung, chưa kiểm chứng với game; xem `docs/known-issues.md` mục 29.
+Dữ liệu hiệu chỉnh và nhật ký nằm trong dữ liệu cá nhân (được sao lưu cùng file sao lưu Manager).
+

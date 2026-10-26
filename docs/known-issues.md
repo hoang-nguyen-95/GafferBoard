@@ -70,4 +70,8 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     ứng dụng báo "thiếu cột" và không nhập (cả lần nhập đó). Cầu thủ đang cho mượn đi vẫn được tính vào quỹ lương hiện tại (chưa rõ game chia lương mượn thế nào, cột `loan_wage_split` đều là -1 trong save đã xem).
 28. **Gợi ý gia hạn hợp đồng dựa trên hệ số kinh nghiệm** (xem `docs/manager.md`): game không xuất mức lương cầu thủ đòi khi gia hạn, "lương tham chiếu" chỉ là trung vị đồng đội cùng tầm OVR; số năm, trần lương (×1,25/×1,15/×1,05)
     và ngưỡng khẩn cấp (6/12/24 tháng) chưa kiểm chứng với game. Ngày tham chiếu là ngày sớm nhất trong lịch thi đấu đã xuất, nên đầu mùa nhiều hợp đồng cùng hết 30/06 sẽ cùng mức khẩn cấp.
+29. **Giá chuyển nhượng ước tính chưa kiểm chứng với game**: game không lưu giá trị cầu thủ; công thức mặc định (mũ OVR 0,18; hệ số tuổi/hợp đồng/thủ môn) là kinh nghiệm chung. Ví dụ trên một save: Haaland (91/93, 25 tuổi) ~ 180 triệu,
+    Courtois (90, 34 tuổi, còn 2 mùa) ~ 18 triệu; chưa đối chiếu được với số trong game. Chỉ đáng tin sau khi hiệu chỉnh bằng vài số bạn thấy trong game và nhật ký đề nghị. Lương ước tính dựa trên thang lương hợp đồng của đội bạn
+    (R² 0,97 trên một save) nên là mức "vào đội bạn", không phải lương ở CLB hiện tại; lương cầu thủ đòi thực tế có thể khác tới ±20%.
+30. **Ứng dụng desktop gọi máy chủ ảnh của EA để hiện ảnh cầu thủ** (theo mã cầu thủ): đã ghi trong `docs/desktop.md` và trang Hướng dẫn; test e2e chỉ cho phép đúng địa chỉ này. Trước đây e2e "không request ra ngoài" bị bỏ sót khi thêm ảnh.
 

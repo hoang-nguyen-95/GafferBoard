@@ -110,8 +110,26 @@ export interface ManagerData {
   season_end_year: number | null;
   shortlist: ShortlistItem[];
   sales: SaleItem[];
+  /** Số bạn thấy trong game (giá trị, lương của một cầu thủ) dùng để hiệu chỉnh công thức ước tính giá. */
+  observations: PriceObservation[];
+  /** Nhật ký các đề nghị đã gửi và kết quả, dùng để tìm mức giá/lương thường được chấp nhận. */
+  offers: Offer[];
+  nextId: { observation: number; offer: number };
 }
-export const emptyManager = (): ManagerData => ({ budget: { transfer: null, wage: null }, season_end_year: null, shortlist: [], sales: [] });
+export interface PriceObservation { id: number; player_id: number; value: number | null; wage: number | null; at: string }
+export type OfferKind = "fee" | "wage";
+export type OfferResult = "accepted" | "rejected" | "counter";
+export interface Offer {
+  id: number; player_id: number; kind: OfferKind; amount: number; result: OfferResult;
+  /** Giá bên kia ra lại (khi result = "counter"). */
+  counter: number | null;
+  /** Mức ước tính lúc ghi nhật ký, để tính tỉ lệ đề nghị / ước tính về sau. */
+  estimate: number | null; at: string;
+}
+export const emptyManager = (): ManagerData => ({
+  budget: { transfer: null, wage: null }, season_end_year: null, shortlist: [], sales: [],
+  observations: [], offers: [], nextId: { observation: 1, offer: 1 },
+});
 
 // ---- hợp đồng và cho mượn (chỉ có khi save có bảng career_playercontract/playerloans; không có bản Python tương ứng) ----
 /** Hợp đồng hiện tại của một cầu thủ trong save (game chỉ lưu hợp đồng cho đội của bạn và đội dự bị, không có cho đội khác). */

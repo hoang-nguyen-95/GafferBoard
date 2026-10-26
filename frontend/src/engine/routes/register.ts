@@ -6,6 +6,7 @@ import * as contracts from "./contracts";
 import * as manager from "./manager";
 import * as manual from "./manual";
 import * as notes from "./notes";
+import * as pricing from "./pricing";
 
 r("GET", "/teams/{team_id}/analysis", analysis.teamAnalysis);
 r("GET", "/teams/{team_id}/suggestions", analysis.teamSuggestions);
@@ -43,3 +44,8 @@ r("DELETE", "/manager/shortlist/{player_id}", manager.deleteShortlist);
 r("PUT", "/manager/sales/{player_id}", manager.putSale);
 r("DELETE", "/manager/sales/{player_id}", manager.deleteSale);
 r("GET", "/manager/negotiation", manager.negotiation);
+r("GET", "/manager/pricing", pricing.pricing);
+r("POST", "/manager/observations", pricing.postObservation);
+r("DELETE", "/manager/observations/{observation_id}", pricing.deleteObservation);
+r("POST", "/manager/offers", pricing.postOffer);
+r("DELETE", "/manager/offers/{offer_id}", pricing.deleteOffer);

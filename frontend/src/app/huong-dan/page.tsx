@@ -47,7 +47,7 @@ export default function GuidePage() {
           nên ứng dụng kèm một script thử 10 giây để kiểm tra game có bị đơ không trước khi dùng. Bấm Execute thủ công vẫn luôn dùng được.
         </Callout>
         <Callout icon={Lock} tone="emerald" title="Riêng tư">
-          Ứng dụng chỉ đọc file CSV bạn tự xuất. Không đọc bộ nhớ game, không sửa save, không đụng tới chế độ online, và không gửi dữ liệu của bạn đi đâu.
+          Ứng dụng chỉ đọc file CSV bạn tự xuất. Không đọc bộ nhớ game, không sửa save, không đụng tới chế độ online, và không gửi dữ liệu save hay ghi chú của bạn đi đâu. Điểm ngoại lệ duy nhất: để hiện ảnh cầu thủ, ứng dụng tải ảnh từ máy chủ ảnh của EA theo mã cầu thủ (máy chủ đó thấy mã các cầu thủ bạn đang xem, không thấy gì khác).
         </Callout>
         <section>
           <SectionTitle icon={HelpCircle} tone="sky">Câu hỏi thường gặp</SectionTitle>

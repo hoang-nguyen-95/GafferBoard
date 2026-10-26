@@ -174,9 +174,20 @@ function check(cond, msg) {
     await page.waitForSelector("text=Shortlist mua");
     check(await page.isVisible(`a:has-text("${firstName}")`) && (await page.isVisible("text=30.000.000")), "shortlist và ngân sách còn sau khi tải lại");
     await page.click("table button:has-text('Đàm phán') >> nth=0");
-    await page.fill("label:has-text('Giá trị hiển thị trong game') input", "10000000");
-    await page.waitForSelector("text=Giá tối đa nên trả");
-    check(true, "gợi ý đàm phán có bậc giá");
+    await page.waitForSelector("text=Phí chuyển nhượng hợp lý");
+    check(await page.isVisible("text=Tối đa nên trả") && await page.isVisible("text=Lương hợp lý khi vào đội bạn"), "đàm phán ước tính được giá và lương dù chưa nhập số nào từ game");
+    check(await page.isVisible("text=Chưa hiệu chỉnh"), "nói rõ giá trị là ước tính chưa hiệu chỉnh");
+    const fee0 = await page.evaluate(async () => {
+      const pid = new URLSearchParams(location.search).get("pid");
+      return (await (await fetch(`/api/manager/pricing?player_id=${pid}`)).json()).fee.ladder.open;
+    });
+    await page.fill("section[aria-label='Ghi lại đề nghị'] input[type=number] >> nth=0", String(fee0));
+    await page.click("button:has-text('Ghi lại')");
+    await page.waitForSelector("text=bị từ chối", { state: "attached", timeout: 3000 }).catch(() => null);
+    await page.waitForSelector("li:has-text('Từ chối')");
+    check(await page.isVisible("text=nâng khoảng 6%"), "ghi một đề nghị bị từ chối thì gợi ý nâng khoảng 6%");
+    await page.reload({ waitUntil: "networkidle" });
+    check(await page.isVisible("li:has-text('Từ chối')"), "nhật ký đề nghị còn sau khi tải lại");
     await page.goto(`${base}/player?id=${(await api("GET", "/players?q=&limit=1")).json[0].player_id}`, { waitUntil: "networkidle" });
     check(await page.isVisible("button:has-text('Thêm vào shortlist mua')"), "trang cầu thủ có nút thêm vào shortlist");
 
@@ -208,7 +219,9 @@ function check(cond, msg) {
     check((await api("GET", "/meta")).json.players === before, "nhập file hỏng không làm mất hay đổi dữ liệu đang có");
 
     console.log("8. Dữ liệu không rời máy");
-    check(external.length === 0, `không có request nào ra ngoài (${external.join(", ") || "không"})`);
+    // Ngoại lệ duy nhất: ảnh chân dung tải theo mã cầu thủ từ máy chủ ảnh của EA (không kèm dữ liệu save hay ghi chú)
+    const unexpected = external.filter((u) => !/^https:\/\/ratings-images-prod\.pulse\.ea\.com\/FC25\/full\/player-portraits\/p\d+\.png(\?padding=[\d.]+)?$/.test(u));
+    check(unexpected.length === 0, `không có request nào ra ngoài trừ ảnh cầu thủ (${unexpected.join(", ") || "không"}; ${external.length} request ảnh)`);
     check(problems.length === 0, `không có lỗi console (${problems.slice(0, 3).join(" | ") || "không"})`);
     console.log("\nE2E TĨNH: ĐẠT");
   } catch (e) {

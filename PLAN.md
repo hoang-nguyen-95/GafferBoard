@@ -16,7 +16,7 @@ Một web app **chạy local (localhost)** giúp người chơi FC26 Career Mode
 - **Chỉ Career Mode offline trên PC.** Dữ liệu lấy từ file xuất ra bằng công cụ mod cộng đồng (Live Editor, FIFA Editor Tool hoặc bản tương đương hỗ trợ FC26).
 - **Không** hook/đọc bộ nhớ game đang chạy, **không** chặn gói tin, **không** đụng vào Ultimate Team/Rivals/Champions hay bất kỳ chế độ online nào.
 - App chỉ đọc file CSV/JSON/SQLite mà người dùng xuất ra. Không sửa file save của game.
-- Chạy hoàn toàn local, không cần server/cloud, không gửi dữ liệu ra ngoài (trừ khi người dùng bật tính năng LLM ở giai đoạn sau).
+- Chạy hoàn toàn local, không cần server/cloud, không gửi dữ liệu ra ngoài (trừ khi người dùng bật tính năng LLM ở giai đoạn sau; và ảnh cầu thủ tải theo mã cầu thủ từ máy chủ ảnh của EA, xem docs/desktop.md).
 - Không dùng "FIFA" hay "EA" trong tên/branding của app.
 
 ## 3. Công nghệ
