@@ -125,7 +125,10 @@ export interface Offer {
   counter: number | null;
   /** Mức ước tính lúc ghi nhật ký, để tính tỉ lệ đề nghị / ước tính về sau. */
   estimate: number | null; at: string;
+  /** Khi đề nghị là một gói (trao đổi, thưởng, % bán lại): thành phần của gói. `amount` là giá trị gói theo bên bán. */
+  package?: PackageBreakdown | null;
 }
+export interface PackageBreakdown { cash: number; swap_ids: number[]; addons: number; sell_on_percent: number; sign_on: number }
 export const emptyManager = (): ManagerData => ({
   budget: { transfer: null, wage: null }, season_end_year: null, shortlist: [], sales: [],
   observations: [], offers: [], nextId: { observation: 1, offer: 1 },

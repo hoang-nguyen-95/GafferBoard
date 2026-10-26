@@ -369,7 +369,7 @@ export type RenewalPlan = {
 };
 
 export type Ladder = { open: number; target: number; walk: number };
-export type OfferRow = { id: number; player_id: number; kind: "fee" | "wage"; amount: number; result: "accepted" | "rejected" | "counter"; counter: number | null; estimate: number | null; at: string };
+export type OfferRow = { id: number; player_id: number; kind: "fee" | "wage"; amount: number; result: "accepted" | "rejected" | "counter"; counter: number | null; estimate: number | null; at: string; package?: { cash: number; swap_ids: number[]; addons: number; sell_on_percent: number; sign_on: number } | null };
 export type ObservationRow = { id: number; player_id: number; value: number | null; wage: number | null; at: string };
 export type OfferStatsRow = { kind: "fee" | "wage"; accepted: number; rejected: number; counters: number; medianAcceptedRatio: number | null; lowestAcceptedRatio: number | null; highestRejectedRatio: number | null };
 export type PriceAnalysis = {
@@ -380,4 +380,18 @@ export type PriceAnalysis = {
   wage_offer: { ladder: Ladder; source: "default" | "history"; next: { amount: number | null; text: string } };
   verdicts: string[]; tips: string[]; stats: { fee: OfferStatsRow; wage: OfferStatsRow };
   offers: OfferRow[]; observations: ObservationRow[]; disclaimer: string;
+};
+
+export type PackageInputRow = { cash: number; swapIds: number[]; addons: number; sellOnPercent: number; signOn: number };
+export type PackageEvaluation = {
+  target: { player_id: number; name: string }; ladder: Ladder; verdict: "likely" | "possible" | "unlikely" | "below_open";
+  perceived: { cash: number; swaps: { player_id: number; name: string; value: number; credit: number; in_xi: boolean; wage: number | null }[]; swap_credit: number; addons: number; sell_on: number; total: number; ratio_to_target: number };
+  cost: { cash: number; swap_value_given: number; addons_expected: number; sell_on_expected: number; sign_on: number; total: number; wage_freed: number };
+  resale_estimate: number; notes: string[]; weights: { swap_credit: number; addon: number; sell_on: number };
+};
+export type PackageSquadRow = { player_id: number; name: string; overall: number; potential: number | null; age: number | null; role: string; in_xi: boolean; value: number; wage: number | null; seasons_left: number | null };
+export type PackagesResponse = {
+  evaluation: PackageEvaluation | null;
+  options: { label: string; why: string; input: PackageInputRow; evaluation: PackageEvaluation }[];
+  squad: PackageSquadRow[];
 };

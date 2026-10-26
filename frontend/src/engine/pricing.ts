@@ -13,7 +13,7 @@ import { seasonEndYear, seasonsLeft } from "./manager";
 import { roleOfPlayer } from "./positions";
 import { referenceDate } from "./serialize";
 import type { Store } from "./store";
-import type { Offer, OfferKind, OfferResult, Player, PriceObservation } from "./types";
+import type { Offer, OfferKind, OfferResult, PackageBreakdown, Player, PriceObservation } from "./types";
 
 export const PRICING = {
   value: {
@@ -46,7 +46,7 @@ const median = (xs: number[]): number | null => {
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 };
-const round = (n: number) => {
+export const round = (n: number) => {
   if (n >= 1_000_000) return Math.round(n / 50_000) * 50_000;
   if (n >= 100_000) return Math.round(n / 5_000) * 5_000;
   return Math.round(n / 500) * 500;
@@ -86,6 +86,14 @@ export function valueModel(store: Store): ValueModel {
   const dev = residuals.map((r) => Math.abs(r - med));
   const spread = n >= 3 ? Math.min(V.maxSpread, Math.max(V.minSpread, 1.4826 * median(dev)!)) : V.uncalibratedSpread * 0.7;
   return { scaleLn: med * (n / (n + V.shrinkPoints)), spread, points: n, calibrated: true };
+}
+
+/** Giá trị ước tính của một cầu thủ: số bạn đã nhập từ game nếu có, không thì công thức đã hiệu chỉnh. */
+export function estimatedValue(store: Store, p: Player, vm: ValueModel = valueModel(store)): number {
+  const seen = [...store.user.manager.observations].reverse().find((o) => o.player_id === p.player_id && o.value !== null)?.value;
+  if (seen) return seen;
+  const ref = referenceDate(store);
+  return priorValue(p, ageOn(p.birth_date, ref), seasonsLeft(p, seasonEndYear(store))) * Math.exp(vm.scaleLn);
 }
 
 // ---------------------------------------------------------------- lương
@@ -255,13 +263,13 @@ export function addObservation(store: Store, input: { player_id: number; value: 
   return obs;
 }
 
-export function addOffer(store: Store, teamId: number | null, input: { player_id: number; kind: OfferKind; amount: number; result: OfferResult; counter: number | null }): Offer {
+export function addOffer(store: Store, teamId: number | null, input: { player_id: number; kind: OfferKind; amount: number; result: OfferResult; counter: number | null }, pkg: PackageBreakdown | null = null): Offer {
   const m = store.user.manager;
   const p = store.data.players.get(input.player_id)!;
   // tính ước tính lúc này (không tính chính lần ghi này) để lưu cùng đề nghị
   const a = priceAnalysis(store, teamId, p, null, null);
   const estimate = input.kind === "fee" ? a.value.estimate : a.wage.estimate;
-  const offer: Offer = { id: m.nextId.offer++, ...input, estimate, at: new Date().toISOString() };
+  const offer: Offer = { id: m.nextId.offer++, ...input, estimate, at: new Date().toISOString(), package: pkg };
   m.offers.push(offer);
   store.touch();
   return offer;

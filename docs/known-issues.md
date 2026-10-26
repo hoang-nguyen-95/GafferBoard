@@ -74,4 +74,6 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     Courtois (90, 34 tuổi, còn 2 mùa) ~ 18 triệu; chưa đối chiếu được với số trong game. Chỉ đáng tin sau khi hiệu chỉnh bằng vài số bạn thấy trong game và nhật ký đề nghị. Lương ước tính dựa trên thang lương hợp đồng của đội bạn
     (R² 0,97 trên một save) nên là mức "vào đội bạn", không phải lương ở CLB hiện tại; lương cầu thủ đòi thực tế có thể khác tới ±20%.
 30. **Ứng dụng desktop gọi máy chủ ảnh của EA để hiện ảnh cầu thủ** (theo mã cầu thủ): đã ghi trong `docs/desktop.md` và trang Hướng dẫn; test e2e chỉ cho phép đúng địa chỉ này. Trước đây e2e "không request ra ngoài" bị bỏ sót khi thêm ảnh.
+31. **Cách bên bán "tính" trao đổi cầu thủ, thưởng, % chia lại là hệ số kinh nghiệm chưa kiểm chứng** (xem `docs/manager.md`): trao đổi 90% giá trị, thưởng 50% mệnh giá, chia lại 60% giá bán lại kỳ vọng sau 3 năm. Nhật ký đề nghị lưu từng thành phần
+    nên sau này có thể học hệ số thật từ kết quả của bạn, nhưng chưa làm. Chưa mô hình hóa điều khoản giải phóng hợp đồng, trả góp, cho mượn có quyền mua, loại thưởng cụ thể.
 

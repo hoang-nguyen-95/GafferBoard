@@ -177,17 +177,26 @@ function check(cond, msg) {
     await page.waitForSelector("text=Phí chuyển nhượng hợp lý");
     check(await page.isVisible("text=Tối đa nên trả") && await page.isVisible("text=Lương hợp lý khi vào đội bạn"), "đàm phán ước tính được giá và lương dù chưa nhập số nào từ game");
     check(await page.isVisible("text=Chưa hiệu chỉnh"), "nói rõ giá trị là ước tính chưa hiệu chỉnh");
-    const fee0 = await page.evaluate(async () => {
-      const pid = new URLSearchParams(location.search).get("pid");
-      return (await (await fetch(`/api/manager/pricing?player_id=${pid}`)).json()).fee.ladder.open;
-    });
-    await page.fill("section[aria-label='Ghi lại đề nghị'] input[type=number] >> nth=0", String(fee0));
-    await page.click("button:has-text('Ghi lại')");
-    await page.waitForSelector("text=bị từ chối", { state: "attached", timeout: 3000 }).catch(() => null);
+    // Ghi nhanh: để trống số, chỉ bấm kết quả -> dùng số gợi ý
+    await page.click("section[aria-label='Ghi lại đề nghị'] button:has-text('Bị từ chối')");
     await page.waitForSelector("li:has-text('Từ chối')");
     check(await page.isVisible("text=nâng khoảng 6%"), "ghi một đề nghị bị từ chối thì gợi ý nâng khoảng 6%");
     await page.reload({ waitUntil: "networkidle" });
     check(await page.isVisible("li:has-text('Từ chối')"), "nhật ký đề nghị còn sau khi tải lại");
+
+    // Gói đề nghị: gợi ý tự động, dùng một gói, thấy giá trị bên bán và chi phí thực
+    await page.waitForSelector("text=Gói gợi ý tự động");
+    check(await page.isVisible("text=Toàn bộ bằng tiền mặt") && await page.isVisible("text=Giảm tiền mặt, thêm tiền thưởng"), "có gói gợi ý tự động (tiền mặt, thưởng...)");
+    await page.click("tr:has-text('Giảm tiền mặt, thêm tiền thưởng') button:has-text('Dùng gói này')");
+    await page.waitForSelector("text=giá trị gói theo bên bán");
+    check(await page.isVisible("text=Bạn tốn thực tế (kỳ vọng)"), "gói hiện giá trị theo bên bán và chi phí thực của bạn");
+    await page.click("button:has-text('Được chấp nhận') >> nth=0");
+    await page.waitForSelector("li:has-text('(gói)')");
+    check(true, "ghi nhanh kết quả của cả gói vào nhật ký");
+    // Nhập tiền nhanh: "35m" -> 35.000.000
+    await page.fill("label:has-text('Giá bên bán đòi') input", "35m");
+    await page.waitForSelector("text=35.000.000");
+    check(true, "ô tiền hiểu cách gõ tắt 35m");
     await page.goto(`${base}/player?id=${(await api("GET", "/players?q=&limit=1")).json[0].player_id}`, { waitUntil: "networkidle" });
     check(await page.isVisible("button:has-text('Thêm vào shortlist mua')"), "trang cầu thủ có nút thêm vào shortlist");
 
