@@ -45,6 +45,7 @@ r("PUT", "/manager/sales/{player_id}", manager.putSale);
 r("DELETE", "/manager/sales/{player_id}", manager.deleteSale);
 r("GET", "/manager/negotiation", manager.negotiation);
 r("GET", "/manager/pricing", pricing.pricing);
+r("GET", "/manager/packages", pricing.packages);
 r("POST", "/manager/observations", pricing.postObservation);
 r("DELETE", "/manager/observations/{observation_id}", pricing.deleteObservation);
 r("POST", "/manager/offers", pricing.postOffer);

@@ -72,3 +72,22 @@ số mùa hợp đồng còn lại và thủ môn. Sai lệch có thể lớn (d
 Mọi hệ số (mũ OVR 0,18, hệ số tuổi, hợp đồng, thủ môn, bước 6%, bậc 0,8/0,95/1,1 trong `negotiationPlan`) là kinh nghiệm chung, chưa kiểm chứng với game; xem `docs/known-issues.md` mục 29.
 Dữ liệu hiệu chỉnh và nhật ký nằm trong dữ liệu cá nhân (được sao lưu cùng file sao lưu Manager).
 
+## Gói đề nghị: trao đổi cầu thủ, tiền thưởng, % chia lại khi bán
+
+Trong game, đề nghị không chỉ có tiền mặt: bảng `career_presignedcontract` có các trường `offeredfee`, `isexchangedplayer`/`secondaryplayerid` (trao đổi cầu thủ), `performancebonus*` (thưởng), `signonbonus` (tiền ký),
+`releaseclause`, `future_fee`... Mục **Gói đề nghị** của tab Đàm phán quy mọi thành phần về hai con số để so sánh:
+- **Giá trị theo bên bán** (so với mức mục tiêu): tiền mặt + cầu thủ trao đổi × 0,9 + tiền thưởng × 0,5 + (% chia lại × giá bán lại kỳ vọng sau 3 năm × 0,6). Từ 100% mục tiêu là "dễ", từ 93% là "có thể", dưới mức mở giá là gần như chắc bị từ chối.
+- **Chi phí thực của bạn**: tiền mặt + giá trị cầu thủ đưa đi + thưởng kỳ vọng + chia lại kỳ vọng + tiền ký. Trao đổi giúp giảm tiền mặt và giải phóng quỹ lương nhưng KHÔNG giảm chi phí thực (bạn mất giá trị cầu thủ đó).
+- **Gói gợi ý tự động** (không cần nhập): toàn tiền mặt; trao đổi một cầu thủ không đá chính + tiền; giảm 15% tiền mặt thay bằng thưởng; giảm 10% tiền mặt thay bằng % chia lại (làm tròn bội số 5%, tối đa 20%).
+- Cầu thủ trẻ còn tiến bộ được dự kiến lên giá khi bán lại, cầu thủ trên 30 tuổi giảm giá, nên % chia lại hợp với người trẻ.
+- Ghi nhanh kết quả của cả gói (bị từ chối / được chấp nhận) vào nhật ký đề nghị: nhật ký lưu từng thành phần.
+
+Các hệ số (`PACKAGE` trong `frontend/src/engine/packages.ts`) là kinh nghiệm chung, **chưa kiểm chứng** với cách game tính; chưa mô hình hóa: điều khoản giải phóng hợp đồng, trả góp (`future_fee`), cho mượn có quyền mua,
+và loại thưởng cụ thể (số trận, bàn thắng). Thưởng được nhập dưới dạng tổng mệnh giá.
+
+## Giảm nhập tay
+
+- Ô tiền hiểu cách gõ tắt: `35m`, `35tr`, `1,2 tỷ`, `500k`, `35.000.000` (`frontend/src/lib/money.ts`), kèm số đã hiểu bên dưới.
+- Ghi nhanh đề nghị: để trống số tiền thì dùng luôn số gợi ý bước tiếp theo, chỉ bấm kết quả.
+- Lương trong đội bạn tính tự động từ hợp đồng trong save; chỉ phí chuyển nhượng cần vài số hiệu chỉnh từ game.
+

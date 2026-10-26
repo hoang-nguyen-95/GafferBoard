@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { parseMoney } from "@/lib/money";
 
 export const money = (n: number | null | undefined): string => (n === null || n === undefined ? "–" : n.toLocaleString("vi-VN"));
 
@@ -27,4 +28,17 @@ export function contractText(left: number | null, until: number | null): string 
   if (until === null) return "–";
   if (left === 0) return `${until} (đã hết)`;
   return `${until} (${left} mùa)`;
+}
+
+/** Ô nhập tiền nhanh: gõ "35m", "35tr", "1,2 tỷ", "500k" hoặc "35.000.000"; hiện số đã hiểu bên dưới. */
+export function MoneyInput({ label, value, onChange, placeholder, width = "w-40", hint }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; width?: string; hint?: string }) {
+  const parsed = parseMoney(value);
+  const bad = value.trim() !== "" && parsed === null;
+  return (
+    <Field label={label} hint={hint}>
+      <input type="text" inputMode="text" value={value} placeholder={placeholder ?? "vd 35m"} onChange={(e) => onChange(e.target.value)} aria-invalid={bad}
+        className={`${width} ${inputCls} ${bad ? "border-red-500" : ""}`} />
+      <span className={`mt-0.5 text-[11px] ${bad ? "text-red-600" : "text-zinc-400"}`}>{bad ? "Không đọc được số" : parsed !== null ? `= ${money(parsed)}` : "\u00a0"}</span>
+    </Field>
+  );
 }
