@@ -1,6 +1,7 @@
 // Hợp đồng và lương (chỉ TypeScript, không có bản Python): dữ liệu lấy từ career_playercontract.csv và playerloans.csv.
 import { monthsLeft, wageBill } from "../contracts";
 import { notFound, pathInt, type Ctx } from "../http";
+import { renewalPlan } from "../renewals";
 import { referenceDate } from "../serialize";
 import { effectiveUserTeam } from "../settings";
 
@@ -38,4 +39,14 @@ export function wages(ctx: Ctx) {
     expiring: rows.filter((r) => r.months_left !== null && r.months_left <= EXPIRING_MONTHS).sort((a, b) => (a.months_left! - b.months_left!) || b.wage - a.wage),
     top: [...rows].sort((a, b) => b.wage - a.wage).slice(0, 8),
   };
+}
+
+/** Gợi ý gia hạn hợp đồng cho từng cầu thủ đội bạn (cần hợp đồng trong save). */
+export function renewals(ctx: Ctx) {
+  const { store } = ctx;
+  const { teamId } = effectiveUserTeam(store);
+  if (teamId === null || store.data.contracts.size === 0) {
+    return { available: false, reference_date: referenceDate(store), players: 0, xi_average: 0, totals: null, warnings: [], rows: [] };
+  }
+  return { available: true, ...renewalPlan(store, teamId) };
 }

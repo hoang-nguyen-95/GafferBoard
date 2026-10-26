@@ -33,6 +33,7 @@ r("GET", "/compare/teams", compare.compareTeams);
 // Chế độ Manager (chỉ có ở engine TypeScript)
 r("GET", "/players/{player_id}/contract", contracts.playerContract);
 r("GET", "/manager/wages", contracts.wages);
+r("GET", "/manager/renewals", contracts.renewals);
 r("GET", "/manager/overview", manager.overview);
 r("GET", "/manager/targets", manager.targets);
 r("GET", "/manager/shortlist", manager.shortlist);

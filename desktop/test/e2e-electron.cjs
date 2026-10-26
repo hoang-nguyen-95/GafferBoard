@@ -149,6 +149,10 @@ const api = (page, method, p, body) => page.evaluate(async ([m, u, b]) => {
     await page.goto("app://counterpick/manager?tab=budget");
     await page.waitForSelector("text=Quỹ lương hiện tại (đọc từ save)");
     check(true, "tab Ngân sách hiện quỹ lương hiện tại");
+    await page.goto("app://counterpick/manager?tab=renewals");
+    await page.waitForSelector("text=Cần quyết định");
+    const renewals = await page.evaluate(async () => (await fetch("/api/manager/renewals")).json());
+    check(renewals.available && renewals.rows.length === 5 && renewals.rows.some((r) => r.action !== "none"), `tab Gia hạn hợp đồng liệt kê ${renewals.rows.length} cầu thủ có hợp đồng kèm gợi ý`);
     await page.goto("app://counterpick/import");
     await page.goto("app://counterpick/");
     await page.waitForSelector("text=Đã cập nhật từ", { timeout: 1000 }).catch(() => null);

@@ -68,3 +68,6 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     đặt `PLAYER_PHOTO_URL = ""` để tắt hẳn. Ứng dụng Windows cần có mạng mới hiện ảnh.
 27. **Hợp đồng/cho mượn chỉ đọc được khi save có hai file `career_playercontract.csv` và `playerloans.csv`** (script xuất v3 trở lên). Cột đã đối chiếu với một bản xuất thật; nếu bản Live Editor khác đổi tên cột,
     ứng dụng báo "thiếu cột" và không nhập (cả lần nhập đó). Cầu thủ đang cho mượn đi vẫn được tính vào quỹ lương hiện tại (chưa rõ game chia lương mượn thế nào, cột `loan_wage_split` đều là -1 trong save đã xem).
+28. **Gợi ý gia hạn hợp đồng dựa trên hệ số kinh nghiệm** (xem `docs/manager.md`): game không xuất mức lương cầu thủ đòi khi gia hạn, "lương tham chiếu" chỉ là trung vị đồng đội cùng tầm OVR; số năm, trần lương (×1,25/×1,15/×1,05)
+    và ngưỡng khẩn cấp (6/12/24 tháng) chưa kiểm chứng với game. Ngày tham chiếu là ngày sớm nhất trong lịch thi đấu đã xuất, nên đầu mùa nhiều hợp đồng cùng hết 30/06 sẽ cùng mức khẩn cấp.
+
