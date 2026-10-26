@@ -367,3 +367,17 @@ export type RenewalPlan = {
   totals: { to_renew: number; to_sell: number; wage_total: number; extra_wage_target: number; extra_wage_max: number; budget_wage: number | null } | null;
   warnings: string[]; rows: RenewalRow[];
 };
+
+export type Ladder = { open: number; target: number; walk: number };
+export type OfferRow = { id: number; player_id: number; kind: "fee" | "wage"; amount: number; result: "accepted" | "rejected" | "counter"; counter: number | null; estimate: number | null; at: string };
+export type ObservationRow = { id: number; player_id: number; value: number | null; wage: number | null; at: string };
+export type OfferStatsRow = { kind: "fee" | "wage"; accepted: number; rejected: number; counters: number; medianAcceptedRatio: number | null; lowestAcceptedRatio: number | null; highestRejectedRatio: number | null };
+export type PriceAnalysis = {
+  player: { player_id: number; name: string; overall: number; potential: number | null; age: number | null; seasons_left: number | null; months_left: number | null };
+  value: { estimate: number; low: number; high: number; source: "game" | "estimate"; calibration_points: number; calibrated: boolean; spread_percent: number; prior: number };
+  wage: { estimate: number; low: number; high: number; source: "game" | "club_fit" | "default"; points: number; r2: number | null; spread_percent: number; shift_percent: number; team_estimate: number };
+  fee: { ladder: Ladder; source: "default" | "history"; factors: { text: string; effect: "buyer" | "seller"; adjust: number }[]; next: { amount: number | null; text: string } };
+  wage_offer: { ladder: Ladder; source: "default" | "history"; next: { amount: number | null; text: string } };
+  verdicts: string[]; tips: string[]; stats: { fee: OfferStatsRow; wage: OfferStatsRow };
+  offers: OfferRow[]; observations: ObservationRow[]; disclaimer: string;
+};

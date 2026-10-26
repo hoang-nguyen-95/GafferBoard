@@ -1,5 +1,6 @@
 // Lưu dữ liệu vào IndexedDB của trình duyệt: dữ liệu game (thay mới mỗi lần nhập) và dữ liệu cá nhân (giữ lại) tách riêng.
 import { emptyGameData, emptyUserData, type Store } from "./store";
+import { emptyManager } from "./types";
 
 const DB_NAME = "counterpick-fc";
 const KV = "kv";
@@ -51,6 +52,8 @@ export async function loadStore(store: Store): Promise<void> {
     ]);
     if (game?.v === SCHEMA) store.data = { ...emptyGameData(), ...game.data };
     if (user?.v === SCHEMA) store.user = { ...emptyUserData(), ...user.user };
+    // dữ liệu Manager lưu từ bản cũ chưa có các trường mới (observations, offers...): bổ sung mặc định
+    store.user.manager = { ...emptyManager(), ...store.user.manager };
   } catch {
     store.data = emptyGameData();
     store.user = emptyUserData();
