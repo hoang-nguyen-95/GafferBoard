@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { BudgetSummary, Meta, PlayerSummary, SaleRow, ShortlistRow, TeamOverview } from "@/lib/api";
+import type { WagesSummary, BudgetSummary, Meta, PlayerSummary, SaleRow, ShortlistRow, TeamOverview } from "@/lib/api";
 import { useApi } from "@/lib/engine";
 import { playerHref } from "@/lib/routes";
 import { Field, btnCls, inputCls, money, primaryCls, send } from "./common";
@@ -59,6 +59,7 @@ function SaleRowView({ row }: { row: SaleRow }) {
 export function BudgetTab({ onNegotiate }: { onNegotiate: (id: number) => void }) {
   const res = useApi<BudgetSummary>("/manager/shortlist");
   const meta = useApi<Meta>("/meta")?.data ?? null;
+  const wages = useApi<WagesSummary>("/manager/wages")?.data ?? null;
   const overview = useApi<TeamOverview>(meta?.user_team ? `/teams/${meta.user_team.team_id}/overview` : null)?.data ?? null;
   const [transfer, setTransfer] = useState<string | null>(null);
   const [wage, setWage] = useState<string | null>(null);
@@ -82,10 +83,46 @@ export function BudgetTab({ onNegotiate }: { onNegotiate: (id: number) => void }
   const t = d.totals;
   return (
     <div className="space-y-8">
+      {wages?.available && (
+        <section className="space-y-3" aria-label="Quỹ lương theo hợp đồng trong save">
+          <h2 className="font-semibold">Quỹ lương hiện tại (đọc từ save)</h2>
+          <p className="text-sm">
+            <b className="tabular-nums">{wages.total.toLocaleString("vi-VN")}</b> cho <b>{wages.players}</b> cầu thủ có hợp đồng
+            <span className="text-zinc-500"> (số <code>wage</code> trong save; game hiển thị theo tuần). Đây là số đã chi, không phải số còn trống: ngân sách và trần lương vẫn phải nhập ở dưới.</span>
+          </p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <h3 className="mb-1 text-sm font-medium">Lương cao nhất</h3>
+              <ul className="space-y-0.5 text-sm">
+                {wages.top.map((r) => (
+                  <li key={r.player_id} className="flex justify-between gap-3">
+                    <span>{r.name}{r.on_loan_from !== null && <span className="text-xs text-zinc-500"> (mượn)</span>}</span>
+                    <span className="tabular-nums">{r.wage.toLocaleString("vi-VN")}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-1 text-sm font-medium">Hợp đồng sắp hết (trong 12 tháng)</h3>
+              {wages.expiring.length === 0 ? <p className="text-sm text-zinc-500">Không có hợp đồng nào sắp hết.</p> : (
+                <ul className="space-y-0.5 text-sm">
+                  {wages.expiring.map((r) => (
+                    <li key={r.player_id} className="flex justify-between gap-3">
+                      <span>{r.name}</span>
+                      <span className="tabular-nums text-zinc-600 dark:text-zinc-400">{r.end_date} · {r.months_left !== null && r.months_left < 0 ? "đã hết hạn" : `còn ${r.months_left} tháng`}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="space-y-3">
         <h2 className="font-semibold">Số liệu từ màn Tài chính của game</h2>
         <p className="text-xs text-zinc-500">
-          Dữ liệu xuất từ Live Editor hiện không có ngân sách hay lương, nên bạn nhập số còn lại đọc trong game (giữ cùng một đơn vị cho mọi ô, ví dụ 25000000 cho 25 triệu).
+          Dữ liệu xuất từ Live Editor không có ngân sách chuyển nhượng hay trần lương, nên bạn nhập số còn lại đọc trong game (giữ cùng một đơn vị cho mọi ô, ví dụ 25000000 cho 25 triệu).
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <Field label="Ngân sách chuyển nhượng còn lại"><input type="number" min={0} value={transfer ?? d.budget.transfer ?? ""} onChange={(e) => setTransfer(e.target.value)} className={`w-40 ${inputCls}`} /></Field>

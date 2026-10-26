@@ -38,3 +38,6 @@ quên chạy lại).
 
 Diễn giải bằng LLM (gọi `api.anthropic.com` từ trình duyệt bằng khóa của người dùng) cần khóa thật nên chưa chạy thử
 được trong môi trường phát triển; phần dựng báo cáo gửi đi thì dùng đúng đường dẫn `report.md` đã được đối chiếu.
+
+Ngoài bộ đối chiếu (không có bản Python): chế độ Manager, `GET /players/{id}/contract`, `GET /manager/wages` và bảng `contracts`/`loans` trong `Store.data` (nhập từ `career_playercontract.csv`, `playerloans.csv`; tên file ở `engine/data/extra-files.json`).
+

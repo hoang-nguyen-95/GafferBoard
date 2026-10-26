@@ -8,6 +8,7 @@ import type {
   Fixture, FormationDef, League, Player, SquadMember, Team, TeamLineup, TeamStanding, UserProfile, LineupSlotData,
 } from "./types";
 import { newPlayer } from "./types";
+import { applyContracts, CONTRACT_FILE, LOANS_FILE, prepareContracts } from "./contracts";
 import { daysToDate, displayName, parseCsv, searchKey } from "./util";
 
 export class MappingError extends Error {}
@@ -278,6 +279,9 @@ export function importExports(store: Store, files: FileMap, mapping: Mapping = M
     }
   }
 
+  // Hợp đồng và cho mượn (chỉ TypeScript): đọc và kiểm tra cùng giai đoạn 1 nên file lỗi cũng không làm nhập dở
+  const extras = prepareContracts(files);
+
   // Giai đoạn 2: ghi (không còn lỗi dữ liệu nào có thể xảy ra)
   const reports: TableReport[] = [];
   for (const step of steps) {
@@ -296,6 +300,11 @@ export function importExports(store: Store, files: FileMap, mapping: Mapping = M
       reports.push({ table: "lineups", status: "ok", read: step.prep.rows.length, ...r, note: "" });
     }
   }
+  const wrote = applyContracts(store, extras);
+  reports.push(wrote.contracts === null ? skipped("contracts", `không có ${CONTRACT_FILE}`)
+    : { table: "contracts", status: "ok", read: wrote.contracts, inserted: wrote.contracts, updated: 0, deleted: 0, note: "" });
+  reports.push(wrote.loans === null ? skipped("loans", `không có ${LOANS_FILE}`)
+    : { table: "loans", status: "ok", read: wrote.loans, inserted: wrote.loans, updated: 0, deleted: 0, note: "" });
   store.reindex();
   return reports;
 }
@@ -336,5 +345,7 @@ export function expectedFiles(mapping: Mapping = MAPPING): { file: string; what:
     add(mapping.names.edited_file, "tên cầu thủ do bạn sửa", true);
   }
   if (mapping.lineups) add(mapping.lineups.teamsheets_file, "đội hình ra sân của các đội", true);
+  add(CONTRACT_FILE, "lương và hợp đồng (đội của bạn)", true);
+  add(LOANS_FILE, "cầu thủ đang cho mượn", true);
   return out;
 }

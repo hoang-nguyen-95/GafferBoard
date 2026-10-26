@@ -24,7 +24,8 @@ fs.writeFileSync(path.join(userData, "config.json"), JSON.stringify({ exportDir,
 fs.writeFileSync(path.join(exportDir, "transfers.csv"), "a,b\n" + "1,2\n".repeat(50000));
 const mapping = JSON.parse(fs.readFileSync(path.join(ROOT, "frontend/src/engine/data/mapping.json"), "utf8"));
 const knownFile = path.join(userData, "known-files.json");
-fs.writeFileSync(knownFile, JSON.stringify([...Object.values(mapping.tables).map((t) => t.file), mapping.names.names_file, ...mapping.names.extra_names_files, mapping.names.edited_file, mapping.lineups.teamsheets_file, mapping.lineups.formations_file].map((f) => f.toLowerCase())));
+const extraFiles = JSON.parse(fs.readFileSync(path.join(ROOT, "frontend/src/engine/data/extra-files.json"), "utf8"));
+fs.writeFileSync(knownFile, JSON.stringify([...Object.values(extraFiles), ...Object.values(mapping.tables).map((t) => t.file), mapping.names.names_file, ...mapping.names.extra_names_files, mapping.names.edited_file, mapping.lineups.teamsheets_file, mapping.lineups.formations_file].map((f) => f.toLowerCase())));
 
 async function launch() {
   const app = await electron.launch({
@@ -112,11 +113,12 @@ const api = (page, method, p, body) => page.evaluate(async ([m, u, b]) => {
     await page.waitForSelector("text=Script xuất lặp đang chạy");
     check(true, "giao diện báo script xuất lặp đang chạy");
 
+
     // Bảng hợp đồng giả (chưa được ứng dụng dùng): nút báo cáo phải liệt kê cột và dòng mẫu, không liệt kê bảng đã dùng
-    fs.writeFileSync(path.join(exportDir, "career_playercontract.csv"), "playerid,teamid,wage\n1,10,5000\n2,10,7000\n");
+    fs.writeFileSync(path.join(exportDir, "career_scouts.csv"), "scoutid,firstname,lastname\n1,An,Binh\n2,Cuong,Dung\n");
     await page.click("text=Xem cấu trúc các bảng chưa dùng");
     const report = await page.inputValue("textarea[aria-label='Báo cáo các bảng chưa dùng']");
-    check(/## career_playercontract\.csv {2}\(2 dòng\)/.test(report) && /Cột \(3\): playerid, teamid, wage/.test(report) && /Mẫu 1: playerid=1 \| teamid=10 \| wage=5000/.test(report), "báo cáo liệt kê bảng chưa dùng với cột và dòng mẫu");
+    check(/## career_scouts\.csv {2}\(2 dòng\)/.test(report) && /Cột \(3\): scoutid, firstname, lastname/.test(report) && /Mẫu 1: scoutid=1 \| firstname=An \| lastname=Binh/.test(report), "báo cáo liệt kê bảng chưa dùng với cột và dòng mẫu");
     check(!/## players\.csv/.test(report) && !/## teams\.csv/.test(report), "không liệt kê bảng ứng dụng đã dùng");
 
     check(problems.length === 0, `không có lỗi console (${problems.slice(0, 3).join(" | ") || "không"})`);
@@ -125,6 +127,29 @@ const api = (page, method, p, body) => page.evaluate(async ([m, u, b]) => {
     // sửa lại players.csv hợp lệ để mọi file ở trạng thái đã nhập
     execFileSync("python3", [path.join(ROOT, "backend/tools/make_synthetic_exports.py"), exportDir], { stdio: "ignore" });
     await sleep(2500);
+
+    // Hợp đồng của đội bạn: tự nhập khi file xuất hiện, hiện cột Lương, quỹ lương và hợp đồng sắp hết ở tab Ngân sách
+    const mine = await page.evaluate(async () => {
+      const meta = await (await fetch("/api/meta")).json();
+      const ov = await (await fetch(`/api/teams/${meta.user_team.team_id}/overview`)).json();
+      return { team: meta.user_team.team_id, ids: Object.values(ov.squad).flat().slice(0, 5).map((p) => p.player_id) };
+    });
+    const contractHeader = "performancebonuscount,last_status_change_date,performancebonuscountachieved,playerrole,contract_date,duration_months,wage,performancebonustype,performancebonusvalue,signon_bonus,contract_status,isperformancebonusachieved,teamid,loan_wage_split,playerid";
+    fs.writeFileSync(path.join(exportDir, "career_playercontract.csv"), [contractHeader, ...mine.ids.map((id, i) => `-1,20260630,0,-1,20260630,${i === 0 ? 12 : 36},${10000 * (i + 1)},0,-1,0,0,0,${mine.team},-1,${id}`)].join("\n") + "\n");
+    for (let i = 0; i < 60; i++) {
+      if ((await page.evaluate(async () => (await (await fetch("/api/manager/wages")).json()).available)) === true) break;
+      await sleep(250);
+    }
+    const wages = await page.evaluate(async () => (await fetch("/api/manager/wages")).json());
+    check(wages.players === 5 && wages.total === 150000, `quỹ lương đọc từ hợp đồng trong save (${wages.players} người, ${wages.total})`);
+    check(wages.expiring.length === 1 && wages.top[0].wage === 50000, "có một hợp đồng sắp hết hạn và lương cao nhất đứng đầu");
+    await page.goto("app://counterpick/cau-thu");
+    await page.waitForSelector("th:has-text('Lương')");
+    check(await page.isVisible("th:has-text('HĐ hết hạn')"), "bảng cầu thủ có cột Lương và HĐ hết hạn khi save có hợp đồng");
+    await page.goto("app://counterpick/manager?tab=budget");
+    await page.waitForSelector("text=Quỹ lương hiện tại (đọc từ save)");
+    check(true, "tab Ngân sách hiện quỹ lương hiện tại");
+    await page.goto("app://counterpick/import");
     await page.goto("app://counterpick/");
     await page.waitForSelector("text=Đã cập nhật từ", { timeout: 1000 }).catch(() => null);
     await sleep(3000);

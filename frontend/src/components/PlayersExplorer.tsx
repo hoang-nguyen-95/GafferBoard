@@ -28,6 +28,9 @@ type Row = {
   pos: string;
   line: string;
   age: number | null;
+  wage: number | null;
+  contractEnd: string | null;
+  loanFrom: string | null;
 };
 
 type Col = { key: string; label: string; title?: string; align?: "left" | "right"; get: (r: Row) => string | number | null; text?: boolean };
@@ -54,6 +57,13 @@ const FACE: Col[] = [
   ["dri_ref", "DRI", "Rê bóng (TM: phản xạ)"], ["def_spe", "DEF", "Phòng ngự (TM: tốc độ)"], ["phy_pos", "PHY", "Thể chất (TM: chọn vị trí)"],
 ].map(([key, label, title]) => ({ key, label, title, get: num((p) => p[key as keyof Player] as number | null) }));
 const DETAIL: Col[] = PLAYER_ATTRS.map((key) => ({ key, label: ATTRIBUTE_LABELS[key] ?? key, get: num((p) => p[key]) }));
+
+// Chỉ hiện khi save có hợp đồng (career_playercontract): game chỉ lưu hợp đồng cho đội của bạn và đội dự bị.
+const CONTRACT_COLS: Col[] = [
+  { key: "wage", label: "Lương", title: "Số wage trong save (đơn vị game, game hiển thị theo tuần)", get: (r) => r.wage },
+  { key: "contractEnd", label: "HĐ hết hạn", title: "Ngày hợp đồng kết thúc (ngày bắt đầu + số tháng)", get: (r) => r.contractEnd, text: true },
+  { key: "loanFrom", label: "Mượn từ", title: "Đội gốc nếu cầu thủ đang được mượn", get: (r) => r.loanFrom, text: true },
+];
 
 const SETS = [
   { id: "basic", label: "Cơ bản", cols: BASIC },
@@ -96,6 +106,10 @@ export function PlayersExplorer() {
 
   const rows = useMemo<Row[]>(() => {
     const ref = referenceDate(store);
+    const loanFromName = (id: number) => {
+      const loan = store.data.loans.get(id);
+      return loan ? store.data.teams.get(loan.from_team_id)?.name ?? `#${loan.from_team_id}` : null;
+    };
     const out: Row[] = [];
     for (const p of store.data.players.values()) {
       const club = clubOfPlayer(store, p.player_id);
@@ -112,6 +126,9 @@ export function PlayersExplorer() {
         pos: code !== null ? POSITION_NAMES[code] ?? "?" : "",
         line: code !== null ? lineOfPosition(code) ?? "" : "",
         age: ageOn(p.birth_date, ref),
+        wage: store.data.contracts.get(p.player_id)?.wage ?? null,
+        contractEnd: store.data.contracts.get(p.player_id)?.end_date ?? null,
+        loanFrom: loanFromName(p.player_id),
       });
     }
     return out;
@@ -126,7 +143,9 @@ export function PlayersExplorer() {
     [rows, league, legends],
   );
 
-  const cols = SETS.find((s) => s.id === setId)!.cols as readonly Col[];
+  const baseCols = SETS.find((s) => s.id === setId)!.cols as readonly Col[];
+  const hasContracts = useMemo(() => store.data.contracts.size > 0, [version]); // eslint-disable-line react-hooks/exhaustive-deps
+  const cols: readonly Col[] = hasContracts ? [...baseCols.slice(0, 7), ...CONTRACT_COLS, ...baseCols.slice(7)] : baseCols;
   const filtered = useMemo(() => {
     const words = foldText(dq).split(" ").filter(Boolean);
     const n = (s: string) => (s.trim() === "" ? null : Number(s));
@@ -144,7 +163,7 @@ export function PlayersExplorer() {
       if (a2 !== null && (r.age ?? 999) > a2) return false;
       return true;
     });
-    const col = [...BASIC, ...FACE, ...DETAIL, { key: "name", label: "", get: (r: Row) => r.name, text: true } as Col].find((c) => c.key === sort.key);
+    const col = [...BASIC, ...CONTRACT_COLS, ...FACE, ...DETAIL, { key: "name", label: "", get: (r: Row) => r.name, text: true } as Col].find((c) => c.key === sort.key);
     if (!col) return list;
     return list.sort((x, y) => {
       const a = col.get(x), b = col.get(y);
@@ -253,7 +272,7 @@ export function PlayersExplorer() {
       <div className="mt-6 flex gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
         <Info size={18} className="mt-0.5 shrink-0 text-amber-600" aria-hidden="true" />
         <div className="space-y-1">
-          <p><strong>Giá trị chuyển nhượng và lương chưa có trong bảng.</strong> Các bảng hợp đồng/chuyển nhượng của game chưa được xuất, và chúng tôi không đoán số. Khi có dữ liệu thật, hai cột này sẽ được thêm.</p>
+          <p><strong>Giá trị chuyển nhượng chưa có trong bảng.</strong> Game không lưu số này trong dữ liệu (chỉ tính ra lúc cần) và chúng tôi không đoán số.{IS_DESKTOP_BUILD ? " Lương và hợp đồng chỉ có cho đội của bạn và đội dự bị (game không lưu cho đội khác)." : " Lương cũng chưa có vì chỉ có trong save của người chơi."}</p>
           {IS_DESKTOP_BUILD ? (
             <p className="text-zinc-600 dark:text-zinc-400">Dữ liệu lấy từ bản save bạn đã nhập, tuổi tính theo ngày trong lịch thi đấu của save.</p>
           ) : (

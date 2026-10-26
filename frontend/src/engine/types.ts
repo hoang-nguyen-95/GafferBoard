@@ -112,3 +112,14 @@ export interface ManagerData {
   sales: SaleItem[];
 }
 export const emptyManager = (): ManagerData => ({ budget: { transfer: null, wage: null }, season_end_year: null, shortlist: [], sales: [] });
+
+// ---- hợp đồng và cho mượn (chỉ có khi save có bảng career_playercontract/playerloans; không có bản Python tương ứng) ----
+/** Hợp đồng hiện tại của một cầu thủ trong save (game chỉ lưu hợp đồng cho đội của bạn và đội dự bị, không có cho đội khác). */
+export interface Contract {
+  player_id: number; team_id: number;
+  /** Số `wage` trong save (đơn vị game; game hiển thị theo tuần, chưa xác nhận). */
+  wage: number;
+  duration_months: number; start_date: string | null; end_date: string | null;
+  signon_bonus: Num; status: Num; loan_wage_split: Num;
+}
+export interface Loan { player_id: number; from_team_id: number; ends_on: string | null; to_buy: boolean }

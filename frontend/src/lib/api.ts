@@ -347,3 +347,10 @@ export type NegotiationPlan = {
   factors: { text: string; effect: "buyer" | "seller"; adjust: number }[];
   ladder: { step: string; percent_of_value: number; amount: number }[]; verdict: string | null; tips: string[]; disclaimer: string;
 };
+
+export type WageRow = { player_id: number; name: string; wage: number; end_date: string | null; months_left: number | null; on_loan_from: number | null };
+export type WagesSummary = { available: boolean; team_id: number | null; ref_date: string; players: number; total: number; expiring: WageRow[]; top: WageRow[] };
+export type PlayerContractInfo = {
+  contract: { wage: number; duration_months: number; start_date: string | null; end_date: string | null; months_left: number | null; signon_bonus: number | null; loan_wage_split: number | null } | null;
+  loan: { from_team_id: number; from_team_name: string | null; ends_on: string | null; to_buy: boolean } | null;
+};

@@ -100,7 +100,7 @@ function check(cond, msg) {
     await page.waitForSelector("table tbody tr td a", { timeout: 20000 });
     const total = await page.textContent("[data-testid=count]");
     check(/\d/.test(total) && !/^\s*0 \//.test(total.trim()), `bảng có dữ liệu (${total.trim()})`);
-    check(await page.isVisible("text=Giá trị chuyển nhượng và lương chưa có"), "ghi rõ chưa có giá trị chuyển nhượng, không đoán số");
+    check(await page.isVisible("text=Giá trị chuyển nhượng chưa có"), "ghi rõ chưa có giá trị chuyển nhượng, không đoán số");
     await page.waitForFunction(() => document.querySelectorAll("table tbody tr td:first-child img").length + document.querySelectorAll("table tbody tr td:first-child span[aria-hidden]").length >= 50);
     check(photoRequests.length > 0, "bảng xin ảnh theo mã cầu thủ từ máy chủ ảnh (không có file ảnh nào trong repo)");
     check((await page.locator("table tbody tr td:first-child span[aria-hidden]").count()) > 0, "ảnh lỗi/thiếu thì dùng avatar chữ viết tắt");

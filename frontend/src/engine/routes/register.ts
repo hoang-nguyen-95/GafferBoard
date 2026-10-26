@@ -2,6 +2,7 @@
 import { registerRoute as r } from "../api";
 import * as analysis from "./analysis";
 import * as compare from "./compare";
+import * as contracts from "./contracts";
 import * as manager from "./manager";
 import * as manual from "./manual";
 import * as notes from "./notes";
@@ -30,6 +31,8 @@ r("GET", "/compare/players", compare.comparePlayers);
 r("GET", "/compare/teams", compare.compareTeams);
 
 // Chế độ Manager (chỉ có ở engine TypeScript)
+r("GET", "/players/{player_id}/contract", contracts.playerContract);
+r("GET", "/manager/wages", contracts.wages);
 r("GET", "/manager/overview", manager.overview);
 r("GET", "/manager/targets", manager.targets);
 r("GET", "/manager/shortlist", manager.shortlist);
