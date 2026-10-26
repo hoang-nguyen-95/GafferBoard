@@ -36,3 +36,21 @@ khớp cột `contractvaliduntil` của bảng cầu thủ). Đây là số **đ
 Bảng cầu thủ thêm cột Lương, HĐ hết hạn, Mượn từ (khi save có dữ liệu); trang cầu thủ hiện lương, ngày hết hạn và đội gốc nếu đang mượn. Game chỉ lưu hợp đồng cho đội của bạn và đội dự bị.
 Mã: `frontend/src/engine/contracts.ts`, route `GET /manager/wages` và `GET /players/{id}/contract` (chỉ TypeScript, không có bản Python nên không nằm trong bộ đối chiếu).
 
+## Gợi ý gia hạn hợp đồng (tab Gia hạn hợp đồng)
+
+Dựa trên hợp đồng thật trong save (lương, ngày hết hạn) cho từng cầu thủ đội bạn. Mỗi cầu thủ được xếp vai trò (đá chính / tiềm năng trẻ / dự bị hữu ích / ít đóng góp), mức khẩn cấp theo số tháng còn lại
+(gấp ≤ 6, sớm ≤ 12, sau ≤ 24) và một gợi ý:
+
+| Gợi ý | Khi nào |
+|---|---|
+| Gia hạn | Đá chính, trẻ tiềm năng hoặc dự bị hữu ích còn dưới 31 tuổi, hợp đồng còn tối đa 24 tháng. Số năm: ≤ 23 tuổi 5 năm, 24–28 tuổi 4 năm, 29–30 tuổi 2 năm |
+| Gia hạn ngắn | Đá chính từ 31 tuổi (1 năm) |
+| Bán / cho đi | Ít đóng góp hoặc dự bị từ 31 tuổi mà hợp đồng còn dưới 12 tháng |
+| Theo dõi / Chưa cần | Ít đóng góp nhưng hợp đồng còn 12–24 tháng; hợp đồng còn trên 24 tháng |
+
+**Bậc lương:** game không xuất mức lương cầu thủ sẽ đòi, nên "lương tham chiếu" là lương trung vị của đồng đội cùng tầm OVR (±2, nới ra ±4 nếu dưới 3 người) trong chính đội bạn.
+Mở = giữ nguyên lương hiện tại; Mục tiêu = tham chiếu (không thấp hơn hiện tại); Trần = tham chiếu × 1,25 (trụ cột), 1,15 (trẻ tiềm năng), 1,05 (dự bị), không thấp hơn lương hiện tại.
+Các hệ số, số năm và ngưỡng ở `frontend/src/engine/renewals.ts` (`RENEWAL`) là **kinh nghiệm chung, chưa kiểm chứng với game**. Tab cũng cộng mức tăng quỹ lương nếu gia hạn tất cả
+và so với "quỹ lương còn trống" bạn nhập ở tab Ngân sách. Cầu thủ không có đồng đội cùng tầm (thường là ngôi sao) không có lương tham chiếu.
+Route `GET /manager/renewals`, test `engine/__tests__/renewals.test.ts`.
+

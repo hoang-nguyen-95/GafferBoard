@@ -354,3 +354,16 @@ export type PlayerContractInfo = {
   contract: { wage: number; duration_months: number; start_date: string | null; end_date: string | null; months_left: number | null; signon_bonus: number | null; loan_wage_split: number | null } | null;
   loan: { from_team_id: number; from_team_name: string | null; ends_on: string | null; to_buy: boolean } | null;
 };
+
+export type RenewalRow = {
+  player_id: number; name: string; age: number | null; overall: number; potential: number | null; role: string;
+  squad_role: "starter" | "prospect" | "rotation" | "surplus"; in_xi: boolean; wage: number; end_date: string | null; months_left: number | null;
+  urgency: "urgent" | "soon" | "later" | "none"; action: "renew" | "renew_short" | "sell" | "hold" | "none"; reason: string;
+  suggested_years: number | null; reference_wage: number | null; reference_peers: number;
+  wage_ladder: { open: number; target: number; walk: number } | null; wage_note: string;
+};
+export type RenewalPlan = {
+  available: boolean; reference_date: string; players: number; xi_average: number;
+  totals: { to_renew: number; to_sell: number; wage_total: number; extra_wage_target: number; extra_wage_max: number; budget_wage: number | null } | null;
+  warnings: string[]; rows: RenewalRow[];
+};

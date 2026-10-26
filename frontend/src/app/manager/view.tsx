@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BudgetTab } from "@/components/manager/BudgetTab";
 import { NeedsTab } from "@/components/manager/NeedsTab";
+import { RenewalsTab } from "@/components/manager/RenewalsTab";
 import { NegotiationTab } from "@/components/manager/NegotiationTab";
 import { TargetsTab } from "@/components/manager/TargetsTab";
 import type { ManagerOverview } from "@/lib/api";
 import { useApi } from "@/lib/engine";
 
 const TABS = [
-  ["needs", "Nhu cầu đội hình"], ["targets", "Mục tiêu chuyển nhượng"], ["budget", "Ngân sách & shortlist"], ["negotiate", "Đàm phán"],
+  ["needs", "Nhu cầu đội hình"], ["targets", "Mục tiêu chuyển nhượng"], ["budget", "Ngân sách & shortlist"], ["negotiate", "Đàm phán"], ["renewals", "Gia hạn hợp đồng"],
 ] as const;
 
 export default function ManagerView() {
@@ -60,6 +61,7 @@ export default function ManagerView() {
       {tab === "needs" && <NeedsTab data={overview.data} onFind={(r) => go({ tab: "targets", role: r })} />}
       {tab === "targets" && <TargetsTab role={role} onRole={(r) => go({ role: r })} onNegotiate={(id) => go({ tab: "negotiate", pid: String(id) })} />}
       {tab === "budget" && <BudgetTab onNegotiate={(id) => go({ tab: "negotiate", pid: String(id) })} />}
+      {tab === "renewals" && <RenewalsTab />}
       {tab === "negotiate" && <NegotiationTab playerId={pid} onPlayer={(id) => go({ pid: String(id) })} />}
     </div>
   );
