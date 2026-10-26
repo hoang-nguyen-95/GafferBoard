@@ -28,3 +28,11 @@ Script xuất đã được bổ sung các bảng `career_playercontract`, `care
 `career_scoutmission`, `career_playerlastgrowth`, `career_growthcurveinfo`, `career_playergrowthuserseason`, `career_managerinfo`, `career_manager`. Ứng dụng chưa đọc chúng (ứng dụng
 desktop bỏ qua file không nằm trong danh sách dùng). Sau khi bạn xuất lại và gửi tiêu đề cột (hoặc vài dòng đầu, đã bỏ thông tin riêng tư), có thể lập ánh xạ để dùng
 lương thật, thời hạn hợp đồng, danh sách chuyển nhượng, và đường cong tăng trưởng thay cho các giả định ở trên.
+
+## Quỹ lương và hợp đồng đọc từ save
+
+Tab **Ngân sách** hiện **Quỹ lương hiện tại**: tổng `wage` của các cầu thủ đội bạn trong `career_playercontract.csv`, 8 mức lương cao nhất và các hợp đồng còn dưới 12 tháng (ngày hết hạn = ngày bắt đầu + `duration_months`,
+khớp cột `contractvaliduntil` của bảng cầu thủ). Đây là số **đã chi**, không phải số còn trống: ngân sách chuyển nhượng và trần lương không có trong dữ liệu xuất nên vẫn nhập tay.
+Bảng cầu thủ thêm cột Lương, HĐ hết hạn, Mượn từ (khi save có dữ liệu); trang cầu thủ hiện lương, ngày hết hạn và đội gốc nếu đang mượn. Game chỉ lưu hợp đồng cho đội của bạn và đội dự bị.
+Mã: `frontend/src/engine/contracts.ts`, route `GET /manager/wages` và `GET /players/{id}/contract` (chỉ TypeScript, không có bản Python nên không nằm trong bộ đối chiếu).
+

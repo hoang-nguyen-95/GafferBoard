@@ -57,14 +57,14 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
     game kiểm tra.
 23. **Trang web có bộ dữ liệu cầu thủ công khai** (`frontend/public/data/players.json`, xem `docs/players-dataset.md`): đây là ngoại lệ có chủ đích của quy tắc "không commit dữ liệu game",
     do chủ dự án chọn sau khi được cảnh báo về rủi ro bản quyền/điều khoản của EA. Chỉ gồm chỉ số, không có ảnh/logo. Nếu cần gỡ: xóa thư mục `frontend/public/data/` và route `/cau-thu` sẽ báo lỗi tải dữ liệu.
-24. **Cột giá trị chuyển nhượng và lương chưa có** trong bảng cầu thủ (web và ứng dụng): bản xuất hiện tại không có bảng hợp đồng/chuyển nhượng; quyết định là không ước lượng số.
-    Khi có `career_playercontract.csv`/`career_transferblock.csv`, ánh xạ vào importer rồi thêm cột (xem `docs/players-dataset.md`).
+24. **Giá trị chuyển nhượng không có trong dữ liệu game**: bản xuất FC26 (34 bảng) không bảng nào chứa giá trị cầu thủ hay giá các thương vụ (`transfers`, `career_transferblock` trống), nên bảng cầu thủ không có cột này
+    và dự án không ước lượng. **Lương và hợp đồng chỉ có cho đội của người chơi và đội dự bị** (`career_playercontract`: 55 dòng, game không lưu cho đội khác); đơn vị `wage` (game hiển thị theo tuần?) chưa xác nhận.
+    Ngân sách chuyển nhượng và trần lương cũng không có trong bảng nào đã xuất, vẫn phải nhập tay ở tab Ngân sách.
 25. **Một số tên tiếng Việt trong bản xuất bị lỗi mã ký tự** (vd "BŇ" thay cho "Bỉ"). Bộ dựng dữ liệu công khai sửa bằng bảng cố định (`NATION_FIXES`, `NAME_FIXES` trong `backend/tools/build_players_dataset.py`);
     trong ứng dụng, tên đội/giải/quốc gia đọc từ save vẫn có thể bị lỗi mã nếu không nằm trong bảng đó.
 26. **Ảnh chân dung cầu thủ tải trực tiếp từ máy chủ ảnh của EA** (`PLAYER_PHOTO_URL` trong `frontend/src/lib/links.ts`), không lưu trong repo hay bản cài đặt; chủ dự án chọn làm vậy
     dù được cảnh báo về bản quyền (trang phi thương mại không loại trừ rủi ro). Địa chỉ dùng thư mục `FC25` (đúng như trang đánh giá của EA; `FC26` chưa có ảnh): kiểm tra 25 cầu thủ
     OVR>=75 thì 22 có ảnh, 25 cầu thủ OVR<65 thì chỉ 7 có; cầu thủ mới của FC26 không có ảnh. Không có ảnh thì giao diện dùng avatar chữ viết tắt. EA đổi/chặn bất cứ lúc nào cũng được;
     đặt `PLAYER_PHOTO_URL = ""` để tắt hẳn. Ứng dụng Windows cần có mạng mới hiện ảnh.
-27. **Chưa có dữ liệu hợp đồng/chuyển nhượng thật**: bản xuất mới nhất của người dùng chưa chứa `career_playercontract`, `career_transferblock`... (chỉ có tên bảng trong danh sách). Cần chạy lại `counterpick_export.lua`
-    rồi dùng nút "Xem cấu trúc các bảng chưa dùng" trong ứng dụng (xem `docs/live-editor-loop.md`) để lấy tên cột trước khi ánh xạ.
-
+27. **Hợp đồng/cho mượn chỉ đọc được khi save có hai file `career_playercontract.csv` và `playerloans.csv`** (script xuất v3 trở lên). Cột đã đối chiếu với một bản xuất thật; nếu bản Live Editor khác đổi tên cột,
+    ứng dụng báo "thiếu cột" và không nhập (cả lần nhập đó). Cầu thủ đang cho mượn đi vẫn được tính vào quỹ lương hiện tại (chưa rõ game chia lương mượn thế nào, cột `loan_wage_split` đều là -1 trong save đã xem).

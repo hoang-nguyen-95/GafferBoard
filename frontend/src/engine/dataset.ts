@@ -25,6 +25,7 @@ export function loadDataset(store: Store, ds: PlayersDataset): DatasetMeta {
   if (ds.version !== SUPPORTED_VERSION) throw new Error(`Phiên bản dữ liệu ${ds.version} không được hỗ trợ`);
   const data = store.data;
   data.leagues.clear(); data.teams.clear(); data.players.clear(); data.squad.clear(); data.standings.clear(); data.fixtures.clear();
+  data.contracts.clear(); data.loans.clear(); // bộ dữ liệu công khai không có hợp đồng (chỉ là của một save cụ thể)
 
   for (const r of records(ds.tables.leagues)) {
     data.leagues.set(r.league_id as number, { country_id: null, ...r, is_international: Boolean(r.is_international), is_women: Boolean(r.is_women) } as League);

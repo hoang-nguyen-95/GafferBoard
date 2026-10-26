@@ -186,7 +186,7 @@ function check(cond, msg) {
     const listed = Number((await page.textContent("[data-testid=count]")).replace(/\D/g, ""));
     const apiCount = await page.evaluate(async () => (await (await fetch("/api/players?limit=1000")).json()).length);
     check(listed > 0 && listed <= (apiCount === 1000 ? 1e9 : apiCount), `bảng liệt kê cầu thủ của save (${listed}, API ${apiCount})`);
-    check(await page.isVisible("text=Giá trị chuyển nhượng và lương chưa có"), "báo chưa có giá trị chuyển nhượng");
+    check(await page.isVisible("text=Giá trị chuyển nhượng chưa có"), "báo chưa có giá trị chuyển nhượng");
     await page.click("table tbody tr:first-child td:first-child a");
     await page.waitForSelector("text=Tất cả chỉ số");
     check(await page.isVisible("a:has-text('Gợi ý đàm phán')"), "trang cầu thủ trong ứng dụng vẫn có nút Manager");

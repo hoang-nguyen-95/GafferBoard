@@ -31,5 +31,8 @@ if (mapping.lineups) {
   known.add(mapping.lineups.teamsheets_file.toLowerCase());
   known.add(mapping.lineups.formations_file.toLowerCase());
 }
+// Hợp đồng và cho mượn (engine/contracts.ts) nằm ngoài mapping.json nên khai báo riêng.
+const extra = JSON.parse(fs.readFileSync(path.join(root, "frontend", "src", "engine", "data", "extra-files.json"), "utf8"));
+for (const f of Object.values(extra)) known.add(String(f).toLowerCase());
 fs.writeFileSync(path.join(dest, "known-files.json"), JSON.stringify([...known].sort(), null, 2));
 console.log("Đã chuẩn bị desktop/app từ", web, `(${known.size} file CSV được dùng)`);

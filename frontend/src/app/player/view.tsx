@@ -7,7 +7,7 @@ import { NotFoundNote } from "@/components/NotFoundNote";
 import { ShortlistButton } from "@/components/ShortlistButton";
 import { Radar } from "@/components/Radar";
 import { PLAYER_ATTRS } from "@/engine/types";
-import { type AttributeScore, type Player, type PlayerAnalysis, playerName } from "@/lib/api";
+import { type AttributeScore, type PlayerContractInfo, type Player, type PlayerAnalysis, playerName } from "@/lib/api";
 import { useApi, useNations } from "@/lib/engine";
 import { percentileColor, positionsLabel } from "@/lib/positions";
 import { teamHref } from "@/lib/routes";
@@ -20,6 +20,7 @@ export default function PlayerView() {
   const p = useApi<Player>(base);
   const a = useApi<PlayerAnalysis>(base && `${base}/analysis`);
   const nations = useNations();
+  const contract = useApi<PlayerContractInfo>(base && `${base}/contract`)?.data ?? null;
   if (!p || !a) return <p className="text-zinc-500">Đang tải…</p>;
   if (!p.data || !a.data) return <NotFoundNote what="cầu thủ" />;
   const player = p.data, analysis = a.data;
@@ -61,7 +62,12 @@ export default function PlayerView() {
             ["Ngày sinh", player.birth_date],
             ["Danh tiếng", player.international_rep != null ? `${player.international_rep}★` : null],
             ["HĐ đến", player.contract_until],
-          ].map(([label, value]) => (
+            ["Lương", contract?.contract ? contract.contract.wage.toLocaleString("vi-VN") : null],
+            ["HĐ hết hạn", contract?.contract?.end_date ?? null],
+            ["Mượn từ", contract?.loan ? `${contract.loan.from_team_name ?? `#${contract.loan.from_team_id}`}${contract.loan.ends_on ? ` (đến ${contract.loan.ends_on})` : ""}` : null],
+          ]
+            .filter(([label, value]) => value != null || !["Lương", "HĐ hết hạn", "Mượn từ"].includes(label as string))
+            .map(([label, value]) => (
             <div key={label as string}>
               <dt className="text-xs text-zinc-500">{label}</dt>
               <dd className="text-lg font-semibold tabular-nums">{value ?? "–"}</dd>
@@ -121,7 +127,7 @@ export default function PlayerView() {
           ))}
         </dl>
         <p className="mt-3 text-xs text-zinc-500">
-          Giá trị chuyển nhượng và lương chưa có: dữ liệu hợp đồng/chuyển nhượng của game chưa được xuất, nên chưa hiển thị số nào.
+          Giá trị chuyển nhượng chưa có: game không lưu số này trong dữ liệu nên chúng tôi không hiển thị. Lương và hợp đồng chỉ có cho đội của bạn và đội dự bị trong save.
           {" "}<Link href="/cau-thu" className="underline">Về danh sách cầu thủ</Link>
         </p>
       </section>
