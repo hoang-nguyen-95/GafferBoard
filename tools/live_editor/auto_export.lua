@@ -14,7 +14,7 @@
 
 local OUT_DIR = "D:/XboxGames/fc_exports"
 
-local SCRIPT_VERSION = "counterpick_auto v2"
+local SCRIPT_VERSION = "counterpick_auto v3"
 local FAST_MIN_GAP = 20      -- giây tối thiểu giữa hai lần xuất nhanh
 local HEAVY_MIN_GAP = 300    -- giây tối thiểu giữa hai lần xuất bảng nặng (players, tên...)
 local CONTROL_POLL_GAP = 5   -- giây tối thiểu giữa hai lần kiểm tra file điều khiển / ghi nhịp tim
@@ -36,6 +36,9 @@ local FAST_PATTERNS = {
 
 -- Sự kiện Career Mode (ENUM_CM_EVENT_MSG_*). Dùng hằng của Live Editor nếu có, không thì số đã đối chiếu với enums.lua (v26.3.6).
 pcall(require, "imports/career_mode/enums")
+-- GetUserTeamID nằm trong helpers của Career Mode, GetCurrentDate trong helpers chung: không nạp thì hai hàm này "không có hàm".
+pcall(require, "imports/career_mode/helpers")
+pcall(require, "imports/other/helpers")
 local function ev(name, fallback) return rawget(_G, "ENUM_CM_EVENT_MSG_" .. name) or fallback end
 
 local HEAVY_EVENTS, FAST_EVENTS, CHECK_EVENTS = {}, {}, {}

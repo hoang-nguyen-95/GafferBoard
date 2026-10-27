@@ -216,6 +216,18 @@ def test_trang_thai_cap_nhat_ngay_khi_so_doi_khong_can_xuat_bang(env):
     assert env.text("cp_state.csv").splitlines()[1].split(",")[1] == "999"
 
 
+def test_nap_helpers_de_co_ham_ngay_va_doi(env):
+    # trong Live Editor thật GetUserTeamID/GetCurrentDate chỉ có sau khi require helpers
+    env.set("GetCurrentDate = nil; GetUserTeamID = nil")
+    env.set("""package.preload['imports/other/helpers'] = function()
+        function GetCurrentDate() return {day = 9, month = 8, year = 2026} end
+        function GetUserTeamID() return 11 end
+        return true
+    end""")
+    env.run_script()
+    assert env.text("cp_state.csv").splitlines()[1].split(",")[:3] == ["11", "77000000", "2026-08-09"]
+
+
 def test_ham_loi_chi_ghi_log_mot_lan(env):
     env.set('function GetUserTeamID() error("chưa có save") end')
     env.run_script()
