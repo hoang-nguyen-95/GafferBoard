@@ -14,7 +14,7 @@
 
 local OUT_DIR = "D:/XboxGames/fc_exports"
 
-local SCRIPT_VERSION = "counterpick_auto v1"
+local SCRIPT_VERSION = "counterpick_auto v2"
 local FAST_MIN_GAP = 20      -- giây tối thiểu giữa hai lần xuất nhanh
 local HEAVY_MIN_GAP = 300    -- giây tối thiểu giữa hai lần xuất bảng nặng (players, tên...)
 local CONTROL_POLL_GAP = 5   -- giây tối thiểu giữa hai lần kiểm tra file điều khiển / ghi nhịp tim
@@ -168,20 +168,42 @@ local function export_tables(patterns)
 end
 
 -- Những thứ không nằm trong bảng nào: ngân sách chuyển nhượng, ngày trong game, đội của người chơi.
-local function write_state(event_id, kind)
-    local function try(fn, ...)
-        if type(fn) ~= "function" then return nil end
-        local ok, v = pcall(fn, ...)
-        if ok then return v end
+-- Đọc từng giá trị bằng pcall; hàm nào lỗi hoặc trả nil thì ghi lý do vào log MỘT lần (khỏi spam) để biết hàm nào của Live Editor không dùng được.
+-- Lưu ý: GetTransferBudget của Live Editor v26.3.6 chỉ là hàm giả (in cảnh báo rồi trả nil), phải dùng GetUserTransferBudget.
+local function read_state()
+    S.logged = S.logged or {}
+    local function try(name, fn, ...)
+        local why
+        if type(fn) ~= "function" then
+            why = "không có hàm"
+        else
+            local ok, v = pcall(fn, ...)
+            if ok and v ~= nil then return v end
+            why = ok and "trả về nil" or tostring(v)
+        end
+        local msg = name .. ": " .. why
+        if not S.logged[msg] then
+            S.logged[msg] = true
+            log("Không đọc được " .. msg)
+        end
         return nil
     end
-    local team = try(GetUserTeamID)
-    local budget = try(GetTransferBudget)
-    local d = try(GetCurrentDate)
+    local budget = try("GetUserTransferBudget", GetUserTransferBudget)
+    if type(budget) ~= "number" then budget = try("GetTransferBudget", GetTransferBudget) end
+    local d = try("GetCurrentDate", GetCurrentDate)
     local date = ""
     if type(d) == "table" and d.year and d.month and d.day then
         date = string.format("%04d-%02d-%02d", d.year, d.month, d.day)
     end
+    return { team = try("GetUserTeamID", GetUserTeamID), budget = type(budget) == "number" and budget or nil, date = date }
+end
+
+local function state_sig(st)
+    return tostring(st.team) .. "|" .. tostring(st.budget) .. "|" .. st.date
+end
+
+local function write_state(event_id, kind, st)
+    st = st or read_state()
     local stamp = ""
     if os and os.date then
         local ok, t = pcall(os.date, "%Y-%m-%d %H:%M:%S")
@@ -190,9 +212,18 @@ local function write_state(event_id, kind)
     write_atomic("cp_state.csv", function(f)
         f:write("user_team_id,transfer_budget,game_date,last_event,export_kind,exported_at,script_version\n")
         f:write(table.concat({
-            csv_cell(team), csv_cell(budget), csv_cell(date), csv_cell(event_id), csv_cell(kind), csv_cell(stamp), csv_cell(SCRIPT_VERSION),
+            csv_cell(st.team), csv_cell(st.budget), csv_cell(st.date), csv_cell(event_id), csv_cell(kind), csv_cell(stamp), csv_cell(SCRIPT_VERSION),
         }, ","), "\n")
     end)
+    S.state_sig = state_sig(st)
+end
+
+-- Ngân sách đổi sau mỗi thương vụ và đội/ngày chỉ có khi save nạp xong: cập nhật cp_state.csv ngay khi số đổi, không chờ đợt xuất bảng.
+local function refresh_state(event_id)
+    local st = read_state()
+    if state_sig(st) ~= S.state_sig and (st.team ~= nil or st.budget ~= nil or st.date ~= "") then
+        write_state(event_id, "state", st)
+    end
 end
 
 local function heartbeat(state)
@@ -242,6 +273,7 @@ local function on_event(_, event_id, _)
             want_full = true
         end
         heartbeat("idle:" .. tostring(event_id))
+        refresh_state(event_id)
     end
 
     if HEAVY_EVENTS[event_id] then S.pending_heavy = true; S.pending_fast = true end

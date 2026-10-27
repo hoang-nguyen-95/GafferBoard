@@ -27,8 +27,12 @@ function AddEventHandler(name, fn)
 end
 IN_CM = true
 function IsInCM() return IN_CM end
-function GetUserTeamID() return 11 end
-function GetTransferBudget() return 77000000 end
+USER_TEAM = 11
+function GetUserTeamID() return USER_TEAM end
+BUDGET = 77000000
+function GetUserTransferBudget() return BUDGET end
+-- Live Editor v26.3.6: hàm cũ chỉ in cảnh báo rồi trả nil
+function GetTransferBudget() return nil end
 function GetCurrentDate() return {day = 5, month = 8, year = 2026} end
 TABLES = {"players", "playernames", "teams", "fixtures", "career_users", "audio_junk", "leagueteamlinks"}
 function GetDBTablesNames() return TABLES end
@@ -140,7 +144,7 @@ def test_vua_nap_save_thi_doi_su_kien_ke_tiep(env):
     env.run_script()
     env.set("IN_CM = true")
     env.fire(POST_LOAD)
-    assert env.files() == set()                     # dữ liệu có thể chưa sẵn sàng ngay lúc nạp
+    assert env.files() <= {"cp_state.csv"}          # chưa xuất bảng (dữ liệu có thể chưa sẵn sàng ngay lúc nạp), chỉ cập nhật trạng thái
     env.tick(1)
     env.fire(DAY_PASSED)
     assert "players.csv" in env.files()             # lần đầu của phiên: xuất đầy đủ
@@ -174,10 +178,52 @@ def test_mot_bang_loi_khong_lam_hong_ca_dot_xuat(env):
 
 
 def test_thieu_ham_ngan_sach_van_ghi_trang_thai(env):
-    env.set("GetTransferBudget = nil; GetCurrentDate = nil")
+    env.set("GetUserTransferBudget = nil; GetTransferBudget = nil; GetCurrentDate = nil")
     env.run_script()
     cells = env.text("cp_state.csv").splitlines()[1].split(",")
     assert cells[0] == "11" and cells[1] == "" and cells[2] == ""
+
+
+def test_dung_ham_moi_va_chi_roi_ve_ham_cu_khi_co_so(env, tmp_path):
+    env.run_script()
+    assert env.text("cp_state.csv").splitlines()[1].split(",")[1] == "77000000"
+    other = tmp_path / "b"
+    other.mkdir()
+    env2 = Env(other)
+    env2.set("GetUserTransferBudget = nil; function GetTransferBudget() return 5000 end")
+    env2.run_script()
+    assert env2.text("cp_state.csv").splitlines()[1].split(",")[1] == "5000"
+
+
+def test_trang_thai_cap_nhat_ngay_khi_so_doi_khong_can_xuat_bang(env):
+    env.set("USER_TEAM = nil; BUDGET = nil; GetCurrentDate = function() return nil end")   # save chưa nạp xong
+    env.run_script()
+    assert env.text("cp_state.csv").splitlines()[1].split(",")[:3] == ["", "", ""]
+    env.clear()
+    env.set("USER_TEAM = 11; BUDGET = 1234; GetCurrentDate = function() return {day = 1, month = 7, year = 2026} end")
+    env.tick(6)
+    env.fire(CPU_MATCH)                              # sự kiện không liên quan nhưng đủ để kiểm tra lại số
+    assert env.files() == {"cp_state.csv"}           # chỉ cập nhật trạng thái, không xuất bảng
+    cells = env.text("cp_state.csv").splitlines()[1].split(",")
+    assert cells[:3] == ["11", "1234", "2026-07-01"] and cells[4] == "state"
+    env.clear()
+    env.tick(6)
+    env.fire(CPU_MATCH)
+    assert env.files() == set()                      # số không đổi thì không ghi lại
+    env.set("BUDGET = 999")                          # sau một thương vụ
+    env.tick(6)
+    env.fire(CPU_MATCH)
+    assert env.text("cp_state.csv").splitlines()[1].split(",")[1] == "999"
+
+
+def test_ham_loi_chi_ghi_log_mot_lan(env):
+    env.set('function GetUserTeamID() error("chưa có save") end')
+    env.run_script()
+    for _ in range(3):
+        env.tick(30)
+        env.fire(DAY_PASSED)
+    assert env.logs().count("Không đọc được GetUserTeamID") == 1
+    assert "chưa có save" in env.logs()
 
 
 def test_loi_trong_bo_xu_ly_khong_nem_ra_ngoai(env):
