@@ -228,6 +228,21 @@ def test_nap_helpers_de_co_ham_ngay_va_doi(env):
     assert env.text("cp_state.csv").splitlines()[1].split(",")[:3] == ["11", "77000000", "2026-08-09"]
 
 
+def test_buoc_dam_phan_xong_thi_xuat_va_ghi_nhat_ky_su_kien(env):
+    env.run_script()
+    env.clear()
+    env.tick(30)
+    env.fire(139)                                    # USER_TRANSFER_CLUB_STAGE_FINISHED: xong bước với CLB bán
+    assert {"fixtures.csv", "cp_state.csv"} <= env.files()
+    assert "players.csv" not in env.files()
+    env.fire(CPU_MATCH)
+    env.fire(CPU_MATCH)
+    env.tick(6)
+    env.fire(CPU_MATCH)                              # tới chu kỳ kiểm tra: ghi nhật ký sự kiện
+    counts = dict(line.split(",") for line in env.text("cp_events.txt").splitlines()[1:])
+    assert counts["139"] == "1" and counts[str(CPU_MATCH)] == "3"
+
+
 def test_ham_loi_chi_ghi_log_mot_lan(env):
     env.set('function GetUserTeamID() error("chưa có save") end')
     env.run_script()

@@ -14,7 +14,7 @@
 
 local OUT_DIR = "D:/XboxGames/fc_exports"
 
-local SCRIPT_VERSION = "counterpick_auto v3"
+local SCRIPT_VERSION = "counterpick_auto v4"
 local FAST_MIN_GAP = 20      -- giây tối thiểu giữa hai lần xuất nhanh
 local HEAVY_MIN_GAP = 300    -- giây tối thiểu giữa hai lần xuất bảng nặng (players, tên...)
 local CONTROL_POLL_GAP = 5   -- giây tối thiểu giữa hai lần kiểm tra file điều khiển / ghi nhịp tim
@@ -55,6 +55,11 @@ for _, e in ipairs({
     ev("USER_LOANLISTED", 138), ev("USER_TRANSFER_OFFER_RECEIVED", 143), ev("USER_LOAN_OFFER_RECEIVED", 144),
     ev("USER_CONTRACT_RENEWAL", 145), ev("PLAYER_MADE_AVAILABLE_FOR_TRANSFER", 80),
     ev("BACK_FROM_INJURY", 66), ev("LONGTERM_INJURY", 122),
+    -- các bước đàm phán của người chơi: xong bước với CLB bán, xong bước hợp đồng với cầu thủ, vào danh sách theo dõi...
+    ev("TRANSFER_MOVE_ABOUT_TO_COMPLETE", 85), ev("USER_SHORTLISTED", 136),
+    ev("USER_TRANSFER_CLUB_STAGE_FINISHED", 139), ev("USER_LOAN_CLUB_STAGE_FINISHED", 140),
+    ev("USER_TRANSFER_PLAYER_STAGE_FINISHED", 141), ev("USER_LOAN_PLAYER_STAGE_FINISHED", 142),
+    ev("LOAN_BUY_LOAN_CONTRACT_ACCEPTED", 103), ev("LOAN_BUY_NEGOTIATE_PLAYER_CONTRACT_OFFER", 106),
 }) do FAST_EVENTS[e] = true end
 for _, e in ipairs({ ev("SCREEN_HAS_DONE_LOADING", 68), ev("ENTERING_TEAM_MANAGEMENT", 82) }) do CHECK_EVENTS[e] = true end
 local POST_LOAD = ev("POST_LOAD_PREPARE", 29)
@@ -237,6 +242,19 @@ local function heartbeat(state)
     end
 end
 
+-- Nhật ký các sự kiện đã thấy (mã và số lần) trong cp_events.txt: để biết game phát sự kiện nào khi bạn mua bán, rồi chỉnh bộ lọc cho đúng.
+local function write_events()
+    local ids = {}
+    for id in pairs(S.seen) do ids[#ids + 1] = id end
+    table.sort(ids)
+    local f = io.open(OUT_DIR .. "/cp_events.txt", "w")
+    if not f then return end
+    f:write("event_id,count\n")
+    for _, id in ipairs(ids) do f:write(tostring(id), ",", tostring(S.seen[id]), "\n") end
+    f:close()
+    S.seen_dirty = false
+end
+
 local function in_career()
     if type(IsInCM) ~= "function" then return true end
     local ok, v = pcall(IsInCM)
@@ -262,6 +280,9 @@ local function on_event(_, event_id, _)
     if S.busy then return end
     if not in_career() then return end
     local t = now()
+    S.seen = S.seen or {}
+    S.seen[event_id] = (S.seen[event_id] or 0) + 1
+    S.seen_dirty = true
 
     -- file điều khiển (không kiểm tra ở mọi sự kiện để khỏi tốn)
     local want_full = false
@@ -277,6 +298,7 @@ local function on_event(_, event_id, _)
         end
         heartbeat("idle:" .. tostring(event_id))
         refresh_state(event_id)
+        if S.seen_dirty then write_events() end
     end
 
     if HEAVY_EVENTS[event_id] then S.pending_heavy = true; S.pending_fast = true end
