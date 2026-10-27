@@ -9,6 +9,10 @@ declare global {
     watching: boolean;
     /** Nhịp tim của script xuất lặp trong Live Editor; null nếu chưa thấy. */
     heartbeat: { ageSeconds: number; state: string } | null;
+    /** Lần cuối script tự động ghi dữ liệu (theo cp_state.csv); null nếu chưa từng. */
+    lastExport: { ageSeconds: number } | null;
+    /** Việc ứng dụng đã tự làm: thư mục script/autorun tìm được, số script vừa chép, lỗi (nếu có). */
+    setup: { scriptDir: string | null; autorunDirs: string[]; written: number; errors: string[] };
   }
   interface DesktopFile { name: string; sig: string; text: string }
   interface DesktopApi {

@@ -5,7 +5,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { resolveAppPath } = require("../src/protocol");
 const { createWatcher } = require("../src/watcher");
-const { findScriptDir, installScript, installScripts, renderScript, SCRIPTS } = require("../src/lesetup");
+const { detectLiveEditor, findAutorunDir, findScriptDir, installScript, installScripts, renderScript, syncScripts, SCRIPTS } = require("../src/lesetup");
 const { createConfig } = require("../src/config");
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), "cp-desktop-"));
@@ -88,6 +88,41 @@ test("lesetup: tìm thư mục script và chép script", () => {
   fs.writeFileSync(tpl, 'local OUT_DIR = "old"\n');
   const out = installScript({ templatePath: tpl, targetDir: findScriptDir(le), exportDir: path.join(tmp(), "exports") });
   assert.match(fs.readFileSync(out, "utf8"), /^local OUT_DIR = "[^"]*exports"\n$/);
+});
+
+test("lesetup: tự dò Live Editor (thư mục chạy có lua/scripts, thư mục dữ liệu có lua/autorun)", () => {
+  const root = tmp();
+  const run = path.join(root, "XboxGames", "FC 26 LE v26.3.6");
+  const data = path.join(root, "FC 26 Live Editor");
+  fs.mkdirSync(path.join(run, "lua", "scripts"), { recursive: true });
+  fs.writeFileSync(path.join(run, "FCLiveEditor.DLL"), "x");
+  fs.mkdirSync(path.join(data, "lua", "autorun"), { recursive: true });
+  fs.mkdirSync(path.join(root, "XboxGames", "Steam", "lua", "scripts"), { recursive: true }); // không phải Live Editor
+  fs.mkdirSync(path.join(root, "XboxGames", "(TU 1.6.6) MOD VLEAGUE  FC26 v17 Final", "lua", "scripts"), { recursive: true });
+  const found = detectLiveEditor([root, path.join(root, "XboxGames")]);
+  assert.equal(found.leDir, run);
+  assert.equal(found.scriptDir, path.join(run, "lua", "scripts"));
+  assert.deepEqual(found.autorunDirs, [path.join(data, "lua", "autorun")]);
+  assert.equal(findAutorunDir(data), path.join(data, "lua", "autorun"));
+  assert.equal(findAutorunDir(run), null);
+  // thư mục dữ liệu không có lua/scripts nên không bị nhận nhầm là nơi chạy
+  assert.deepEqual(detectLiveEditor([path.join(root, "nope")]), { leDir: null, scriptDir: null, autorunDirs: [] });
+});
+
+test("lesetup: đồng bộ script chỉ ghi file khác nội dung, script tự động vào cả autorun", () => {
+  const live = path.resolve(__dirname, "../../tools/live_editor");
+  const scriptDir = tmp(), autorunDir = tmp();
+  const exportDir = path.join(tmp(), "exports");
+  const first = syncScripts({ templateDir: live, scriptDir, autorunDirs: [autorunDir], exportDir });
+  assert.equal(first.errors.length, 0);
+  assert.equal(first.written.length, SCRIPTS.length + 1);
+  assert.ok(fs.existsSync(path.join(autorunDir, "counterpick_auto.lua")));
+  assert.ok(!fs.existsSync(path.join(autorunDir, "counterpick_export.lua")), "script chạy tay không vào autorun");
+  assert.match(fs.readFileSync(path.join(autorunDir, "counterpick_auto.lua"), "utf8"), /local OUT_DIR = "[^"]*exports"/);
+  assert.equal(syncScripts({ templateDir: live, scriptDir, autorunDirs: [autorunDir], exportDir }).written.length, 0, "chạy lại không ghi gì");
+  const other = path.join(tmp(), "other");
+  assert.equal(syncScripts({ templateDir: live, scriptDir, autorunDirs: [autorunDir], exportDir: other }).written.length, SCRIPTS.length + 1, "đổi thư mục xuất thì cập nhật lại");
+  assert.equal(syncScripts({ templateDir: path.join(tmp(), "khong-co"), scriptDir, exportDir }).errors.length, SCRIPTS.length);
 });
 
 test("config: lưu và đọc lại, file hỏng thì dùng mặc định", () => {

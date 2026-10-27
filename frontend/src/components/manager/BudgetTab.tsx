@@ -122,10 +122,18 @@ export function BudgetTab({ onNegotiate }: { onNegotiate: (id: number) => void }
       <section className="space-y-3">
         <h2 className="font-semibold">Số liệu từ màn Tài chính của game</h2>
         <p className="text-xs text-zinc-500">
-          Dữ liệu xuất từ Live Editor không có ngân sách chuyển nhượng hay trần lương, nên bạn nhập số còn lại đọc trong game (giữ cùng một đơn vị cho mọi ô, ví dụ 25000000 cho 25 triệu).
+          Ngân sách chuyển nhượng được script tự động trong Live Editor đọc thẳng từ game mỗi khi có thay đổi, không cần nhập. Trần lương không có trong dữ liệu nên vẫn nhập tay
+          (giữ cùng một đơn vị cho mọi ô, ví dụ 25000000 cho 25 triệu). Muốn dùng số khác với game, nhập vào ô ngân sách; xóa ô đó để quay về số tự đọc.
         </p>
+        {d.game && (
+          <p className="text-xs text-emerald-700 dark:text-emerald-400">
+            Đã nhận từ game{d.game.date ? ` (ngày trong game ${d.game.date})` : ""}{d.game.exported_at ? `, cập nhật ${d.game.exported_at}` : ""}.
+          </p>
+        )}
         <div className="flex flex-wrap items-end gap-3">
-          <Field label="Ngân sách chuyển nhượng còn lại"><input type="number" min={0} value={transfer ?? d.budget.transfer ?? ""} onChange={(e) => setTransfer(e.target.value)} className={`w-40 ${inputCls}`} /></Field>
+          <Field label="Ngân sách chuyển nhượng còn lại" hint={d.effective_budget.transfer_source === "game" ? "Tự đọc từ game" : d.effective_budget.transfer_source === "manual" ? "Bạn nhập tay" : undefined}>
+            <input type="number" min={0} value={transfer ?? d.budget.transfer ?? d.effective_budget.transfer ?? ""} onChange={(e) => setTransfer(e.target.value)} className={`w-40 ${inputCls}`} />
+          </Field>
           <Field label="Quỹ lương còn trống"><input type="number" min={0} value={wage ?? d.budget.wage ?? ""} onChange={(e) => setWage(e.target.value)} className={`w-32 ${inputCls}`} /></Field>
           <Field label="Năm kết thúc mùa" hint={`Đang dùng ${d.season_end_year}; để trống = tự đoán`}>
             <input type="number" min={2000} max={2100} value={year ?? ""} placeholder={String(d.season_end_year)} onChange={(e) => setYear(e.target.value)} className={`w-28 ${inputCls}`} />

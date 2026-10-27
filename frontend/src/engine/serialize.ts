@@ -11,8 +11,13 @@ export function todayLocal(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** Ngày tham chiếu để tính tuổi: ngày sớm nhất trong lịch đã nhập, không có thì hôm nay. */
+/**
+ * Ngày tham chiếu để tính tuổi: ngày trong game do script tự động ghi (nếu có và đáng tin), không thì ngày sớm nhất trong lịch
+ * đã nhập, không có nữa thì hôm nay.
+ */
 export function referenceDate(store: Store): string {
+  const gameDate = store.data.gameState?.date;
+  if (gameDate) return gameDate;
   let earliest: string | null = null;
   for (const f of store.data.fixtures.values()) {
     if (f.fixture_date !== null && (earliest === null || f.fixture_date < earliest)) earliest = f.fixture_date;

@@ -71,7 +71,7 @@ export function DesktopPanel() {
 
       <div className="space-y-1 text-sm">
         <p>
-          <b>Thư mục Live Editor:</b> {state?.leDir ? <code>{state.leDir}</code> : <span className="text-zinc-500">chưa chọn (không bắt buộc)</span>}
+          <b>Thư mục Live Editor:</b> {state?.leDir ? <code>{state.leDir}</code> : <span className="text-zinc-500">chưa tìm thấy, bạn có thể chọn tay</span>}
         </p>
         <div className="flex flex-wrap gap-2">
           <button type="button" className={btn} onClick={async () => setState(await api.chooseLeDir())}>
@@ -84,29 +84,34 @@ export function DesktopPanel() {
           )}
         </div>
         <p className="text-xs text-zinc-500">
-          Các script được chép sẵn với đúng thư mục xuất ở trên. Trong Live Editor vào Features → Lua Engine, chọn script
-          <code> counterpick_export.lua</code> (xuất một lần) và Execute.
+          Ứng dụng tự cập nhật script mỗi khi mở. Muốn xuất một lần bằng tay: Live Editor → Features → Lua Engine, chọn
+          <code> counterpick_export.lua</code> và Execute.
         </p>
         {message && <p className="text-xs">{message}</p>}
       </div>
 
       {state?.exportDir && (
         <div className="space-y-2 rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
-          <p className="font-medium">Tự xuất lặp lại trong Live Editor <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300">thử nghiệm</span></p>
+          <p className="font-medium">Tự động xuất khi chơi</p>
           <p className="text-xs text-zinc-500">
-            Chạy <code>counterpick_probe_loop.lua</code> trước (10 giây, chỉ để xem game có bị đơ không). Nếu ổn, chạy <code>counterpick_export_loop.lua</code> một lần mỗi phiên chơi:
-            script ở lại và tự xuất lại dữ liệu; tạo file <code>stop.txt</code> trong thư mục xuất để dừng.
+            Ứng dụng tự tìm Live Editor và chép script <code>counterpick_auto.lua</code> (vào cả thư mục <code>lua/autorun</code> để chạy mỗi khi mở game).
+            Khi bạn chơi Career, script tự xuất lại dữ liệu sau mỗi ngày, trận đấu hay thương vụ, kèm ngân sách chuyển nhượng và ngày trong game. Không cần bấm gì trong Live Editor.
           </p>
-          <p className={state.heartbeat && state.heartbeat.ageSeconds < 30 ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-500"}>
-            {state.heartbeat
-              ? state.heartbeat.ageSeconds < 30
-                ? `Script xuất lặp đang chạy (nhịp ${state.heartbeat.ageSeconds} giây trước, trạng thái: ${state.heartbeat.state}).`
-                : `Thấy dấu vết script xuất lặp nhưng đã ${state.heartbeat.ageSeconds} giây không có nhịp (có thể đã dừng).`
-              : "Chưa thấy script xuất lặp chạy."}
+          <p className={state.setup?.scriptDir || state.setup?.autorunDirs.length ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400"}>
+            {state.setup?.scriptDir || state.setup?.autorunDirs.length
+              ? `Đã cài script${state.setup.autorunDirs.length ? " (có autorun)" : ""}${state.setup.written ? `, vừa cập nhật ${state.setup.written} file` : ""}.`
+              : "Chưa tìm thấy Live Editor trên máy: hãy chọn thư mục Live Editor ở dưới."}
+          </p>
+          {state.setup?.errors.length ? <p className="text-xs text-red-600">{state.setup.errors.join(" · ")}</p> : null}
+          <p className={state.lastExport ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-500"}>
+            {state.lastExport
+              ? `Dữ liệu từ game cập nhật lần cuối ${state.lastExport.ageSeconds < 90 ? `${state.lastExport.ageSeconds} giây` : `${Math.round(state.lastExport.ageSeconds / 60)} phút`} trước.`
+              : "Chưa nhận dữ liệu từ script tự động. Mở game, vào Career rồi chơi/qua một ngày. Nếu Live Editor không tự chạy autorun: Lua Engine → counterpick_auto.lua → Execute một lần mỗi phiên."}
           </p>
           <button type="button" className={btn} onClick={async () => setMessage((await api.requestExport()).message)}>
             Yêu cầu xuất lại ngay
           </button>
+          <p className="text-xs text-zinc-500">Tạo file <code>stop.txt</code> trong thư mục xuất để tạm dừng, xóa đi để chạy tiếp.</p>
         </div>
       )}
 

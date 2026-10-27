@@ -335,7 +335,12 @@ export type ShortlistRow = {
 };
 export type SaleRow = { player_id: number; expected_fee: number | null; wage: number | null; player: ManagerPlayer };
 export type BudgetSummary = {
-  budget: { transfer: number | null; wage: number | null }; season_end_year: number; items: ShortlistRow[]; sales: SaleRow[];
+  budget: { transfer: number | null; wage: number | null };
+  /** Ngân sách đang dùng: số nhập tay nếu có, không thì số script Live Editor tự đọc từ game. */
+  effective_budget: { transfer: number | null; transfer_source: "manual" | "game" | null };
+  /** Trạng thái game script tự động đã ghi (cp_state.csv); null nếu chưa có. */
+  game: { transfer_budget: number | null; date: string | null; exported_at: string | null } | null;
+  season_end_year: number; items: ShortlistRow[]; sales: SaleRow[];
   totals: {
     planned_spend: number; committed_spend: number; sales_income: number; transfer_after: number | null;
     wage_added: number; wage_saved: number; wage_after: number | null;

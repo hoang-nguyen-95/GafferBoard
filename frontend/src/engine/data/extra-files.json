@@ -1,4 +1,5 @@
 {
   "contracts": "career_playercontract.csv",
-  "loans": "playerloans.csv"
+  "loans": "playerloans.csv",
+  "state": "cp_state.csv"
 }

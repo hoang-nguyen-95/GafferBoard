@@ -16,7 +16,7 @@ fs.cpSync(web, path.join(dest, "web"), { recursive: true });
 // Bộ dữ liệu cầu thủ công khai (~5 MB) chỉ dành cho trang web; ứng dụng đọc dữ liệu save của người dùng nên không đóng gói file này.
 fs.rmSync(path.join(dest, "web", "data", "players.json"), { force: true });
 fs.mkdirSync(path.join(dest, "scripts"), { recursive: true });
-for (const f of ["export_tables.lua", "probe_loop.lua", "export_loop.lua"]) {
+for (const f of ["auto_export.lua", "export_tables.lua", "probe_loop.lua", "export_loop.lua"]) {
   fs.copyFileSync(path.join(root, "tools", "live_editor", f), path.join(dest, "scripts", f));
 }
 // Danh sách file CSV mà bộ nhập thật sự dùng (từ mapping của engine): phần còn lại trong thư mục xuất bị bỏ qua.

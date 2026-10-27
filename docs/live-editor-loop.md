@@ -1,4 +1,24 @@
-# Script xuất lặp trong Live Editor (thử nghiệm)
+# Xuất dữ liệu tự động từ Live Editor
+
+## Cách chính: `counterpick_auto.lua` (theo sự kiện, khuyên dùng)
+
+Script đăng ký vào sự kiện `post__CareerModeEvent` của Live Editor (API chính thức, cùng cơ chế với các script `auto_max_*` đi kèm Live Editor). Vì vậy:
+- **Không vòng lặp, không `Sleep`**: không thể treo game, không cần bước thử như script lặp bên dưới.
+- Ứng dụng chép script vào `lua/autorun` (nếu có) nên chạy khi mở game; script cũng đăng ký lại ở `post__LEInitDoneEvent` đề phòng nạp quá sớm.
+- Sự kiện qua ngày, đá xong trận, chuyển nhượng, đề nghị, gia hạn, chấn thương... đánh dấu "dữ liệu đã đổi"; script xuất các bảng nhẹ sau tối thiểu 20 giây kể từ lần trước.
+  Bảng nặng (`players` ~8 giây, tên cầu thủ...) chỉ xuất lần đầu của phiên, đầu/giữa/cuối mùa, đóng cửa chuyển nhượng hoặc khi bấm "Yêu cầu xuất lại ngay" (tối thiểu cách nhau 5 phút).
+- Mỗi đợt xuất ghi thêm `cp_state.csv`: `user_team_id` (GetUserTeamID), `transfer_budget` (GetTransferBudget), `game_date` (GetCurrentDate). Đây là thứ **không có trong bảng nào** của database;
+  ứng dụng dùng làm ngân sách chuyển nhượng và ngày tham chiếu thật (ngày bị loại nếu trước 2020, vì `career_calendar` trong save thử luôn là 2008-01-01).
+- Lỗi nào trong hàm xử lý cũng bị chặn (`pcall`) và chỉ ghi log, không ảnh hưởng game. `stop.txt` trong thư mục xuất để tạm dừng; `request_full.txt` để xuất đầy đủ ở sự kiện kế tiếp.
+- Test: `backend/tests/test_lua_auto_export.py` chạy script trong Live Editor giả (cần `pip install lupa`).
+
+**Chưa kiểm chứng trên Live Editor thật** (xem `docs/known-issues.md` mục 32): Live Editor có tự chạy `lua/autorun` không, `GetCurrentDate()` trả về ngày nào, `GetTransferBudget()` dùng đơn vị nào,
+và xuất bảng ngay trong hàm xử lý sự kiện có làm giật khi qua ngày không. Cách xem: log của Live Editor (`Logs/live_editor_*.log`) có dòng `[CounterPick auto] ...` mỗi lần xuất.
+
+---
+
+## Script xuất lặp bằng `Sleep` (cũ, thử nghiệm)
+
 
 Mục tiêu: bấm Execute **một lần mỗi phiên chơi**, script ở lại trong Live Editor và tự xuất lại dữ liệu định kỳ, ứng dụng tự cập nhật.
 Cách này **chưa được thử trên Live Editor thật**: mình chỉ kiểm tra được logic bằng môi trường giả (`backend/tests/test_lua_scripts.py`, cần `lua`).

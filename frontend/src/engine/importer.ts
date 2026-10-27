@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import { newPlayer } from "./types";
 import { applyContracts, CONTRACT_FILE, LOANS_FILE, prepareContracts } from "./contracts";
+import { applyGameState, prepareGameState, STATE_FILE } from "./gamestate";
 import { daysToDate, displayName, parseCsv, searchKey } from "./util";
 
 export class MappingError extends Error {}
@@ -281,6 +282,7 @@ export function importExports(store: Store, files: FileMap, mapping: Mapping = M
 
   // Hợp đồng và cho mượn (chỉ TypeScript): đọc và kiểm tra cùng giai đoạn 1 nên file lỗi cũng không làm nhập dở
   const extras = prepareContracts(files);
+  const gameState = prepareGameState(files);
 
   // Giai đoạn 2: ghi (không còn lỗi dữ liệu nào có thể xảy ra)
   const reports: TableReport[] = [];
@@ -305,6 +307,9 @@ export function importExports(store: Store, files: FileMap, mapping: Mapping = M
     : { table: "contracts", status: "ok", read: wrote.contracts, inserted: wrote.contracts, updated: 0, deleted: 0, note: "" });
   reports.push(wrote.loans === null ? skipped("loans", `không có ${LOANS_FILE}`)
     : { table: "loans", status: "ok", read: wrote.loans, inserted: wrote.loans, updated: 0, deleted: 0, note: "" });
+  const wroteState = applyGameState(store, gameState);
+  reports.push(wroteState === null ? skipped("state", `không có ${STATE_FILE}`)
+    : { table: "state", status: "ok", read: 1, inserted: 0, updated: 1, deleted: 0, note: "" });
   store.reindex();
   return reports;
 }

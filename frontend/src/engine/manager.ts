@@ -214,23 +214,30 @@ export function budgetSummary(store: Store, teamId: number | null) {
   const income = sumNums(m.sales.map((s) => s.expected_fee));
   const wageAdded = sumNums(m.shortlist.map((i) => i.wage));
   const wageSaved = sumNums(m.sales.map((s) => s.wage));
-  const transferAfter = m.budget.transfer === null ? null : m.budget.transfer - planned + income;
+  // Ngân sách chuyển nhượng: số bạn nhập tay (nếu có) ưu tiên hơn số script Live Editor tự đọc từ game.
+  const game = store.data.gameState;
+  const gameTransfer = game?.transfer_budget ?? null;
+  const transferBudget = m.budget.transfer ?? gameTransfer;
+  const transferSource: "manual" | "game" | null = m.budget.transfer !== null ? "manual" : gameTransfer !== null ? "game" : null;
+  const transferAfter = transferBudget === null ? null : transferBudget - planned + income;
   const wageAfter = m.budget.wage === null ? null : m.budget.wage - wageAdded + wageSaved;
   const warnings: string[] = [];
   if (transferAfter !== null && transferAfter < 0) warnings.push(`Kế hoạch vượt ngân sách chuyển nhượng ${-transferAfter}`);
   if (wageAfter !== null && wageAfter < 0) warnings.push(`Kế hoạch vượt quỹ lương còn lại ${-wageAfter}`);
-  if (m.budget.transfer === null) warnings.push("Chưa nhập ngân sách chuyển nhượng còn lại (đọc ở màn Tài chính của game)");
+  if (transferBudget === null) warnings.push("Chưa nhập ngân sách chuyển nhượng còn lại (đọc ở màn Tài chính của game; script tự động trong Live Editor chưa gửi được số này)");
   if (items.some((i) => i.fee === null)) warnings.push("Một số cầu thủ trong shortlist chưa có giá: tổng chi đang bị thiếu");
 
   // gợi ý chia ngân sách theo mức cần thiết của từng vai trò (tỷ lệ với điểm ưu tiên)
-  const pool = m.budget.transfer === null ? null : Math.max(0, m.budget.transfer + income);
+  const pool = transferBudget === null ? null : Math.max(0, transferBudget + income);
   const needs = teamId !== null ? squadNeeds(store, teamId).needs.filter((n) => n.priority > 0).slice(0, 4) : [];
   const totalPriority = needs.reduce((a, n) => a + n.priority, 0);
   const allocation = pool === null || totalPriority === 0 ? [] : needs.map((n) => ({
     role: n.role, role_label: n.role_label, priority: n.priority, share: pyRound(n.priority / totalPriority, 3), amount: Math.round((pool * n.priority) / totalPriority),
   }));
   return {
-    budget: m.budget, season_end_year: endYear, items, sales,
+    budget: m.budget, effective_budget: { transfer: transferBudget, transfer_source: transferSource },
+    game: game ? { transfer_budget: game.transfer_budget, date: game.date, exported_at: game.exported_at } : null,
+    season_end_year: endYear, items, sales,
     totals: { planned_spend: planned, committed_spend: committed, sales_income: income, transfer_after: transferAfter, wage_added: wageAdded, wage_saved: wageSaved, wage_after: wageAfter },
     warnings, allocation,
   };

@@ -144,3 +144,15 @@ export interface Contract {
   signon_bonus: Num; status: Num; loan_wage_split: Num;
 }
 export interface Loan { player_id: number; from_team_id: number; ends_on: string | null; to_buy: boolean }
+
+// ---- trạng thái game do script tự động ghi (cp_state.csv): thứ không nằm trong bảng nào của database ----
+export interface GameState {
+  /** Đội của người chơi theo GetUserTeamID. */
+  user_team_id: number | null;
+  /** Ngân sách chuyển nhượng hiện tại (GetTransferBudget), đơn vị tiền của game. */
+  transfer_budget: number | null;
+  /** Ngày trong game "YYYY-MM-DD" (GetCurrentDate); null nếu thiếu hoặc không đáng tin (xem gamestate.ts). */
+  date: string | null;
+  last_event: number | null;
+  exported_at: string | null;
+}

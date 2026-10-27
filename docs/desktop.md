@@ -7,17 +7,18 @@ thư mục xuất từ Live Editor**: có file CSV mới là tự nhập và ph�
 
 1. Bấm **Tải ứng dụng cho Windows** trên trang web: tải thẳng `CounterPickFC-Setup.exe` (cài đặt) về máy. Có thêm `CounterPickFC-Portable.exe` (chạy thẳng, không cần cài) ở trang tải hoặc trang Releases của repo.
    Windows có thể cảnh báo "Unknown publisher" vì app chưa có chữ ký số: bấm *More info → Run anyway*.
-2. Lần đầu mở: ở trang chủ bấm **Chọn thư mục xuất** (thư mục `fc_exports` nơi script Live Editor ghi CSV). App nhớ lựa chọn.
-3. (Tùy chọn) **Chọn thư mục Live Editor** rồi **Cài script xuất vào Live Editor**: app chép `counterpick_export.lua` vào thư mục script, đã điền sẵn
-   thư mục xuất. Trong Live Editor: Features → Lua Engine → chọn script → Execute.
-4. Từ đó, mỗi lần script xuất lại, app tự cập nhật sau vài giây yên lặng.
+2. Mở app là xong phần thiết lập: app **tự tìm Live Editor** trên máy (thư mục chạy có `lua/scripts`, thư mục dữ liệu có `lua/autorun`), **tự chọn thư mục xuất**
+   (mặc định `Tài liệuCounterPick FCexports`) và **tự chép/cập nhật script** vào Live Editor mỗi lần mở (chỉ ghi file khác nội dung). Nút chọn thư mục chỉ cần khi muốn đổi.
+3. Mở game, vào Career và chơi. Script `counterpick_auto.lua` (nằm trong `lua/autorun` nên Live Editor chạy khi mở game) tự xuất dữ liệu sau mỗi ngày, trận, thương vụ,
+   kèm ngân sách chuyển nhượng và ngày trong game. Không phải bấm Execute (nếu bản Live Editor của bạn không chạy autorun, Execute `counterpick_auto.lua` một lần mỗi phiên).
+4. App tự nhập mỗi khi có file mới sau vài giây yên lặng và tự điền ngân sách chuyển nhượng ở tab Ngân sách.
 
 Dữ liệu và ghi chú nằm trong thư mục dữ liệu người dùng của app (`%APPDATA%/counterpick-fc-desktop`), không gửi đi đâu. Ngoại lệ duy nhất: ảnh chân dung cầu thủ được tải từ máy chủ ảnh của EA theo mã cầu thủ (máy chủ đó thấy mã các cầu thủ đang hiện trên màn hình, không thấy dữ liệu save hay ghi chú); đặt `PLAYER_PHOTO_URL = ""` trong `frontend/src/lib/links.ts` và build lại để tắt.
 
-## Tự xuất lặp trong Live Editor (thử nghiệm)
+## Tự xuất trong Live Editor
 
-Nút **Cài các script xuất vào Live Editor** chép ba script: xuất một lần, script thử vòng lặp và script xuất lặp. Xem `docs/live-editor-loop.md` (bước thử an toàn trước, rồi mới dùng).
-Ứng dụng hiển thị nhịp tim của script lặp và có nút **Yêu cầu xuất lại ngay**.
+Xem `docs/live-editor-loop.md`. Script tự động hoạt động theo sự kiện của Career Mode (không vòng lặp, không cần `Sleep`), nên không còn bước "chạy thử vòng lặp" như trước.
+Hai script vòng lặp cũ (`counterpick_probe_loop.lua`, `counterpick_export_loop.lua`) vẫn được chép vào để ai muốn thì dùng. App hiển thị lần cuối nhận dữ liệu từ game và có nút **Yêu cầu xuất lại ngay**.
 
 ## Chế độ Manager
 

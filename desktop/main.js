@@ -3,7 +3,7 @@ const { app, BrowserWindow, Menu, dialog, ipcMain, protocol, shell } = require("
 const fs = require("node:fs");
 const path = require("node:path");
 const { createConfig } = require("./src/config");
-const { findScriptDir, installScripts } = require("./src/lesetup");
+const { detectLiveEditor, findAutorunDir, findScriptDir, installScripts, syncScripts } = require("./src/lesetup");
 const { mimeOf, resolveAppPath } = require("./src/protocol");
 const { createWatcher, listCsv } = require("./src/watcher");
 const { describeUnused } = require("./src/describe");
@@ -69,9 +69,48 @@ function readHeartbeat(exportDir) {
   }
 }
 
+/** Lần cuối script trong Live Editor xuất dữ liệu (cp_state.csv do script tự động ghi sau mỗi đợt xuất). */
+function readLastExport(exportDir) {
+  if (!exportDir) return null;
+  try {
+    return { ageSeconds: Math.max(0, Math.round((Date.now() - fs.statSync(path.join(exportDir, "cp_state.csv")).mtimeMs) / 1000)) };
+  } catch {
+    return null;
+  }
+}
+
+// Kết quả lần tự cài script gần nhất, hiện trong giao diện để biết app đã tự làm gì.
+let setupInfo = { scriptDir: null, autorunDirs: [], written: [], errors: [], detected: false };
+
+/**
+ * Tự thiết lập mà không hỏi: chọn thư mục xuất mặc định, dò Live Editor trên máy, rồi chép/cập nhật script
+ * (kể cả vào thư mục autorun để Live Editor tự chạy khi mở game). Chỉ ghi file khác nội dung nên gọi nhiều lần cũng được.
+ */
+function autoSetup() {
+  const cfg = config.get();
+  const patch = {};
+  if (!cfg.exportDir) patch.exportDir = path.join(app.getPath("documents"), "CounterPick FC", "exports");
+  const detected = detectLiveEditor();
+  if (!cfg.leDir && detected.leDir) patch.leDir = detected.leDir;
+  if (Object.keys(patch).length) config.set(patch);
+  const { exportDir, leDir } = config.get();
+  const scriptDir = (leDir && findScriptDir(leDir)) || detected.scriptDir;
+  const autorunDirs = [...new Set([leDir && findAutorunDir(leDir), ...detected.autorunDirs].filter(Boolean))];
+  setupInfo = { scriptDir, autorunDirs, written: [], errors: [], detected: Boolean(detected.leDir || detected.autorunDirs.length) };
+  if (!exportDir || (!scriptDir && autorunDirs.length === 0)) return setupInfo;
+  const r = syncScripts({ templateDir: SCRIPTS_DIR, scriptDir, autorunDirs, exportDir });
+  setupInfo.written = r.written;
+  setupInfo.errors = r.errors;
+  return setupInfo;
+}
+
 function state() {
   const { exportDir, leDir } = config.get();
-  return { exportDir, leDir, csvCount: exportDir ? listCsv(exportDir, knownFiles).size : 0, watching: Boolean(watcher), heartbeat: readHeartbeat(exportDir) };
+  return {
+    exportDir, leDir, csvCount: exportDir ? listCsv(exportDir, knownFiles).size : 0, watching: Boolean(watcher),
+    heartbeat: readHeartbeat(exportDir), lastExport: readLastExport(exportDir),
+    setup: { scriptDir: setupInfo.scriptDir, autorunDirs: setupInfo.autorunDirs, written: setupInfo.written.length, errors: setupInfo.errors },
+  };
 }
 
 async function pickDir(title, defaultPath) {
@@ -97,6 +136,7 @@ function registerIpc() {
     const dir = await pickDir("Chọn thư mục chứa file CSV xuất từ Live Editor", config.get().exportDir);
     if (dir) {
       config.set({ exportDir: dir, imported: {} });
+      autoSetup(); // script đã cài phải trỏ tới thư mục xuất mới
       startWatching(false);
     }
     return state();
@@ -104,22 +144,27 @@ function registerIpc() {
 
   handle("desktop:choose-le-dir", async () => {
     const dir = await pickDir("Chọn thư mục cài đặt Live Editor", config.get().leDir);
-    if (dir) config.set({ leDir: dir });
+    if (dir) {
+      config.set({ leDir: dir });
+      autoSetup();
+    }
     return state();
   });
 
   handle("desktop:install-script", async () => {
     const { exportDir, leDir } = config.get();
     if (!exportDir) return { ok: false, message: "Hãy chọn thư mục xuất trước." };
-    if (!leDir) return { ok: false, message: "Hãy chọn thư mục Live Editor trước." };
-    let target = findScriptDir(leDir);
+    const info = autoSetup();
+    let target = info.scriptDir;
     if (!target) {
-      target = await pickDir("Không thấy thư mục script trong Live Editor, hãy chọn thư mục để chép script vào", leDir);
+      if (!leDir && info.autorunDirs.length === 0) return { ok: false, message: "Không tìm thấy Live Editor trên máy. Hãy chọn thư mục Live Editor trước." };
+      target = await pickDir("Không thấy thư mục script trong Live Editor, hãy chọn thư mục để chép script vào", leDir || undefined);
       if (!target) return { ok: false, message: "Đã hủy." };
     }
     try {
       const files = installScripts({ templateDir: SCRIPTS_DIR, targetDir: target, exportDir });
-      return { ok: true, path: target, message: `Đã chép ${files.length} script vào ${target}: ${files.map((f) => path.basename(f.file)).join(", ")}`, files: files.map((f) => ({ name: path.basename(f.file), note: f.note })) };
+      const auto = info.autorunDirs.length ? ` Script tự động cũng nằm trong thư mục autorun: ${info.autorunDirs.join(", ")}.` : "";
+      return { ok: true, path: target, message: `Đã chép ${files.length} script vào ${target}: ${files.map((f) => path.basename(f.file)).join(", ")}.${auto}`, files: files.map((f) => ({ name: path.basename(f.file), note: f.note })) };
     } catch (e) {
       return { ok: false, message: `Không chép được script: ${e.message}` };
     }
@@ -198,6 +243,13 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
     config = createConfig(app.getPath("userData"));
+    if (!process.env.COUNTERPICK_NO_AUTOSETUP) {
+      try {
+        autoSetup();
+      } catch (e) {
+        setupInfo = { ...setupInfo, errors: [`Tự thiết lập lỗi: ${e.message}`] };
+      }
+    }
     protocol.handle("app", (request) => {
       const file = resolveAppPath(WEB_ROOT, new URL(request.url).pathname);
       if (!file) {

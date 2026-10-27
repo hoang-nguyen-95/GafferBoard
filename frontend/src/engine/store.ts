@@ -1,6 +1,6 @@
 import type {
   Fixture, FormationDef, ImportRun, League, ManualLineup, MatchResult, Meeting, Player, SquadMember, Team,
-  TeamLineup, TeamNote, TeamStanding, UserProfile, ManagerData, Contract, Loan,
+  TeamLineup, TeamNote, TeamStanding, UserProfile, ManagerData, Contract, Loan, GameState,
 } from "./types";
 import { emptyManager } from "./types";
 
@@ -18,6 +18,8 @@ export interface GameData {
   /** Hợp đồng theo player_id (chỉ đội của bạn và đội dự bị); rỗng nếu save chưa xuất career_playercontract. */
   contracts: Map<number, Contract>;
   loans: Map<number, Loan>;
+  /** Ngân sách, ngày và đội người chơi do script tự động ghi; null nếu chưa có cp_state.csv. */
+  gameState: GameState | null;
 }
 
 /** Dữ liệu cá nhân của người dùng: KHÔNG bị xóa khi import lại. */
@@ -78,6 +80,7 @@ export function emptyGameData(): GameData {
   return {
     leagues: new Map(), teams: new Map(), players: new Map(), formations: new Map(), squad: new Map(),
     standings: new Map(), lineups: new Map(), fixtures: new Map(), users: new Map(), contracts: new Map(), loans: new Map(),
+    gameState: null,
   };
 }
 

@@ -76,4 +76,7 @@ Những điểm chưa giải quyết được hoặc chưa kiểm chứng, ghi l
 30. **Ứng dụng desktop gọi máy chủ ảnh của EA để hiện ảnh cầu thủ** (theo mã cầu thủ): đã ghi trong `docs/desktop.md` và trang Hướng dẫn; test e2e chỉ cho phép đúng địa chỉ này. Trước đây e2e "không request ra ngoài" bị bỏ sót khi thêm ảnh.
 31. **Cách bên bán "tính" trao đổi cầu thủ, thưởng, % chia lại là hệ số kinh nghiệm chưa kiểm chứng** (xem `docs/manager.md`): trao đổi 90% giá trị, thưởng 50% mệnh giá, chia lại 60% giá bán lại kỳ vọng sau 3 năm. Nhật ký đề nghị lưu từng thành phần
     nên sau này có thể học hệ số thật từ kết quả của bạn, nhưng chưa làm. Chưa mô hình hóa điều khoản giải phóng hợp đồng, trả góp, cho mượn có quyền mua, loại thưởng cụ thể.
-
+32. **Script xuất tự động theo sự kiện (`counterpick_auto.lua`) chưa chạy thử trên Live Editor thật**: chỉ kiểm tra bằng Live Editor giả (`backend/tests/test_lua_auto_export.py`). Chưa biết: (a) Live Editor có tự chạy script
+    trong `lua/autorun` khi mở game không (thư mục này có sẵn nhưng trống, tài liệu wiki không nói rõ; lúc đó phải Execute tay một lần mỗi phiên); (b) `GetCurrentDate()` có trả đúng ngày hay vẫn là 2008-01-01 như `career_calendar`
+    (app bỏ ngày trước 2020); (c) `GetTransferBudget()` cùng đơn vị với số hiển thị trong game không; (d) xuất bảng ngay trong hàm xử lý sự kiện có làm giật khi qua ngày không (đã giãn tối thiểu 20 giây giữa hai lần).
+33. **Tự dò Live Editor chỉ dựa vào tên thư mục** (`FC xx Live Editor`, `FC xx LE ...`) trong gốc các ổ đĩa và `XboxGames`/`Games`/`Program Files`; nếu bạn đặt tên khác, chọn tay ở trang Nhập dữ liệu.
